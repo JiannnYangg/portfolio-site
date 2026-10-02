@@ -31,15 +31,6 @@ function Highlight({ children }) {
   );
 }
 
-/** Secondary emphasis: full-contrast text with a brand-blue underline. */
-function Underline({ children }) {
-  return (
-    <strong className='font-normal text-foreground underline decoration-primary decoration-2 underline-offset-4'>
-      {children}
-    </strong>
-  );
-}
-
 /** Small uppercase section label, same style as the menu "Navigation" label. */
 function Label({ children }) {
   return (
@@ -102,8 +93,7 @@ export function AboutBody() {
             <p className='text-2xl leading-snug text-foreground lg:text-3xl lg:leading-snug'>
               To be in this time of artificial intelligence, and now we call it{' '}
               <Highlight>super intelligence</Highlight>, it&apos;s hard to not
-              test the waters of{' '}
-              <Underline>what an individual can achieve</Underline>.
+              test the waters of what an individual can achieve.
             </p>
           </ParallaxFade>
 
@@ -112,11 +102,10 @@ export function AboutBody() {
             <p className='text-lg leading-relaxed text-foreground/70 lg:text-xl lg:leading-relaxed'>
               That said, I am here to push the boundary of{' '}
               <Highlight>automation through orchestration</Highlight>,
-              extracting the <Highlight>highest possible value per token</Highlight>.
-              Prioritizing <Underline>quality over slop</Underline>, and
-              remaining <Underline>adaptable</Underline> rather than confined to
-              a single domain, I dig deep for the insights and expertise
-              required to execute deliverables.
+              extracting the highest possible value per token. Prioritizing{' '}
+              <Highlight>quality over slop</Highlight>, and remaining adaptable
+              rather than confined to a single domain, I dig deep for the
+              insights and expertise required to execute deliverables.
             </p>
           </ParallaxFade>
 
@@ -124,9 +113,9 @@ export function AboutBody() {
           <ParallaxFade>
             <blockquote className='border-l-2 border-solid border-primary pl-6 lg:pl-8'>
               <p className='text-xl leading-snug text-foreground lg:text-2xl lg:leading-snug'>
-                This places me in a unique position, one where I believe{' '}
-                <Highlight>adaptability</Highlight> is no longer just leverage,
-                but <Highlight>an absolute prerequisite</Highlight>.
+                This places me in a unique position, one where I believe
+                adaptability is no longer just leverage, but{' '}
+                <Highlight>an absolute prerequisite</Highlight>.
               </p>
             </blockquote>
           </ParallaxFade>
