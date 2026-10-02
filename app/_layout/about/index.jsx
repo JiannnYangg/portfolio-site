@@ -22,8 +22,23 @@ const tags = [
   'Agentic Loops',
 ];
 
-const closing =
-  "To be in this time of artificial intelligence, and now we call it super intelligence, it's hard to not test the waters of what an individual can achieve. That said, I am here to push the boundary of automation through orchestration, extracting the highest possible value per token. Prioritizing quality over slop, and remaining adaptable rather than confined to a single domain, I dig deep for the insights and expertise required to execute deliverables. This places me in a unique position, one where I believe adaptability is no longer just leverage, but an absolute prerequisite.";
+/** Key phrase: brand-blue text on a soft tint. Wraps cleanly across lines. */
+function Highlight({ children }) {
+  return (
+    <strong className='rounded-md bg-primary/10 px-1.5 py-0.5 font-normal text-primary box-decoration-clone'>
+      {children}
+    </strong>
+  );
+}
+
+/** Secondary emphasis: full-contrast text with a brand-blue underline. */
+function Underline({ children }) {
+  return (
+    <strong className='font-normal text-foreground underline decoration-primary decoration-2 underline-offset-4'>
+      {children}
+    </strong>
+  );
+}
 
 /** Small uppercase section label, same style as the menu "Navigation" label. */
 function Label({ children }) {
@@ -81,11 +96,39 @@ export function AboutBody() {
         <div className='lg:col-span-3'>
           <Label>Approach</Label>
         </div>
-        <div className='lg:col-span-7'>
+        <div className='flex flex-col gap-8 lg:col-span-7 lg:gap-10'>
+          {/* Lead statement */}
           <ParallaxFade>
-            <p className='text-lg leading-relaxed text-foreground/80 lg:text-xl lg:leading-relaxed'>
-              {closing}
+            <p className='text-2xl leading-snug text-foreground lg:text-3xl lg:leading-snug'>
+              To be in this time of artificial intelligence, and now we call it{' '}
+              <Highlight>super intelligence</Highlight>, it&apos;s hard to not
+              test the waters of{' '}
+              <Underline>what an individual can achieve</Underline>.
             </p>
+          </ParallaxFade>
+
+          {/* Supporting copy */}
+          <ParallaxFade>
+            <p className='text-lg leading-relaxed text-foreground/70 lg:text-xl lg:leading-relaxed'>
+              That said, I am here to push the boundary of{' '}
+              <Highlight>automation through orchestration</Highlight>,
+              extracting the <Highlight>highest possible value per token</Highlight>.
+              Prioritizing <Underline>quality over slop</Underline>, and
+              remaining <Underline>adaptable</Underline> rather than confined to
+              a single domain, I dig deep for the insights and expertise
+              required to execute deliverables.
+            </p>
+          </ParallaxFade>
+
+          {/* Closing pull-quote */}
+          <ParallaxFade>
+            <blockquote className='border-l-2 border-solid border-primary pl-6 lg:pl-8'>
+              <p className='text-xl leading-snug text-foreground lg:text-2xl lg:leading-snug'>
+                This places me in a unique position, one where I believe{' '}
+                <Highlight>adaptability</Highlight> is no longer just leverage,
+                but <Highlight>an absolute prerequisite</Highlight>.
+              </p>
+            </blockquote>
           </ParallaxFade>
         </div>
       </section>
