@@ -42,9 +42,10 @@ const shadowFor = depth =>
   ].join(' ');
 
 /**
- * Hierarchy layout. Three hero logos (claude, comfy, elevenlabs) are large and
- * close to the viewer; the three supporting logos (n8n, github, squiggle) are
- * small and sit further back, so they add texture without competing.
+ * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
+ * large and close to the viewer; the three supporting logos (n8n, github,
+ * elevenlabs) are small and sit further back, so they add texture without
+ * competing.
  * Nothing mirrors: sizes, edges and tilts all differ, but the visual weight is
  * balanced: big top-left vs big top-right, big mid-right vs small mid-left.
  *
@@ -83,16 +84,16 @@ const LOGOS = [
     float: [12, 7.4, 1.2, 0.8],
   },
   {
-    id: 'elevenlabs',
-    src: '/hero-logos/hero-elevenlabs-7342.png',
-    width: 240,
-    height: 234,
-    size: 'clamp(64px, 9.5vw, 175px)',
+    id: 'squiggle',
+    src: '/hero-logos/hero-squiggle-1084.png',
+    width: 224,
+    height: 196,
+    size: 'clamp(68px, 10vw, 185px)',
     position:
       'bottom-[29%] right-[6%] md:bottom-auto md:right-[6%] md:top-[50%]',
-    rotate: 11,
+    rotate: -8,
     depth: 1.25,
-    float: [9, 5.6, 1.4, 0.4],
+    float: [9, 6.6, 1.5, 2],
   },
   {
     id: 'n8n',
@@ -117,15 +118,15 @@ const LOGOS = [
     float: [5, 5.2, 1.8, 1.1],
   },
   {
-    id: 'squiggle',
-    src: '/hero-logos/hero-squiggle-1084.png',
-    width: 224,
-    height: 196,
-    size: 'clamp(40px, 5vw, 82px)',
+    id: 'elevenlabs',
+    src: '/hero-logos/hero-elevenlabs-7342.png',
+    width: 240,
+    height: 234,
+    size: 'clamp(38px, 4.8vw, 78px)',
     position: 'bottom-[15%] right-[26%] md:bottom-[13%] md:right-[27%]',
-    rotate: -8,
+    rotate: 11,
     depth: 0.6,
-    float: [5, 6.6, 1.5, 2],
+    float: [5, 5.6, 1.4, 0.4],
   },
 ];
 
