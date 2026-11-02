@@ -326,24 +326,28 @@ export function Header() {
         </div>
       </div>
 
-      {/* bottom CTA, built from the reference: light grey outer pill (225 x 62),
-          lime label pill (156 x 50) + dark circle (50 x 50) with an up-right
-          arrow, 6px padding and 6px gap */}
+      {/* bottom CTA. Geometry measured from the reference: 6px ring around the
+          inner buttons, 6px gap between them, 50px tall inner buttons.
+          Colours: the ring follows the site's own pill (white fill + 2px ink
+          border) so it reads on the pale hero; the label is the dark ink fill
+          with lime text (strongest contrast on a light page full of lime
+          glows); the circle is the lime accent with a dark arrow. On hover
+          the two swap. */}
       <div className='absolute inset-x-0 bottom-6 flex justify-center px-4 md:bottom-10'>
         <button
           type='button'
           onClick={() => scrollToId('contact-footer')}
           aria-label="Let's talk, go to contact"
-          className='group flex items-center gap-[6px] rounded-full bg-[#d9d9d9] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03]'
+          className='group flex items-center gap-[6px] rounded-full border-2 border-[#1f2024] bg-white p-[6px] font-[family-name:var(--font-montserrat)] shadow-[0_10px_28px_rgba(31,32,36,0.14)] transition-transform duration-300 ease-in-expo hover:scale-[1.03]'
         >
-          <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-normal leading-none tracking-[0.01em] text-[#1f2024]'>
+          <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#1f2024] text-[20px] font-normal leading-none tracking-[0.01em] text-[#b6f500] transition-colors duration-300 group-hover:bg-[#b6f500] group-hover:text-[#1f2024]'>
             Let&apos;s talk
           </span>
-          <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#1f2024]'>
+          <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#b6f500] transition-colors duration-300 group-hover:bg-[#1f2024]'>
             <ArrowUpRight
               size={20}
-              strokeWidth={2}
-              className='text-[#b6f500] transition-transform duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5'
+              strokeWidth={2.25}
+              className='text-[#1f2024] transition-all duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#b6f500]'
             />
           </span>
         </button>
