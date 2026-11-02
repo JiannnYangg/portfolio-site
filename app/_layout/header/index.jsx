@@ -146,6 +146,16 @@ export function Header() {
         }}
       />
 
+      {/* lime corner glows: sit on top of the paper + grid */}
+      <div
+        aria-hidden='true'
+        className='pointer-events-none absolute inset-0'
+        style={{
+          backgroundImage:
+            'radial-gradient(55% 42% at 100% 0%, rgba(182,245,0,0.8) 0%, rgba(182,245,0,0) 70%), radial-gradient(50% 38% at 0% 100%, rgba(182,245,0,0.75) 0%, rgba(182,245,0,0) 70%)',
+        }}
+      />
+
       {/* headline: compact, centered column, staggered lines on desktop */}
       <div className='relative flex min-h-[100svh] items-center'>
         <div className='mx-auto w-full max-w-4xl px-6 pb-32 pt-32 md:px-10'>
