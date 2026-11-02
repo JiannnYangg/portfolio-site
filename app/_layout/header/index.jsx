@@ -118,31 +118,52 @@ export function Header() {
       initial='initial'
       animate='enter'
     >
-      {/* crumpled paper: soft grey folds on an off-white sheet */}
+      {/* paper + grid, dropped to 60% opacity (40% lighter) */}
+      <div
+        aria-hidden='true'
+        className='pointer-events-none absolute inset-0'
+        style={{ opacity: 0.6 }}
+      >
+        {/* crumpled paper: soft grey folds on an off-white sheet */}
+        <div
+          className='absolute inset-0'
+          style={{
+            backgroundImage: [
+              'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
+              'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
+              'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
+              'radial-gradient(38% 26% at 30% 22%, rgba(80,80,90,0.09) 0%, rgba(80,80,90,0) 100%)',
+              'radial-gradient(34% 24% at 78% 58%, rgba(80,80,90,0.07) 0%, rgba(80,80,90,0) 100%)',
+              'radial-gradient(40% 22% at 22% 84%, rgba(80,80,90,0.08) 0%, rgba(80,80,90,0) 100%)',
+              'radial-gradient(60% 40% at 85% 12%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
+            ].join(', '),
+          }}
+        />
+
+        {/* graph-paper grid */}
+        <div
+          className='absolute inset-0'
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, rgba(40,44,56,0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(40,44,56,0.55) 1px, transparent 1px)',
+            backgroundSize: '33px 33px',
+          }}
+        />
+      </div>
+
+      {/* soft pastel blooms spread across the hero (peach, lavender, sky, mint, blush) */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0'
         style={{
           backgroundImage: [
-            'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
-            'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
-            'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
-            'radial-gradient(38% 26% at 30% 22%, rgba(80,80,90,0.09) 0%, rgba(80,80,90,0) 100%)',
-            'radial-gradient(34% 24% at 78% 58%, rgba(80,80,90,0.07) 0%, rgba(80,80,90,0) 100%)',
-            'radial-gradient(40% 22% at 22% 84%, rgba(80,80,90,0.08) 0%, rgba(80,80,90,0) 100%)',
-            'radial-gradient(60% 40% at 85% 12%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
+            'radial-gradient(34% 30% at 14% 18%, rgba(255,205,178,0.55) 0%, rgba(255,205,178,0) 100%)',
+            'radial-gradient(30% 28% at 52% 8%, rgba(205,190,255,0.5) 0%, rgba(205,190,255,0) 100%)',
+            'radial-gradient(32% 30% at 84% 40%, rgba(178,224,255,0.55) 0%, rgba(178,224,255,0) 100%)',
+            'radial-gradient(30% 28% at 40% 62%, rgba(255,196,224,0.5) 0%, rgba(255,196,224,0) 100%)',
+            'radial-gradient(34% 30% at 70% 90%, rgba(190,240,215,0.55) 0%, rgba(190,240,215,0) 100%)',
+            'radial-gradient(28% 26% at 6% 66%, rgba(255,236,170,0.5) 0%, rgba(255,236,170,0) 100%)',
           ].join(', '),
-        }}
-      />
-
-      {/* graph-paper grid */}
-      <div
-        aria-hidden='true'
-        className='pointer-events-none absolute inset-0'
-        style={{
-          backgroundImage:
-            'linear-gradient(to right, rgba(40,44,56,0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(40,44,56,0.55) 1px, transparent 1px)',
-          backgroundSize: '33px 33px',
         }}
       />
 
