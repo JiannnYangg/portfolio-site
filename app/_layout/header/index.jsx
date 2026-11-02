@@ -12,6 +12,7 @@ import { ArrowUpRight, ChevronRight } from 'lucide-react';
 
 import { scrollToId } from '@/hooks';
 
+import { HeroLogos } from './hero-logos';
 import { slideUp } from './variants';
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1];
@@ -361,6 +362,10 @@ export function Header() {
             'radial-gradient(55% 42% at 100% 0%, rgba(182,245,0,0.8) 0%, rgba(182,245,0,0) 70%), radial-gradient(50% 38% at 0% 100%, rgba(182,245,0,0.75) 0%, rgba(182,245,0,0) 70%)',
         }}
       />
+
+      {/* floating 3D logos: asymmetric scatter around the headline, lit from
+          the top-left, sequenced right after the headline words */}
+      <HeroLogos />
 
       {/* headline: one shrink-to-fit block centered in the hero, so the
           staggered lines sit optically centered instead of hugging the left.
