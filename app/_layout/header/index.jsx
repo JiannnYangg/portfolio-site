@@ -62,8 +62,13 @@ const CALM_MASK = [
   calmZone('200px 80px at 50% calc(100% - 5.5rem)'), // CTA pill
 ].join(', ');
 
-/** Grid line alpha (was 0.10, +15% = 0.115) */
-const GRID_ALPHA = 0.115;
+/**
+ * Graph-paper grid. It is drawn on TOP of the blooms and glows (so they can't
+ * wash it out) in a deeper lime than the glows, so the lines stay readable on
+ * both the off-white and the lime areas.
+ */
+const GRID_COLOR = '140,190,0';
+const GRID_ALPHA = 0.2;
 
 /** Clips only the bottom edge of a line, so text rises out of a mask
  *  while the callout above the word stays visible. */
@@ -316,7 +321,7 @@ export function Header() {
       initial='initial'
       animate='enter'
     >
-      {/* background: paper + grid + soft blooms + lime corner glows.
+      {/* background: paper + soft blooms + lime corner glows + grid on top.
           The mask dims all of it behind the headline and the CTA only. */}
       <div
         aria-hidden='true'
@@ -328,33 +333,22 @@ export function Header() {
           WebkitMaskComposite: 'source-in',
         }}
       >
-        {/* paper + grid, wrapper at 60% opacity */}
-        <div className='absolute inset-0' style={{ opacity: 0.6 }}>
-          {/* crumpled paper: soft grey folds on an off-white sheet */}
-          <div
-            className='absolute inset-0'
-            style={{
-              backgroundImage: [
-                'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
-                'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
-                'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
-                'radial-gradient(38% 26% at 30% 22%, rgba(80,80,90,0.09) 0%, rgba(80,80,90,0) 100%)',
-                'radial-gradient(34% 24% at 78% 58%, rgba(80,80,90,0.07) 0%, rgba(80,80,90,0) 100%)',
-                'radial-gradient(40% 22% at 22% 84%, rgba(80,80,90,0.08) 0%, rgba(80,80,90,0) 100%)',
-                'radial-gradient(60% 40% at 85% 12%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
-              ].join(', '),
-            }}
-          />
-
-          {/* graph-paper grid: 62px x 57px cells, 2px lines in the theme lime */}
-          <div
-            className='absolute inset-0'
-            style={{
-              backgroundImage: `linear-gradient(to right, rgba(182,245,0,${GRID_ALPHA}) 2px, transparent 2px), linear-gradient(to bottom, rgba(182,245,0,${GRID_ALPHA}) 2px, transparent 2px)`,
-              backgroundSize: '62px 57px',
-            }}
-          />
-        </div>
+        {/* crumpled paper: soft grey folds on an off-white sheet */}
+        <div
+          className='absolute inset-0'
+          style={{
+            opacity: 0.6,
+            backgroundImage: [
+              'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
+              'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
+              'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
+              'radial-gradient(38% 26% at 30% 22%, rgba(80,80,90,0.09) 0%, rgba(80,80,90,0) 100%)',
+              'radial-gradient(34% 24% at 78% 58%, rgba(80,80,90,0.07) 0%, rgba(80,80,90,0) 100%)',
+              'radial-gradient(40% 22% at 22% 84%, rgba(80,80,90,0.08) 0%, rgba(80,80,90,0) 100%)',
+              'radial-gradient(60% 40% at 85% 12%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
+            ].join(', '),
+          }}
+        />
 
         {/* soft blooms spread across the hero (pale lime, yellow-green,
             chartreuse, mint, aqua-green, soft yellow). Layer opacity 0.7. */}
@@ -373,12 +367,21 @@ export function Header() {
           }}
         />
 
-        {/* lime corner glows: sit on top of the paper + grid */}
+        {/* lime corner glows */}
         <div
           className='absolute inset-0'
           style={{
             backgroundImage:
               'radial-gradient(55% 42% at 100% 0%, rgba(182,245,0,0.8) 0%, rgba(182,245,0,0) 70%), radial-gradient(50% 38% at 0% 100%, rgba(182,245,0,0.75) 0%, rgba(182,245,0,0) 70%)',
+          }}
+        />
+
+        {/* graph-paper grid: 62px x 57px cells, 2px lines, on top of everything above */}
+        <div
+          className='absolute inset-0'
+          style={{
+            backgroundImage: `linear-gradient(to right, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px), linear-gradient(to bottom, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
+            backgroundSize: '62px 57px',
           }}
         />
       </div>
