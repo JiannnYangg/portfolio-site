@@ -30,9 +30,16 @@ const EASE_OUT_EXPO = [0.16, 1, 0.3, 1];
 export function AiChat({ delay = 0, className = '', onSubmit }) {
   const reduceMotion = useReducedMotion();
   const inputRef = useRef(null);
+  const videoRef = useRef(null);
   const [value, setValue] = useState('');
   const [focused, setFocused] = useState(false);
   const [placeholder, setPlaceholder] = useState('');
+  const [videoFailed, setVideoFailed] = useState(false);
+
+  /* the video may already have failed (404) before hydration attached onError */
+  useEffect(() => {
+    if (videoRef.current?.error) setVideoFailed(true);
+  }, []);
 
   /* typing-effect placeholder, paused while focused or once there is text */
   useEffect(() => {
@@ -104,7 +111,21 @@ export function AiChat({ delay = 0, className = '', onSubmit }) {
         animate={{ clipPath: 'inset(0 0% 0 0% round 999px)' }}
         transition={{ delay: delay + 0.35, duration: 1.1, ease: EASE_OUT_EXPO }}
       >
-        <span className='ai-orb' aria-hidden='true' />
+        <span className='ai-orb' aria-hidden='true'>
+          {/* optional: drop search-bubble.mp4 into /public/videos to use it */}
+          {!videoFailed && (
+            <video
+              ref={videoRef}
+              className='ai-orb-video'
+              src='/videos/search-bubble.mp4'
+              autoPlay
+              muted
+              loop
+              playsInline
+              onError={() => setVideoFailed(true)}
+            />
+          )}
+        </span>
 
         <div className='relative flex min-w-0 flex-1 items-center'>
           <input
