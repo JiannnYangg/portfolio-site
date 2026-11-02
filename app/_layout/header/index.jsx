@@ -442,8 +442,9 @@ export function Header() {
 
           {/* CTA: exactly the reference design (no border, no shadow).
               Light grey outer pill 225 x 62, 6px ring, 6px gap, 50px inner
-              buttons. Only the colours are themed: dark label with lime
-              text, lime circle with a dark arrow; the two swap on hover.
+              buttons. Only the colours are themed. Resting state: lime label
+              with dark text, dark circle with a lime arrow. On hover the two
+              swap (dark label with lime text, lime circle with a dark arrow).
               Sits a deliberate, modest gap under the headline. */}
           <div className='mt-[60px] flex justify-center md:mt-[88px]'>
             <button
@@ -452,14 +453,14 @@ export function Header() {
               aria-label="Let's talk, go to contact"
               className='group flex items-center gap-[6px] rounded-full bg-[#d9d9d9] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03]'
             >
-              <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#1f2024] text-[20px] font-normal leading-none tracking-[0.01em] text-[#b6f500] transition-colors duration-300 group-hover:bg-[#b6f500] group-hover:text-[#1f2024]'>
+              <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-normal leading-none tracking-[0.01em] text-[#1f2024] transition-colors duration-300 group-hover:bg-[#1f2024] group-hover:text-[#b6f500]'>
                 Let&apos;s talk
               </span>
-              <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#b6f500] transition-colors duration-300 group-hover:bg-[#1f2024]'>
+              <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#1f2024] transition-colors duration-300 group-hover:bg-[#b6f500]'>
                 <ArrowUpRight
                   size={20}
                   strokeWidth={2.25}
-                  className='text-[#1f2024] transition-all duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#b6f500]'
+                  className='text-[#b6f500] transition-all duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#1f2024]'
                 />
               </span>
             </button>
