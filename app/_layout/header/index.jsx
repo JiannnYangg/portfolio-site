@@ -113,29 +113,36 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='relative min-h-[100svh] overflow-hidden bg-white text-black selection:bg-[#d8f6a2] selection:text-[#3d5a0e]'
+      className='relative min-h-[100svh] overflow-hidden bg-[#f3f3f5] text-black selection:bg-[#d8f6a2] selection:text-[#3d5a0e]'
       variants={slideUp}
       initial='initial'
       animate='enter'
     >
-      {/* lime corner glows */}
+      {/* crumpled paper: soft grey folds on an off-white sheet */}
+      <div
+        aria-hidden='true'
+        className='pointer-events-none absolute inset-0'
+        style={{
+          backgroundImage: [
+            'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
+            'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
+            'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
+            'radial-gradient(38% 26% at 30% 22%, rgba(80,80,90,0.09) 0%, rgba(80,80,90,0) 100%)',
+            'radial-gradient(34% 24% at 78% 58%, rgba(80,80,90,0.07) 0%, rgba(80,80,90,0) 100%)',
+            'radial-gradient(40% 22% at 22% 84%, rgba(80,80,90,0.08) 0%, rgba(80,80,90,0) 100%)',
+            'radial-gradient(60% 40% at 85% 12%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
+          ].join(', '),
+        }}
+      />
+
+      {/* graph-paper grid */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0'
         style={{
           backgroundImage:
-            'radial-gradient(55% 42% at 100% 0%, rgba(182,245,0,0.8) 0%, rgba(182,245,0,0) 70%), radial-gradient(50% 38% at 0% 100%, rgba(182,245,0,0.75) 0%, rgba(182,245,0,0) 70%)',
-        }}
-      />
-
-      {/* subtle grid */}
-      <div
-        aria-hidden='true'
-        className='pointer-events-none absolute inset-0 opacity-70'
-        style={{
-          backgroundImage:
-            'linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px)',
-          backgroundSize: '36px 36px',
+            'linear-gradient(to right, rgba(40,44,56,0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(40,44,56,0.55) 1px, transparent 1px)',
+          backgroundSize: '33px 33px',
         }}
       />
 
