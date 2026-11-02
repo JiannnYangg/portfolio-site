@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { MoveDownRight } from 'lucide-react';
+import { ChevronRight, MoveDownRight } from 'lucide-react';
 
 import { scrollToId } from '@/hooks';
 
@@ -10,38 +10,58 @@ import { slideUp } from './variants';
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1];
 const IOS_FONT =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
-const CALLOUT_ITEMS = ['Copy', 'Look Up', 'Share'];
+const CALLOUT_ITEMS = ['Copy', 'Look Up', 'Translate'];
+const MENU_BG = 'rgba(44, 44, 46, 0.94)';
 
 /** Key word inside the headline: ExtraBold Italic, same weight as the reference */
 function Emphasis({ children }) {
   return <em className='font-extrabold italic'>{children}</em>;
 }
 
-/** iPhone-style text-selection callout (black bubble + arrow) */
+/**
+ * iOS edit menu (the black bubble shown when text is selected on iPhone):
+ * dark translucent material, small radius, hairline dividers,
+ * a trailing chevron for the overflow page and a pointer arrow.
+ */
 function IosCallout() {
   const reduceMotion = useReducedMotion();
 
   return (
     <span
       aria-hidden='true'
-      className='pointer-events-none absolute bottom-full left-1/2 z-10 mb-[18px] -translate-x-1/2'
+      className='pointer-events-none absolute bottom-full left-1/2 z-10 mb-[16px] -translate-x-1/2'
     >
       <motion.span
-        className='relative flex items-center whitespace-nowrap rounded-[10px] bg-[#1c1c1e] px-1 text-[13px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)]'
-        style={{ fontFamily: IOS_FONT, transformOrigin: '50% 100%' }}
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.85, y: 6 }}
+        className='relative flex select-none items-stretch whitespace-nowrap rounded-[9px] text-[12px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_6px_18px_rgba(0,0,0,0.28),0_0_0_0.5px_rgba(255,255,255,0.08)] backdrop-blur-xl backdrop-saturate-150'
+        style={{
+          fontFamily: IOS_FONT,
+          background: MENU_BG,
+          transformOrigin: '50% 100%',
+        }}
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 4 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 1.9, duration: 0.35, ease: EASE_OUT_EXPO }}
+        transition={{ delay: 1.9, duration: 0.22, ease: EASE_OUT_EXPO }}
       >
         {CALLOUT_ITEMS.map((item, index) => (
           <span
             key={item}
-            className={`px-3 py-[11px] ${index > 0 ? 'border-l border-white/15' : ''}`}
+            className={`flex items-center px-[10px] py-[9px] ${index > 0 ? 'border-l-[0.5px] border-white/25' : ''}`}
           >
             {item}
           </span>
         ))}
-        <span className='absolute left-1/2 top-full -mt-px h-[7px] w-[14px] -translate-x-1/2 bg-[#1c1c1e] [clip-path:polygon(0_0,100%_0,50%_100%)]' />
+        <span className='flex items-center border-l-[0.5px] border-white/25 px-[6px]'>
+          <ChevronRight size={12} strokeWidth={2.5} />
+        </span>
+
+        {/* pointer arrow */}
+        <span
+          className='absolute left-1/2 top-full h-[6px] w-[12px] -translate-x-1/2'
+          style={{
+            background: MENU_BG,
+            clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+          }}
+        />
       </motion.span>
     </span>
   );
