@@ -43,9 +43,9 @@ const shadowFor = depth =>
 
 /**
  * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
- * large and close to the viewer; the three supporting logos (n8n, github,
- * elevenlabs) are small and sit further back, so they add texture without
- * competing.
+ * the largest and close to the viewer; the three supporting logos (n8n,
+ * github, elevenlabs) are small and sit further back, so they add texture
+ * without competing.
  * Nothing mirrors: sizes, edges and tilts all differ, but the visual weight is
  * balanced: big top-left vs big top-right, big mid-right vs small mid-left.
  *
@@ -66,7 +66,7 @@ const LOGOS = [
     src: '/hero-logos/hero-claude-4827.png',
     width: 300,
     height: 261,
-    size: 'clamp(76px, 10.5vw, 190px)',
+    size: 'clamp(62px, 8.4vw, 152px)', // was clamp(76px, 10.5vw, 190px)
     position: 'left-[4%] top-[14%] md:left-[7%] md:top-[15%]',
     rotate: -9,
     depth: 1.3,
@@ -77,7 +77,7 @@ const LOGOS = [
     src: '/hero-logos/hero-comfy-9153.png',
     width: 420,
     height: 172,
-    size: 'clamp(104px, 15vw, 280px)',
+    size: 'clamp(84px, 12vw, 224px)', // was clamp(104px, 15vw, 280px)
     position: 'right-[4%] top-[21%] md:right-[8%] md:top-[24%]',
     rotate: 5,
     depth: 1.5,
@@ -88,7 +88,7 @@ const LOGOS = [
     src: '/hero-logos/hero-squiggle-1084.png',
     width: 224,
     height: 196,
-    size: 'clamp(68px, 10vw, 185px)',
+    size: 'clamp(54px, 8vw, 148px)', // was clamp(68px, 10vw, 185px)
     position:
       'bottom-[29%] right-[6%] md:bottom-auto md:right-[6%] md:top-[50%]',
     rotate: -8,
