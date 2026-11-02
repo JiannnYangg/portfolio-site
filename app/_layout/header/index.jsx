@@ -2,7 +2,12 @@
 
 import { useState } from 'react';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
 import { ChevronRight, MoveDownRight } from 'lucide-react';
 
 import { scrollToId } from '@/hooks';
@@ -25,9 +30,15 @@ const LINE_STAGGER = 0.14;
 const HIGHLIGHT_DELAY = 3.4;
 const HANDLES_DELAY = 3.9;
 const CALLOUT_DELAY = 4.2;
-const SHINE_FIRST_DELAY = 5.2;
-const SHINE_DURATION = 1.1;
-const SHINE_REPEAT_DELAY = 4.5; // 1.1s sweep + 4.5s pause = a pass every ~5.6s
+const SHINE_FIRST_DELAY = CALLOUT_DELAY + 3; // first pass 3s after the bubble appears
+const SHINE_DURATION = 2.2; // slow sweep
+const SHINE_REPEAT_DELAY = 3; // 3s pause, so a pass roughly every 5s
+
+/** Scroll fade: each line starts fading a little after the previous one */
+const SCROLL_FADE_START = 30; // px scrolled before the first line starts to fade
+const SCROLL_FADE_STAGGER = 45; // extra px per line
+const SCROLL_FADE_DISTANCE = 320; // px over which a line fades out completely
+const SCROLL_LIFT = -40; // px the line drifts up while fading
 
 /** iOS-style dark translucent material with a light frosted blur */
 const MENU_BG = 'rgba(40, 40, 44, 0.82)';
@@ -40,10 +51,18 @@ const LINE_CLIP = 'inset(-300px -100px -0.12em -100px)';
 /**
  * Same principle as the rest of the site (ParallaxReveal + ParallaxFade):
  * the line sits in a mask, slides up from below and fades in, staggered.
+ * After that it is scroll-linked: scrolling down fades and lifts each line
+ * (top line first), scrolling back up brings them back.
  */
 function Line({ index, className = '', children }) {
   const reduceMotion = useReducedMotion();
   const [settled, setSettled] = useState(false);
+
+  const { scrollY } = useScroll();
+  const start = SCROLL_FADE_START + index * SCROLL_FADE_STAGGER;
+  const range = [start, start + SCROLL_FADE_DISTANCE];
+  const scrollOpacity = useTransform(scrollY, range, [1, 0]);
+  const scrollLift = useTransform(scrollY, range, [0, SCROLL_LIFT]);
 
   return (
     <span
@@ -52,18 +71,29 @@ function Line({ index, className = '', children }) {
       // backdrop blur can see the page behind it
       style={settled || reduceMotion ? undefined : { clipPath: LINE_CLIP }}
     >
+      {/* scroll-linked fade + lift */}
       <motion.span
         className='block'
-        initial={reduceMotion ? false : { y: '105%', opacity: 0 }}
-        animate={{ y: '0%', opacity: 1 }}
-        transition={{
-          duration: 0.9,
-          delay: LINE_DELAY + index * LINE_STAGGER,
-          ease: EASE_OUT_EXPO,
-        }}
-        onAnimationComplete={() => setSettled(true)}
+        style={
+          reduceMotion
+            ? undefined
+            : { opacity: scrollOpacity, y: scrollLift }
+        }
       >
-        {children}
+        {/* intro: rise out of the mask while fading in */}
+        <motion.span
+          className='block'
+          initial={reduceMotion ? false : { y: '105%', opacity: 0 }}
+          animate={{ y: '0%', opacity: 1 }}
+          transition={{
+            duration: 0.9,
+            delay: LINE_DELAY + index * LINE_STAGGER,
+            ease: EASE_OUT_EXPO,
+          }}
+          onAnimationComplete={() => setSettled(true)}
+        >
+          {children}
+        </motion.span>
       </motion.span>
     </span>
   );
@@ -78,7 +108,7 @@ function Emphasis({ children }) {
  * iOS edit menu (the bubble shown when text is selected on iPhone):
  * flat dark translucent material with a soft blur, small radius,
  * hairline dividers, a trailing chevron and a pointer arrow.
- * A soft sheen sweeps across it every ~5.6s, like light catching glass.
+ * A slim, soft sheen sweeps slowly across it, like light catching glass.
  */
 function IosCallout() {
   const reduceMotion = useReducedMotion();
@@ -117,18 +147,18 @@ function IosCallout() {
           <ChevronRight size={12} strokeWidth={2.5} />
         </span>
 
-        {/* light sweep: a soft diagonal sheen that passes over the bubble */}
+        {/* light sweep: a slim diagonal sheen that slowly passes over the bubble */}
         {!reduceMotion && (
           <span className='pointer-events-none absolute inset-0 overflow-hidden rounded-[9px]'>
             <motion.span
-              className='absolute inset-y-0 left-0 w-[45%]'
+              className='absolute inset-y-0 left-0 w-[24%]'
               style={{
                 background:
-                  'linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.30) 50%, rgba(255,255,255,0) 100%)',
+                  'linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%)',
                 transform: 'skewX(-18deg)',
               }}
-              initial={{ x: '-130%' }}
-              animate={{ x: '330%' }}
+              initial={{ x: '-160%' }}
+              animate={{ x: '480%' }}
               transition={{
                 delay: SHINE_FIRST_DELAY,
                 duration: SHINE_DURATION,
