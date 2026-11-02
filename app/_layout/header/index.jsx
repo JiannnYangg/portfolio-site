@@ -8,7 +8,7 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion';
-import { ChevronRight, MoveDownRight } from 'lucide-react';
+import { ArrowUpRight, ChevronRight } from 'lucide-react';
 
 import { scrollToId } from '@/hooks';
 
@@ -322,26 +322,27 @@ export function Header() {
         </div>
       </div>
 
-      {/* bottom pill */}
+      {/* bottom CTA, built from the reference: light grey outer pill (225 x 62),
+          lime label pill (156 x 50) + dark circle (50 x 50) with an up-right
+          arrow, 6px padding and 6px gap */}
       <div className='absolute inset-x-0 bottom-6 flex justify-center px-4 md:bottom-10'>
-        <div className='flex w-full max-w-[34rem] items-center justify-between gap-2 rounded-full border-2 border-black bg-white p-1.5 font-[family-name:var(--font-montserrat)]'>
-          <span className='rounded-full bg-black px-5 py-3 text-sm font-medium text-white'>
-            Hey, I&apos;m Satyam
-          </span>
-
-          <button
-            type='button'
-            onClick={() => scrollToId('contact-footer')}
-            className='group inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition-transform duration-300 ease-in-expo hover:scale-[1.03]'
-          >
+        <button
+          type='button'
+          onClick={() => scrollToId('contact-footer')}
+          aria-label="Let's talk, go to contact"
+          className='group flex items-center gap-[6px] rounded-full bg-[#d9d9d9] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03]'
+        >
+          <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-normal leading-none tracking-[0.01em] text-[#1f2024]'>
             Let&apos;s talk
-            <MoveDownRight
-              size={18}
+          </span>
+          <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#1f2024]'>
+            <ArrowUpRight
+              size={20}
               strokeWidth={2}
-              className='text-[#b6f500] transition-transform duration-300 ease-in-expo group-hover:translate-x-0.5 group-hover:translate-y-0.5'
+              className='text-[#b6f500] transition-transform duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5'
             />
-          </button>
-        </div>
+          </span>
+        </button>
       </div>
     </motion.header>
   );
