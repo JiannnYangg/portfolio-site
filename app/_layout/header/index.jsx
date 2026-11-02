@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 
 import {
   motion,
@@ -22,24 +22,25 @@ const CALLOUT_ITEMS = ['Copy', 'Look Up', 'Translate'];
 /**
  * Timeline (seconds). The header itself slides in at 2.5s (see variants.js),
  * so everything inside it is sequenced from there:
- * lines rise in -> selection highlight -> handles -> callout -> light sweeps.
+ * words rise in -> selection highlight -> handles -> callout -> light sweeps.
  */
 const HERO_START = 2.5;
-const LINE_DELAY = HERO_START + 0.15;
-const LINE_STAGGER = 0.14;
+const WORD_DELAY = HERO_START + 0.15;
+const WORD_STAGGER = 0.07; // seconds between consecutive words
+const WORD_DURATION = 0.8;
 const HIGHLIGHT_DELAY = 3.4;
 const HANDLES_DELAY = 3.9;
 const CALLOUT_DELAY = 4.2;
-const MARKER_DELAY = 4.0; // marker bar behind "seen." sweeps in once the line has settled
+const MARKER_DELAY = 4.1; // marker bar behind "seen." sweeps in once the last word has settled
 const SHINE_FIRST_DELAY = CALLOUT_DELAY + 1; // first pass 1s after the bubble appears
 const SHINE_DURATION = 2.2; // slow sweep
 const SHINE_REPEAT_DELAY = 1; // 1s pause between passes
 
-/** Scroll fade: each line starts fading a little after the previous one */
-const SCROLL_FADE_START = 30; // px scrolled before the first line starts to fade
-const SCROLL_FADE_STAGGER = 45; // extra px per line
-const SCROLL_FADE_DISTANCE = 320; // px over which a line fades out completely
-const SCROLL_LIFT = -40; // px the line drifts up while fading
+/** Scroll fade: every word fades + lifts, one after another in reading order */
+const SCROLL_FADE_START = 20; // px scrolled before the first word starts to fade
+const SCROLL_FADE_STAGGER = 14; // extra px per word
+const SCROLL_FADE_DISTANCE = 260; // px over which a word fades out completely (was 320: stronger, quicker fade)
+const SCROLL_LIFT = -64; // px a word drifts up while fading (was -40)
 
 /** iOS-style dark translucent material with a light frosted blur */
 const MENU_BG = 'rgba(40, 40, 44, 0.82)';
@@ -49,15 +50,40 @@ const MENU_FILTER = 'blur(20px) saturate(180%)';
  *  while the callout above the word stays visible. */
 const LINE_CLIP = 'inset(-300px -100px -0.12em -100px)';
 
+/** Lets the last word of a line tell its line that the intro is finished */
+const LineContext = createContext(() => {});
+
 /**
- * Same principle as the rest of the site (ParallaxReveal + ParallaxFade):
- * the line sits in a mask, slides up from below and fades in, staggered.
- * After that it is scroll-linked: scrolling down fades and lifts each line
- * (top line first), scrolling back up brings them back.
+ * A line is the mask the words rise out of. Once the last word has settled
+ * the mask is dropped, so the callout's backdrop blur can see the page behind
+ * it.
  */
-function Line({ index, className = '', children }) {
+function Line({ className = '', children }) {
   const reduceMotion = useReducedMotion();
   const [settled, setSettled] = useState(false);
+  const settle = useCallback(() => setSettled(true), []);
+
+  return (
+    <LineContext.Provider value={settle}>
+      <span
+        className={`block ${className}`}
+        style={settled || reduceMotion ? undefined : { clipPath: LINE_CLIP }}
+      >
+        {children}
+      </span>
+    </LineContext.Provider>
+  );
+}
+
+/**
+ * Same effect as the "Testing the boundaries..." paragraph (ParallaxReveal):
+ * every word slides up out of a mask, staggered one after another.
+ * After the intro it is scroll-linked: scrolling down fades and lifts the
+ * words one by one (first word first), scrolling back up brings them back.
+ */
+function Word({ index, last = false, children }) {
+  const reduceMotion = useReducedMotion();
+  const settleLine = useContext(LineContext);
 
   const { scrollY } = useScroll();
   const start = SCROLL_FADE_START + index * SCROLL_FADE_STAGGER;
@@ -66,37 +92,28 @@ function Line({ index, className = '', children }) {
   const scrollLift = useTransform(scrollY, range, [0, SCROLL_LIFT]);
 
   return (
-    <span
-      className={`block ${className}`}
-      // the mask is dropped once the line has settled, so the callout's
-      // backdrop blur can see the page behind it
-      style={settled || reduceMotion ? undefined : { clipPath: LINE_CLIP }}
+    <motion.span
+      className='inline-block'
+      // scroll-linked fade + lift
+      style={
+        reduceMotion ? undefined : { opacity: scrollOpacity, y: scrollLift }
+      }
     >
-      {/* scroll-linked fade + lift */}
+      {/* intro: rise out of the line mask while fading in */}
       <motion.span
-        className='block'
-        style={
-          reduceMotion
-            ? undefined
-            : { opacity: scrollOpacity, y: scrollLift }
-        }
+        className='inline-block'
+        initial={reduceMotion ? false : { y: '105%', opacity: 0 }}
+        animate={{ y: '0%', opacity: 1 }}
+        transition={{
+          duration: WORD_DURATION,
+          delay: WORD_DELAY + index * WORD_STAGGER,
+          ease: EASE_OUT_EXPO,
+        }}
+        onAnimationComplete={last ? settleLine : undefined}
       >
-        {/* intro: rise out of the mask while fading in */}
-        <motion.span
-          className='block'
-          initial={reduceMotion ? false : { y: '105%', opacity: 0 }}
-          animate={{ y: '0%', opacity: 1 }}
-          transition={{
-            duration: 0.9,
-            delay: LINE_DELAY + index * LINE_STAGGER,
-            ease: EASE_OUT_EXPO,
-          }}
-          onAnimationComplete={() => setSettled(true)}
-        >
-          {children}
-        </motion.span>
+        {children}
       </motion.span>
-    </span>
+    </motion.span>
   );
 }
 
@@ -345,18 +362,37 @@ export function Header() {
         }}
       />
 
-      {/* headline: compact, centered column, staggered lines on desktop */}
+      {/* headline: one shrink-to-fit block centered in the hero, so the
+          staggered lines sit optically centered instead of hugging the left.
+          Extra bottom padding lifts it above true center and keeps it clear
+          of the CTA. */}
       <div className='relative flex min-h-[100svh] items-center'>
-        <div className='mx-auto w-full max-w-4xl px-6 pb-32 pt-32 md:px-10'>
-          <h1 className='font-[family-name:var(--font-montserrat)] text-[clamp(2rem,5.2vw,4.25rem)] font-medium leading-[1.12] tracking-[-0.03em]'>
-            <Line index={0}>
-              We <Selection>design</Selection> it.
+        <div className='mx-auto w-full max-w-5xl px-6 pb-52 pt-24 md:px-10 md:pb-64 md:pt-28'>
+          <h1 className='mx-auto w-fit font-[family-name:var(--font-montserrat)] text-[clamp(2.5rem,6.4vw,5.5rem)] font-medium leading-[1.08] tracking-[-0.03em]'>
+            <Line>
+              <Word index={0}>We</Word>{' '}
+              <Word index={1}>
+                <Selection>design</Selection>
+              </Word>{' '}
+              <Word index={2} last>
+                it.
+              </Word>
             </Line>
-            <Line index={1} className='md:pl-[1em]'>
-              We <Emphasis>build</Emphasis> it.
+            <Line className='md:pl-[1em]'>
+              <Word index={3}>We</Word>{' '}
+              <Word index={4}>
+                <Emphasis>build</Emphasis>
+              </Word>{' '}
+              <Word index={5} last>
+                it.
+              </Word>
             </Line>
-            <Line index={2} className='md:pl-[2em]'>
-              We get it <Marker>seen.</Marker>
+            <Line className='md:pl-[2em]'>
+              <Word index={6}>We</Word> <Word index={7}>get</Word>{' '}
+              <Word index={8}>it</Word>{' '}
+              <Word index={9} last>
+                <Marker>seen.</Marker>
+              </Word>
             </Line>
           </h1>
         </div>
@@ -365,8 +401,9 @@ export function Header() {
       {/* bottom CTA: exactly the reference design (no border, no shadow).
           Light grey outer pill 225 x 62, 6px ring, 6px gap, 50px inner
           buttons. Only the colours are themed: dark label with lime text,
-          lime circle with a dark arrow; the two swap on hover. */}
-      <div className='absolute inset-x-0 bottom-6 flex justify-center px-4 md:bottom-10'>
+          lime circle with a dark arrow; the two swap on hover.
+          Lifted off the bottom edge for more breathing room. */}
+      <div className='absolute inset-x-0 bottom-14 flex justify-center px-4 md:bottom-20'>
         <button
           type='button'
           onClick={() => scrollToId('contact-footer')}
