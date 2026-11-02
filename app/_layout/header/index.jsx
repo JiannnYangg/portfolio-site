@@ -30,9 +30,9 @@ const LINE_STAGGER = 0.14;
 const HIGHLIGHT_DELAY = 3.4;
 const HANDLES_DELAY = 3.9;
 const CALLOUT_DELAY = 4.2;
-const SHINE_FIRST_DELAY = CALLOUT_DELAY + 3; // first pass 3s after the bubble appears
+const SHINE_FIRST_DELAY = CALLOUT_DELAY + 1; // first pass 1s after the bubble appears
 const SHINE_DURATION = 2.2; // slow sweep
-const SHINE_REPEAT_DELAY = 3; // 3s pause, so a pass roughly every 5s
+const SHINE_REPEAT_DELAY = 1; // 1s pause between passes
 
 /** Scroll fade: each line starts fading a little after the previous one */
 const SCROLL_FADE_START = 30; // px scrolled before the first line starts to fade
