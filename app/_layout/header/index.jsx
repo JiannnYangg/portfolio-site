@@ -266,14 +266,15 @@ export function Header() {
           }}
         />
 
-        {/* graph-paper grid: lines only, a further 40% lighter (opacity 0.6) */}
+        {/* graph-paper grid: cells measured from the Chazon flyer
+            (62px wide x 57px tall), lines a further 20% lighter (0.6 -> 0.48) */}
         <div
           className='absolute inset-0'
           style={{
-            opacity: 0.6,
+            opacity: 0.48,
             backgroundImage:
               'linear-gradient(to right, rgba(40,44,56,0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(40,44,56,0.55) 1px, transparent 1px)',
-            backgroundSize: '33px 33px',
+            backgroundSize: '62px 57px',
           }}
         />
       </div>
