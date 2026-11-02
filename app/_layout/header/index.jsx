@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+
 import { motion, useReducedMotion } from 'framer-motion';
 import { ChevronRight, MoveDownRight } from 'lucide-react';
-import { useState } from 'react';
 
 import { scrollToId } from '@/hooks';
 
@@ -98,7 +99,11 @@ function IosCallout() {
         }}
         initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 4 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: CALLOUT_DELAY, duration: 0.22, ease: EASE_OUT_EXPO }}
+        transition={{
+          delay: CALLOUT_DELAY,
+          duration: 0.22,
+          ease: EASE_OUT_EXPO,
+        }}
       >
         {CALLOUT_ITEMS.map((item, index) => (
           <span
@@ -167,7 +172,11 @@ function Selection({ children }) {
         className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px] border border-[#b6f500]/60 bg-[#d8f6a2]'
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
-        transition={{ delay: HIGHLIGHT_DELAY, duration: 0.7, ease: EASE_OUT_EXPO }}
+        transition={{
+          delay: HIGHLIGHT_DELAY,
+          duration: 0.7,
+          ease: EASE_OUT_EXPO,
+        }}
       />
 
       {/* handles */}
@@ -176,7 +185,11 @@ function Selection({ children }) {
         className='pointer-events-none absolute inset-0'
         initial={reduceMotion ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: HANDLES_DELAY, duration: 0.4, ease: EASE_OUT_EXPO }}
+        transition={{
+          delay: HANDLES_DELAY,
+          duration: 0.4,
+          ease: EASE_OUT_EXPO,
+        }}
       >
         <span className='absolute inset-y-[0.06em] left-0 w-[0.035em] bg-[#b6f500]' />
         <span className='absolute -left-[0.135em] -top-[0.1em] h-[0.26em] w-[0.3em] bg-[#b6f500] [clip-path:polygon(0_0,100%_0,50%_100%)]' />
