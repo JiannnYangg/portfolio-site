@@ -8,16 +8,50 @@ import { scrollToId } from '@/hooks';
 import { slideUp } from './variants';
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1];
+const IOS_FONT =
+  "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
+const CALLOUT_ITEMS = ['Copy', 'Look Up', 'Share'];
 
 /** Key word inside the headline: ExtraBold Italic, same weight as the reference */
 function Emphasis({ children }) {
   return <em className='font-extrabold italic'>{children}</em>;
 }
 
+/** iPhone-style text-selection callout (black bubble + arrow) */
+function IosCallout() {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <span
+      aria-hidden='true'
+      className='pointer-events-none absolute bottom-full left-1/2 z-10 mb-[18px] -translate-x-1/2'
+    >
+      <motion.span
+        className='relative flex items-center whitespace-nowrap rounded-[10px] bg-[#1c1c1e] px-1 text-[13px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)]'
+        style={{ fontFamily: IOS_FONT, transformOrigin: '50% 100%' }}
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.85, y: 6 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ delay: 1.9, duration: 0.35, ease: EASE_OUT_EXPO }}
+      >
+        {CALLOUT_ITEMS.map((item, index) => (
+          <span
+            key={item}
+            className={`px-3 py-[11px] ${index > 0 ? 'border-l border-white/15' : ''}`}
+          >
+            {item}
+          </span>
+        ))}
+        <span className='absolute left-1/2 top-full -mt-px h-[7px] w-[14px] -translate-x-1/2 bg-[#1c1c1e] [clip-path:polygon(0_0,100%_0,50%_100%)]' />
+      </motion.span>
+    </span>
+  );
+}
+
 /**
  * The "text selection" effect from the reference:
  * lime highlight box, dark-green ExtraBold Italic text,
- * and the two selection handles (top-left ▼ / bottom-right ▲).
+ * the two selection handles (top-left ▼ / bottom-right ▲)
+ * and the iPhone-style callout menu above it.
  */
 function Selection({ children }) {
   const reduceMotion = useReducedMotion();
@@ -46,6 +80,8 @@ function Selection({ children }) {
         <span className='absolute inset-y-[0.06em] right-0 w-[0.035em] bg-[#b6f500]' />
         <span className='absolute -bottom-[0.1em] -right-[0.135em] h-[0.26em] w-[0.3em] bg-[#b6f500] [clip-path:polygon(50%_0,100%_100%,0_100%)]' />
       </motion.span>
+
+      <IosCallout />
 
       <em className='relative font-extrabold italic text-[#3d5a0e]'>
         {children}
@@ -83,18 +119,18 @@ export function Header() {
         }}
       />
 
-      {/* headline */}
+      {/* headline: compact, centered column, staggered lines on desktop */}
       <div className='relative flex min-h-[100svh] items-center'>
-        <div className='mx-auto w-full max-w-7xl px-6 pb-32 pt-28 md:px-12'>
-          <h1 className='font-[family-name:var(--font-montserrat)] text-[clamp(2.6rem,8.4vw,7.75rem)] font-medium leading-[1.1] tracking-[-0.03em]'>
+        <div className='mx-auto w-full max-w-4xl px-6 pb-32 pt-32 md:px-10'>
+          <h1 className='font-[family-name:var(--font-montserrat)] text-[clamp(2rem,5.2vw,4.25rem)] font-medium leading-[1.12] tracking-[-0.03em]'>
             <span className='block'>
-              We <Emphasis>design</Emphasis> it.
+              We <Selection>design</Selection> it.
             </span>
-            <span className='block'>
+            <span className='block md:pl-[1em]'>
               We <Emphasis>build</Emphasis> it.
             </span>
-            <span className='block'>
-              We get it <Selection>seen.</Selection>
+            <span className='block md:pl-[2em]'>
+              We get it <Emphasis>seen.</Emphasis>
             </span>
           </h1>
         </div>
