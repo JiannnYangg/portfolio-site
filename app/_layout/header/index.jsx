@@ -244,7 +244,7 @@ export function Header() {
       initial='initial'
       animate='enter'
     >
-      {/* paper + grid, dropped to 60% opacity (40% lighter) */}
+      {/* paper + grid, wrapper at 60% opacity */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0'
@@ -266,25 +266,28 @@ export function Header() {
           }}
         />
 
-        {/* graph-paper grid: cells measured from the Chazon flyer
-            (62px wide x 57px tall), lines a further 20% lighter (0.6 -> 0.48) */}
+        {/* graph-paper grid, matched to the Chazon flyer (measured):
+            cells 62px x 57px, ~2px soft lines in a pale yellow-green tint
+            (peak about 5 levels off the background in red, 15 in blue).
+            Gradient alpha 0.12 x wrapper 0.6 = 0.072 effective. */}
         <div
           className='absolute inset-0'
           style={{
-            opacity: 0.48,
             backgroundImage:
-              'linear-gradient(to right, rgba(40,44,56,0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(40,44,56,0.55) 1px, transparent 1px)',
+              'linear-gradient(to right, rgba(170,205,40,0.12) 2px, transparent 2px), linear-gradient(to bottom, rgba(170,205,40,0.12) 2px, transparent 2px)',
             backgroundSize: '62px 57px',
           }}
         />
       </div>
 
       {/* soft blooms spread across the hero, all in the lime-green family
-          (pale lime, yellow-green, chartreuse, mint, aqua-green, soft yellow) */}
+          (pale lime, yellow-green, chartreuse, mint, aqua-green, soft yellow).
+          Layer opacity 0.7 = 30% softer than before. */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0'
         style={{
+          opacity: 0.7,
           backgroundImage: [
             'radial-gradient(34% 30% at 14% 18%, rgba(214,248,140,0.55) 0%, rgba(214,248,140,0) 100%)',
             'radial-gradient(30% 28% at 52% 8%, rgba(232,250,160,0.50) 0%, rgba(232,250,160,0) 100%)',
