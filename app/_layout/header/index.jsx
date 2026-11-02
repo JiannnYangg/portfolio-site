@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { ChevronRight, MoveDownRight } from 'lucide-react';
+import { useState } from 'react';
 
 import { scrollToId } from '@/hooks';
 
@@ -12,9 +13,60 @@ const IOS_FONT =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
 const CALLOUT_ITEMS = ['Copy', 'Look Up', 'Translate'];
 
+/**
+ * Timeline (seconds). The header itself slides in at 2.5s (see variants.js),
+ * so everything inside it is sequenced from there:
+ * lines rise in -> selection highlight -> handles -> callout -> light sweeps.
+ */
+const HERO_START = 2.5;
+const LINE_DELAY = HERO_START + 0.15;
+const LINE_STAGGER = 0.14;
+const HIGHLIGHT_DELAY = 3.4;
+const HANDLES_DELAY = 3.9;
+const CALLOUT_DELAY = 4.2;
+const SHINE_FIRST_DELAY = 5.2;
+const SHINE_DURATION = 1.1;
+const SHINE_REPEAT_DELAY = 4.5; // 1.1s sweep + 4.5s pause = a pass every ~5.6s
+
 /** iOS-style dark translucent material with a light frosted blur */
 const MENU_BG = 'rgba(40, 40, 44, 0.82)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
+
+/** Clips only the bottom edge of a line, so text rises out of a mask
+ *  while the callout above the word stays visible. */
+const LINE_CLIP = 'inset(-300px -100px -0.12em -100px)';
+
+/**
+ * Same principle as the rest of the site (ParallaxReveal + ParallaxFade):
+ * the line sits in a mask, slides up from below and fades in, staggered.
+ */
+function Line({ index, className = '', children }) {
+  const reduceMotion = useReducedMotion();
+  const [settled, setSettled] = useState(false);
+
+  return (
+    <span
+      className={`block ${className}`}
+      // the mask is dropped once the line has settled, so the callout's
+      // backdrop blur can see the page behind it
+      style={settled || reduceMotion ? undefined : { clipPath: LINE_CLIP }}
+    >
+      <motion.span
+        className='block'
+        initial={reduceMotion ? false : { y: '105%', opacity: 0 }}
+        animate={{ y: '0%', opacity: 1 }}
+        transition={{
+          duration: 0.9,
+          delay: LINE_DELAY + index * LINE_STAGGER,
+          ease: EASE_OUT_EXPO,
+        }}
+        onAnimationComplete={() => setSettled(true)}
+      >
+        {children}
+      </motion.span>
+    </span>
+  );
+}
 
 /** Key word inside the headline: ExtraBold Italic, same weight as the reference */
 function Emphasis({ children }) {
@@ -25,6 +77,7 @@ function Emphasis({ children }) {
  * iOS edit menu (the bubble shown when text is selected on iPhone):
  * flat dark translucent material with a soft blur, small radius,
  * hairline dividers, a trailing chevron and a pointer arrow.
+ * A soft sheen sweeps across it every ~5.6s, like light catching glass.
  */
 function IosCallout() {
   const reduceMotion = useReducedMotion();
@@ -45,7 +98,7 @@ function IosCallout() {
         }}
         initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 4 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 1.9, duration: 0.22, ease: EASE_OUT_EXPO }}
+        transition={{ delay: CALLOUT_DELAY, duration: 0.22, ease: EASE_OUT_EXPO }}
       >
         {CALLOUT_ITEMS.map((item, index) => (
           <span
@@ -58,6 +111,29 @@ function IosCallout() {
         <span className='flex items-center border-l-[0.5px] border-white/20 px-[6px]'>
           <ChevronRight size={12} strokeWidth={2.5} />
         </span>
+
+        {/* light sweep: a soft diagonal sheen that passes over the bubble */}
+        {!reduceMotion && (
+          <span className='pointer-events-none absolute inset-0 overflow-hidden rounded-[9px]'>
+            <motion.span
+              className='absolute inset-y-0 left-0 w-[45%]'
+              style={{
+                background:
+                  'linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.30) 50%, rgba(255,255,255,0) 100%)',
+                transform: 'skewX(-18deg)',
+              }}
+              initial={{ x: '-130%' }}
+              animate={{ x: '330%' }}
+              transition={{
+                delay: SHINE_FIRST_DELAY,
+                duration: SHINE_DURATION,
+                ease: 'easeInOut',
+                repeat: Infinity,
+                repeatDelay: SHINE_REPEAT_DELAY,
+              }}
+            />
+          </span>
+        )}
 
         {/* pointer arrow */}
         <span
@@ -91,7 +167,7 @@ function Selection({ children }) {
         className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px] border border-[#b6f500]/60 bg-[#d8f6a2]'
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
-        transition={{ delay: 1, duration: 0.7, ease: EASE_OUT_EXPO }}
+        transition={{ delay: HIGHLIGHT_DELAY, duration: 0.7, ease: EASE_OUT_EXPO }}
       />
 
       {/* handles */}
@@ -100,7 +176,7 @@ function Selection({ children }) {
         className='pointer-events-none absolute inset-0'
         initial={reduceMotion ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.55, duration: 0.4, ease: EASE_OUT_EXPO }}
+        transition={{ delay: HANDLES_DELAY, duration: 0.4, ease: EASE_OUT_EXPO }}
       >
         <span className='absolute inset-y-[0.06em] left-0 w-[0.035em] bg-[#b6f500]' />
         <span className='absolute -left-[0.135em] -top-[0.1em] h-[0.26em] w-[0.3em] bg-[#b6f500] [clip-path:polygon(0_0,100%_0,50%_100%)]' />
@@ -189,15 +265,15 @@ export function Header() {
       <div className='relative flex min-h-[100svh] items-center'>
         <div className='mx-auto w-full max-w-4xl px-6 pb-32 pt-32 md:px-10'>
           <h1 className='font-[family-name:var(--font-montserrat)] text-[clamp(2rem,5.2vw,4.25rem)] font-medium leading-[1.12] tracking-[-0.03em]'>
-            <span className='block'>
+            <Line index={0}>
               We <Selection>design</Selection> it.
-            </span>
-            <span className='block md:pl-[1em]'>
+            </Line>
+            <Line index={1} className='md:pl-[1em]'>
               We <Emphasis>build</Emphasis> it.
-            </span>
-            <span className='block md:pl-[2em]'>
+            </Line>
+            <Line index={2} className='md:pl-[2em]'>
               We get it <Emphasis>seen.</Emphasis>
-            </span>
+            </Line>
           </h1>
         </div>
       </div>
