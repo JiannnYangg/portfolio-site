@@ -27,3 +27,4 @@ Set `NEXT_PUBLIC_SITE_URL` to your live domain when you deploy.
 3. Optional: add your custom domain under Settings, Domains, and set
    `NEXT_PUBLIC_SITE_URL` (for example `https://yourname.com`) under
    Settings, Environment Variables, then redeploy.
+
