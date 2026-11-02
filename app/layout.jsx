@@ -1,5 +1,5 @@
 import { rootMetadata } from '@/config';
-import { neue_montreal } from '@/fonts';
+import { montserrat, neue_montreal } from '@/fonts';
 import { Offcanvas } from '@/layout';
 import { Providers } from '@/providers';
 import './globals.css';
@@ -13,7 +13,11 @@ export const viewport = { themeColor: '#1f2024' };
 /** @param {import('react').PropsWithChildren<unknown>} */
 export default function RootLayout({ children }) {
   return (
-    <html lang='en' dir='ltr' className={neue_montreal.variable}>
+    <html
+      lang='en'
+      dir='ltr'
+      className={`${neue_montreal.variable} ${montserrat.variable}`}
+    >
       <body className={neue_montreal.className}>
         <Providers>
           <Offcanvas />
