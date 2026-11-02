@@ -101,7 +101,8 @@ const LOGOS = [
     width: 320,
     height: 200,
     size: 'clamp(48px, 6vw, 100px)',
-    position: 'bottom-[26%] left-[5%] md:bottom-auto md:left-[4%] md:top-[60%]',
+    // lifted: was bottom-[26%] on mobile and md:top-[60%] on desktop
+    position: 'bottom-[34%] left-[5%] md:bottom-auto md:left-[4%] md:top-[49%]',
     rotate: -14,
     depth: 0.7,
     float: [6, 6.8, 2, 1.6],
