@@ -330,10 +330,12 @@ export function Header() {
       {/* background: paper + soft blooms + lime corner glows + grid on top.
           The mask dims it behind the headline and the CTA only; the two
           zone centers (offsets from the vertical middle) differ per
-          breakpoint because the headline scales with the viewport. */}
+          breakpoint because the headline scales with the viewport.
+          --cta-y moved down together with the CTA (+20px mobile, +32px
+          desktop) so the calm light zone stays behind the pill. */}
       <div
         aria-hidden='true'
-        className='pointer-events-none absolute inset-0 [--cta-y:77px] [--head-y:-59px] md:[--cta-y:140px] md:[--head-y:-74px]'
+        className='pointer-events-none absolute inset-0 [--cta-y:97px] [--head-y:-59px] md:[--cta-y:172px] md:[--head-y:-74px]'
         style={{
           maskImage: CALM_MASK,
           WebkitMaskImage: CALM_MASK,
@@ -403,9 +405,13 @@ export function Header() {
           viewports like it did with the CTA pinned to the bottom).
           The headline is a shrink-to-fit block so the staggered lines sit
           optically centered. Padding is slightly bottom-heavy, which keeps
-          the whole block a touch above true center. */}
+          the whole block a touch above true center.
+          The CTA was moved down by +20px (mobile) / +32px (desktop): the CTA
+          margin grew by that amount and the top padding grew by the same
+          amount, so the block's centering cancels out and the headline stays
+          exactly where it was. */}
       <div className='relative flex min-h-[100svh] items-center'>
-        <div className='mx-auto w-full max-w-5xl px-6 pb-28 pt-24 md:px-10 md:pb-36 md:pt-28'>
+        <div className='mx-auto w-full max-w-5xl px-6 pb-28 pt-[116px] md:px-10 md:pb-36 md:pt-36'>
           <h1 className='mx-auto w-fit font-[family-name:var(--font-montserrat)] text-[clamp(2.5rem,6.4vw,5.5rem)] font-medium leading-[1.08] tracking-[-0.03em]'>
             <Line>
               <Word index={0}>We</Word>{' '}
@@ -439,7 +445,7 @@ export function Header() {
               buttons. Only the colours are themed: dark label with lime
               text, lime circle with a dark arrow; the two swap on hover.
               Sits a deliberate, modest gap under the headline. */}
-          <div className='mt-10 flex justify-center md:mt-14'>
+          <div className='mt-[60px] flex justify-center md:mt-[88px]'>
             <button
               type='button'
               onClick={() => scrollToId('contact-footer')}
