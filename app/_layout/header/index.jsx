@@ -47,6 +47,21 @@ const SCROLL_LIFT = -64; // px a word drifts up while fading (was -40)
 const MENU_BG = 'rgba(40, 40, 44, 0.82)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
+/**
+ * "Calm zones": the background (paper folds, grid, lime glows) is faded down
+ * to CALM_OPACITY behind the headline and behind the CTA, and nowhere else.
+ * Two soft elliptical masks are intersected, so each one only dims its own
+ * area. Headline zone is relative to the hero size (the headline scales with
+ * the viewport); the CTA zone is a fixed size around the pill.
+ */
+const CALM_OPACITY = 0.3;
+const calmZone = size =>
+  `radial-gradient(ellipse ${size}, rgba(0,0,0,${CALM_OPACITY}) 0%, rgba(0,0,0,${CALM_OPACITY}) 65%, #000 100%)`;
+const CALM_MASK = [
+  calmZone('40% 26% at 50% 42%'), // headline block
+  calmZone('200px 80px at 50% calc(100% - 5.5rem)'), // CTA pill
+].join(', ');
+
 /** Clips only the bottom edge of a line, so text rises out of a mask
  *  while the callout above the word stays visible. */
 const LINE_CLIP = 'inset(-300px -100px -0.12em -100px)';
@@ -298,70 +313,52 @@ export function Header() {
       initial='initial'
       animate='enter'
     >
-      {/* paper + grid, wrapper at 60% opacity */}
+      {/* background: off-white sheet + faint grid + two lime corner glows.
+          Brand palette only (lime #b6f500, charcoal, off-white).
+          The mask dims it behind the headline and the CTA only. */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0'
-        style={{ opacity: 0.6 }}
+        style={{
+          maskImage: CALM_MASK,
+          WebkitMaskImage: CALM_MASK,
+          maskComposite: 'intersect',
+          WebkitMaskComposite: 'source-in',
+        }}
       >
-        {/* crumpled paper: soft grey folds on an off-white sheet */}
+        {/* paper folds: soft neutral grey on the off-white sheet */}
         <div
           className='absolute inset-0'
           style={{
+            opacity: 0.6,
             backgroundImage: [
               'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
               'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
               'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
-              'radial-gradient(38% 26% at 30% 22%, rgba(80,80,90,0.09) 0%, rgba(80,80,90,0) 100%)',
-              'radial-gradient(34% 24% at 78% 58%, rgba(80,80,90,0.07) 0%, rgba(80,80,90,0) 100%)',
-              'radial-gradient(40% 22% at 22% 84%, rgba(80,80,90,0.08) 0%, rgba(80,80,90,0) 100%)',
-              'radial-gradient(60% 40% at 85% 12%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
             ].join(', '),
           }}
         />
 
-        {/* graph-paper grid, matched to the Chazon flyer (measured):
-            cells 62px x 57px, ~2px soft lines in a pale yellow-green tint
-            (peak about 5 levels off the background in red, 15 in blue).
-            Gradient alpha 0.12 x wrapper 0.6 = 0.072 effective. */}
+        {/* graph-paper grid in the theme lime, kept very faint */}
         <div
           className='absolute inset-0'
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(170,205,40,0.12) 2px, transparent 2px), linear-gradient(to bottom, rgba(170,205,40,0.12) 2px, transparent 2px)',
+              'linear-gradient(to right, rgba(182,245,0,0.1) 2px, transparent 2px), linear-gradient(to bottom, rgba(182,245,0,0.1) 2px, transparent 2px)',
             backgroundSize: '62px 57px',
           }}
         />
+
+        {/* the only colour on the screen: two soft theme-lime glows in
+            opposite corners */}
+        <div
+          className='absolute inset-0'
+          style={{
+            backgroundImage:
+              'radial-gradient(45% 36% at 100% 0%, rgba(182,245,0,0.5) 0%, rgba(182,245,0,0) 70%), radial-gradient(42% 32% at 0% 100%, rgba(182,245,0,0.45) 0%, rgba(182,245,0,0) 70%)',
+          }}
+        />
       </div>
-
-      {/* soft blooms spread across the hero, all in the lime-green family
-          (pale lime, yellow-green, chartreuse, mint, aqua-green, soft yellow).
-          Layer opacity 0.7 = 30% softer than before. */}
-      <div
-        aria-hidden='true'
-        className='pointer-events-none absolute inset-0'
-        style={{
-          opacity: 0.7,
-          backgroundImage: [
-            'radial-gradient(34% 30% at 14% 18%, rgba(214,248,140,0.55) 0%, rgba(214,248,140,0) 100%)',
-            'radial-gradient(30% 28% at 52% 8%, rgba(232,250,160,0.50) 0%, rgba(232,250,160,0) 100%)',
-            'radial-gradient(32% 30% at 84% 40%, rgba(176,238,200,0.50) 0%, rgba(176,238,200,0) 100%)',
-            'radial-gradient(30% 28% at 40% 62%, rgba(200,245,110,0.45) 0%, rgba(200,245,110,0) 100%)',
-            'radial-gradient(34% 30% at 70% 90%, rgba(170,236,214,0.50) 0%, rgba(170,236,214,0) 100%)',
-            'radial-gradient(28% 26% at 6% 66%, rgba(247,250,170,0.50) 0%, rgba(247,250,170,0) 100%)',
-          ].join(', '),
-        }}
-      />
-
-      {/* lime corner glows: sit on top of the paper + grid */}
-      <div
-        aria-hidden='true'
-        className='pointer-events-none absolute inset-0'
-        style={{
-          backgroundImage:
-            'radial-gradient(55% 42% at 100% 0%, rgba(182,245,0,0.8) 0%, rgba(182,245,0,0) 70%), radial-gradient(50% 38% at 0% 100%, rgba(182,245,0,0.75) 0%, rgba(182,245,0,0) 70%)',
-        }}
-      />
 
       {/* floating 3D logos: asymmetric scatter around the headline, lit from
           the top-left, sequenced right after the headline words */}
