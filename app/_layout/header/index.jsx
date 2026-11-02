@@ -5,7 +5,6 @@ import { ChevronRight, MoveDownRight } from 'lucide-react';
 
 import { scrollToId } from '@/hooks';
 
-import './green-bg.css';
 import { slideUp } from './variants';
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1];
@@ -114,11 +113,32 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='bg-green-wave relative min-h-[100svh] overflow-hidden text-black selection:bg-[#d8f6a2] selection:text-[#3d5a0e]'
+      className='relative min-h-[100svh] overflow-hidden bg-white text-black selection:bg-[#d8f6a2] selection:text-[#3d5a0e]'
       variants={slideUp}
       initial='initial'
       animate='enter'
     >
+      {/* lime corner glows */}
+      <div
+        aria-hidden='true'
+        className='pointer-events-none absolute inset-0'
+        style={{
+          backgroundImage:
+            'radial-gradient(55% 42% at 100% 0%, rgba(182,245,0,0.8) 0%, rgba(182,245,0,0) 70%), radial-gradient(50% 38% at 0% 100%, rgba(182,245,0,0.75) 0%, rgba(182,245,0,0) 70%)',
+        }}
+      />
+
+      {/* subtle grid */}
+      <div
+        aria-hidden='true'
+        className='pointer-events-none absolute inset-0 opacity-70'
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px)',
+          backgroundSize: '36px 36px',
+        }}
+      />
+
       {/* headline: compact, centered column, staggered lines on desktop */}
       <div className='relative flex min-h-[100svh] items-center'>
         <div className='mx-auto w-full max-w-4xl px-6 pb-32 pt-32 md:px-10'>
