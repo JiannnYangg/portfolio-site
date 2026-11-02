@@ -3,7 +3,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { ChevronRight, MoveDownRight } from 'lucide-react';
 
-import { AiChat } from '@/components';
 import { scrollToId } from '@/hooks';
 
 import './green-bg.css';
@@ -122,7 +121,7 @@ export function Header() {
     >
       {/* headline: compact, centered column, staggered lines on desktop */}
       <div className='relative flex min-h-[100svh] items-center'>
-        <div className='mx-auto w-full max-w-4xl px-6 pb-56 pt-32 md:px-10 md:pb-64'>
+        <div className='mx-auto w-full max-w-4xl px-6 pb-32 pt-32 md:px-10'>
           <h1 className='font-[family-name:var(--font-montserrat)] text-[clamp(2rem,5.2vw,4.25rem)] font-medium leading-[1.12] tracking-[-0.03em]'>
             <span className='block'>
               We <Selection>design</Selection> it.
@@ -135,11 +134,6 @@ export function Header() {
             </span>
           </h1>
         </div>
-      </div>
-
-      {/* AI chat box, sitting just above the bottom pill */}
-      <div className='absolute inset-x-0 bottom-24 flex justify-center px-4 md:bottom-32'>
-        <AiChat delay={3.1} />
       </div>
 
       {/* bottom pill */}
