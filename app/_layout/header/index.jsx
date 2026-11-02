@@ -30,6 +30,7 @@ const LINE_STAGGER = 0.14;
 const HIGHLIGHT_DELAY = 3.4;
 const HANDLES_DELAY = 3.9;
 const CALLOUT_DELAY = 4.2;
+const MARKER_DELAY = 4.0; // marker bar behind "seen." sweeps in once the line has settled
 const SHINE_FIRST_DELAY = CALLOUT_DELAY + 1; // first pass 1s after the bubble appears
 const SHINE_DURATION = 2.2; // slow sweep
 const SHINE_REPEAT_DELAY = 1; // 1s pause between passes
@@ -102,6 +103,34 @@ function Line({ index, className = '', children }) {
 /** Key word inside the headline: ExtraBold Italic, same weight as the reference */
 function Emphasis({ children }) {
   return <em className='font-extrabold italic'>{children}</em>;
+}
+
+/**
+ * Asymmetric marker highlight (like the "course?" reference):
+ * a flat bar sits behind the lower part of the word, starts a little to the
+ * left of the first letter, runs further past the last letter on the right,
+ * and drops slightly below the baseline. Theme lime at 50%, so the text stays
+ * dark and crisp on top. It sweeps in from the left after the line settles.
+ */
+function Marker({ children }) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <span className='relative inline-block'>
+      <motion.span
+        aria-hidden='true'
+        className='absolute -left-[0.07em] -right-[0.14em] bottom-[0.1em] h-[0.4em] origin-left bg-[#b6f500]/50'
+        initial={reduceMotion ? false : { scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{
+          delay: MARKER_DELAY,
+          duration: 0.7,
+          ease: EASE_OUT_EXPO,
+        }}
+      />
+      <em className='relative font-extrabold italic'>{children}</em>
+    </span>
+  );
 }
 
 /**
@@ -320,7 +349,7 @@ export function Header() {
               We <Emphasis>build</Emphasis> it.
             </Line>
             <Line index={2} className='md:pl-[2em]'>
-              We get it <Emphasis>seen.</Emphasis>
+              We get it <Marker>seen.</Marker>
             </Line>
           </h1>
         </div>
