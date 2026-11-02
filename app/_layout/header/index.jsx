@@ -51,24 +51,30 @@ const MENU_FILTER = 'blur(20px) saturate(180%)';
  * "Calm zones": the background (paper folds, grid, blooms, lime glows) is
  * faded down to CALM_OPACITY behind the headline and behind the CTA, and
  * nowhere else. Two soft elliptical masks are intersected, so each one only
- * dims its own area. Headline zone is relative to the hero size (the headline
- * scales with the viewport); the CTA zone is a fixed size around the pill.
+ * dims its own area.
+ *
+ * The zones follow the content: the headline + CTA are one block centered in
+ * the hero, so the zone centers are offsets from the vertical middle
+ * (--head-y / --cta-y, set per breakpoint on the wrapper below).
+ *
+ * CALM_OPACITY 0.55 = half the wash of the previous 0.1 (90% dimmed -> 45%).
  */
-const CALM_OPACITY = 0.1;
-const calmZone = size =>
-  `radial-gradient(ellipse ${size}, rgba(0,0,0,${CALM_OPACITY}) 0%, rgba(0,0,0,${CALM_OPACITY}) 65%, #000 100%)`;
+const CALM_OPACITY = 0.55;
+const calmZone = (size, centerY) =>
+  `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(0,0,0,${CALM_OPACITY}) 0%, rgba(0,0,0,${CALM_OPACITY}) 65%, #000 100%)`;
 const CALM_MASK = [
-  calmZone('40% 26% at 50% 42%'), // headline block
-  calmZone('200px 80px at 50% calc(100% - 5.5rem)'), // CTA pill
+  calmZone('40% 26%', 'calc(50% + var(--head-y))'), // headline block
+  calmZone('200px 80px', 'calc(50% + var(--cta-y))'), // CTA pill
 ].join(', ');
 
 /**
  * Graph-paper grid. It is drawn on TOP of the blooms and glows (so they can't
  * wash it out) in a deeper lime than the glows, so the lines stay readable on
  * both the off-white and the lime areas.
+ * 0.2 -> 0.133 = one third less visible.
  */
 const GRID_COLOR = '140,190,0';
-const GRID_ALPHA = 0.2;
+const GRID_ALPHA = 0.133;
 
 /** Clips only the bottom edge of a line, so text rises out of a mask
  *  while the callout above the word stays visible. */
@@ -322,10 +328,12 @@ export function Header() {
       animate='enter'
     >
       {/* background: paper + soft blooms + lime corner glows + grid on top.
-          The mask dims all of it behind the headline and the CTA only. */}
+          The mask dims it behind the headline and the CTA only; the two
+          zone centers (offsets from the vertical middle) differ per
+          breakpoint because the headline scales with the viewport. */}
       <div
         aria-hidden='true'
-        className='pointer-events-none absolute inset-0'
+        className='pointer-events-none absolute inset-0 [--cta-y:77px] [--head-y:-59px] md:[--cta-y:140px] md:[--head-y:-74px]'
         style={{
           maskImage: CALM_MASK,
           WebkitMaskImage: CALM_MASK,
@@ -390,12 +398,14 @@ export function Header() {
           the top-left, sequenced right after the headline words */}
       <HeroLogos />
 
-      {/* headline: one shrink-to-fit block centered in the hero, so the
-          staggered lines sit optically centered instead of hugging the left.
-          Extra bottom padding lifts it above true center and keeps it clear
-          of the CTA. */}
+      {/* headline + CTA as ONE block centered in the hero, so the gap between
+          them is constant on every screen (it can't drift apart on tall
+          viewports like it did with the CTA pinned to the bottom).
+          The headline is a shrink-to-fit block so the staggered lines sit
+          optically centered. Padding is slightly bottom-heavy, which keeps
+          the whole block a touch above true center. */}
       <div className='relative flex min-h-[100svh] items-center'>
-        <div className='mx-auto w-full max-w-5xl px-6 pb-52 pt-24 md:px-10 md:pb-64 md:pt-28'>
+        <div className='mx-auto w-full max-w-5xl px-6 pb-28 pt-24 md:px-10 md:pb-36 md:pt-28'>
           <h1 className='mx-auto w-fit font-[family-name:var(--font-montserrat)] text-[clamp(2.5rem,6.4vw,5.5rem)] font-medium leading-[1.08] tracking-[-0.03em]'>
             <Line>
               <Word index={0}>We</Word>{' '}
@@ -423,32 +433,32 @@ export function Header() {
               </Word>
             </Line>
           </h1>
-        </div>
-      </div>
 
-      {/* bottom CTA: exactly the reference design (no border, no shadow).
-          Light grey outer pill 225 x 62, 6px ring, 6px gap, 50px inner
-          buttons. Only the colours are themed: dark label with lime text,
-          lime circle with a dark arrow; the two swap on hover.
-          Lifted off the bottom edge for more breathing room. */}
-      <div className='absolute inset-x-0 bottom-14 flex justify-center px-4 md:bottom-20'>
-        <button
-          type='button'
-          onClick={() => scrollToId('contact-footer')}
-          aria-label="Let's talk, go to contact"
-          className='group flex items-center gap-[6px] rounded-full bg-[#d9d9d9] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03]'
-        >
-          <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#1f2024] text-[20px] font-normal leading-none tracking-[0.01em] text-[#b6f500] transition-colors duration-300 group-hover:bg-[#b6f500] group-hover:text-[#1f2024]'>
-            Let&apos;s talk
-          </span>
-          <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#b6f500] transition-colors duration-300 group-hover:bg-[#1f2024]'>
-            <ArrowUpRight
-              size={20}
-              strokeWidth={2.25}
-              className='text-[#1f2024] transition-all duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#b6f500]'
-            />
-          </span>
-        </button>
+          {/* CTA: exactly the reference design (no border, no shadow).
+              Light grey outer pill 225 x 62, 6px ring, 6px gap, 50px inner
+              buttons. Only the colours are themed: dark label with lime
+              text, lime circle with a dark arrow; the two swap on hover.
+              Sits a deliberate, modest gap under the headline. */}
+          <div className='mt-10 flex justify-center md:mt-14'>
+            <button
+              type='button'
+              onClick={() => scrollToId('contact-footer')}
+              aria-label="Let's talk, go to contact"
+              className='group flex items-center gap-[6px] rounded-full bg-[#d9d9d9] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03]'
+            >
+              <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#1f2024] text-[20px] font-normal leading-none tracking-[0.01em] text-[#b6f500] transition-colors duration-300 group-hover:bg-[#b6f500] group-hover:text-[#1f2024]'>
+                Let&apos;s talk
+              </span>
+              <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#b6f500] transition-colors duration-300 group-hover:bg-[#1f2024]'>
+                <ArrowUpRight
+                  size={20}
+                  strokeWidth={2.25}
+                  className='text-[#1f2024] transition-all duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#b6f500]'
+                />
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </motion.header>
   );
