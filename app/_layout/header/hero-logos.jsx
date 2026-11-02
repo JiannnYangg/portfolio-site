@@ -42,10 +42,17 @@ const shadowFor = depth =>
   ].join(' ');
 
 /**
- * Asymmetric layout. Nothing mirrors: sizes, edges and tilts all differ.
+ * Hierarchy layout. Three hero logos (claude, comfy, elevenlabs) are large and
+ * close to the viewer; the three supporting logos (n8n, github, squiggle) are
+ * small and sit further back, so they add texture without competing.
+ * Nothing mirrors: sizes, edges and tilts all differ, but the visual weight is
+ * balanced: big top-left vs big top-right, big mid-right vs small mid-left.
+ *
  * Mobile positions are the base classes, md: classes take over on desktop.
  * Everything stays in the empty bands above and below the headline and in
- * the side margins, so the text never collides with a logo.
+ * the side margins, and clear of the top nav, so nothing collides with text.
+ *
+ * Order matters: hero logos come first so they pop in first.
  *
  * width  : clamp(min on phones, fluid vw, max on large screens)
  * depth  : parallax strength + shadow length (big/close logos move more)
@@ -58,67 +65,67 @@ const LOGOS = [
     src: '/hero-logos/hero-claude-4827.png',
     width: 300,
     height: 261,
-    size: 'clamp(64px, 9vw, 150px)',
-    position: 'left-[5%] top-[15%] md:left-[8%] md:top-[14%]',
+    size: 'clamp(76px, 10.5vw, 190px)',
+    position: 'left-[4%] top-[14%] md:left-[7%] md:top-[15%]',
     rotate: -9,
-    depth: 1.1,
-    float: [9, 6.2, 1.6, 0],
+    depth: 1.3,
+    float: [10, 6.2, 1.6, 0],
   },
   {
     id: 'comfy',
     src: '/hero-logos/hero-comfy-9153.png',
     width: 420,
     height: 172,
-    size: 'clamp(92px, 13vw, 210px)',
-    position: 'right-[5%] top-[21%] md:right-[7%] md:top-[12%]',
+    size: 'clamp(104px, 15vw, 280px)',
+    position: 'right-[4%] top-[21%] md:right-[8%] md:top-[24%]',
     rotate: 5,
-    depth: 1.35,
-    float: [11, 7.4, 1.2, 0.8],
-  },
-  {
-    id: 'n8n',
-    src: '/hero-logos/hero-n8n-2606.png',
-    width: 320,
-    height: 200,
-    size: 'clamp(70px, 10vw, 160px)',
-    position: 'bottom-[27%] left-[5%] md:bottom-auto md:left-[3%] md:top-[56%]',
-    rotate: -14,
-    depth: 1.2,
-    float: [10, 6.8, 2, 1.6],
+    depth: 1.5,
+    float: [12, 7.4, 1.2, 0.8],
   },
   {
     id: 'elevenlabs',
     src: '/hero-logos/hero-elevenlabs-7342.png',
     width: 240,
     height: 234,
-    size: 'clamp(54px, 7.5vw, 120px)',
+    size: 'clamp(64px, 9.5vw, 175px)',
     position:
-      'bottom-[31%] right-[7%] md:bottom-auto md:right-[4%] md:top-[47%]',
+      'bottom-[29%] right-[6%] md:bottom-auto md:right-[6%] md:top-[50%]',
     rotate: 11,
-    depth: 0.85,
-    float: [7, 5.6, 1.4, 0.4],
+    depth: 1.25,
+    float: [9, 5.6, 1.4, 0.4],
+  },
+  {
+    id: 'n8n',
+    src: '/hero-logos/hero-n8n-2606.png',
+    width: 320,
+    height: 200,
+    size: 'clamp(48px, 6vw, 100px)',
+    position: 'bottom-[26%] left-[5%] md:bottom-auto md:left-[4%] md:top-[60%]',
+    rotate: -14,
+    depth: 0.7,
+    float: [6, 6.8, 2, 1.6],
   },
   {
     id: 'github',
     src: '/hero-logos/hero-github-5918.png',
     width: 176,
     height: 173,
-    size: 'clamp(44px, 5.5vw, 88px)',
-    position: 'bottom-[20%] left-[34%] md:bottom-[19%] md:left-[22%]',
+    size: 'clamp(34px, 4.2vw, 68px)',
+    position: 'bottom-[19%] left-[36%] md:bottom-[22%] md:left-[20%]',
     rotate: 7,
-    depth: 0.65,
-    float: [6, 5.2, 1.8, 1.1],
+    depth: 0.5,
+    float: [5, 5.2, 1.8, 1.1],
   },
   {
     id: 'squiggle',
     src: '/hero-logos/hero-squiggle-1084.png',
     width: 224,
     height: 196,
-    size: 'clamp(56px, 7vw, 112px)',
-    position: 'bottom-[16%] right-[24%] md:bottom-[14%] md:right-[21%]',
+    size: 'clamp(40px, 5vw, 82px)',
+    position: 'bottom-[15%] right-[26%] md:bottom-[13%] md:right-[27%]',
     rotate: -8,
-    depth: 0.95,
-    float: [8, 6.6, 1.5, 2],
+    depth: 0.6,
+    float: [5, 6.6, 1.5, 2],
   },
 ];
 
