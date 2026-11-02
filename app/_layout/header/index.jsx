@@ -199,18 +199,19 @@ export function Header() {
         />
       </div>
 
-      {/* soft pastel blooms spread across the hero (peach, lavender, sky, mint, blush) */}
+      {/* soft blooms spread across the hero, all in the lime-green family
+          (pale lime, yellow-green, chartreuse, mint, aqua-green, soft yellow) */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0'
         style={{
           backgroundImage: [
-            'radial-gradient(34% 30% at 14% 18%, rgba(255,205,178,0.55) 0%, rgba(255,205,178,0) 100%)',
-            'radial-gradient(30% 28% at 52% 8%, rgba(205,190,255,0.5) 0%, rgba(205,190,255,0) 100%)',
-            'radial-gradient(32% 30% at 84% 40%, rgba(178,224,255,0.55) 0%, rgba(178,224,255,0) 100%)',
-            'radial-gradient(30% 28% at 40% 62%, rgba(255,196,224,0.5) 0%, rgba(255,196,224,0) 100%)',
-            'radial-gradient(34% 30% at 70% 90%, rgba(190,240,215,0.55) 0%, rgba(190,240,215,0) 100%)',
-            'radial-gradient(28% 26% at 6% 66%, rgba(255,236,170,0.5) 0%, rgba(255,236,170,0) 100%)',
+            'radial-gradient(34% 30% at 14% 18%, rgba(214,248,140,0.55) 0%, rgba(214,248,140,0) 100%)',
+            'radial-gradient(30% 28% at 52% 8%, rgba(232,250,160,0.50) 0%, rgba(232,250,160,0) 100%)',
+            'radial-gradient(32% 30% at 84% 40%, rgba(176,238,200,0.50) 0%, rgba(176,238,200,0) 100%)',
+            'radial-gradient(30% 28% at 40% 62%, rgba(200,245,110,0.45) 0%, rgba(200,245,110,0) 100%)',
+            'radial-gradient(34% 30% at 70% 90%, rgba(170,236,214,0.50) 0%, rgba(170,236,214,0) 100%)',
+            'radial-gradient(28% 26% at 6% 66%, rgba(247,250,170,0.50) 0%, rgba(247,250,170,0) 100%)',
           ].join(', '),
         }}
       />
