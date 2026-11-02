@@ -106,11 +106,14 @@ function Emphasis({ children }) {
 }
 
 /**
- * Asymmetric marker highlight (like the "course?" reference):
- * a flat bar sits behind the lower part of the word, starts a little to the
- * left of the first letter, runs further past the last letter on the right,
- * and drops slightly below the baseline. Theme lime at 50%, so the text stays
- * dark and crisp on top. It sweeps in from the left after the line settles.
+ * Asymmetric marker highlight behind a word. Nothing about it is symmetric:
+ * - it starts right at the first letter but trails far past the last one
+ * - the whole bar is tilted up to the right, like a quick marker swipe
+ * - the shape is cut as an uneven quadrilateral (left edge short and
+ *   slanted, right edge tall, indented bottom-right corner)
+ * - it sits low, under the lower half of the letters
+ * Theme lime at 50%, text stays dark and crisp on top. It sweeps in from the
+ * left after the line settles.
  */
 function Marker({ children }) {
   const reduceMotion = useReducedMotion();
@@ -119,7 +122,11 @@ function Marker({ children }) {
     <span className='relative inline-block'>
       <motion.span
         aria-hidden='true'
-        className='absolute -left-[0.07em] -right-[0.14em] bottom-[0.1em] h-[0.4em] origin-left bg-[#b6f500]/50'
+        className='absolute -left-[0.04em] -right-[0.3em] bottom-[0.02em] h-[0.5em] origin-left bg-[#b6f500]/50'
+        style={{
+          rotate: -1.8,
+          clipPath: 'polygon(0% 22%, 100% 0%, 94% 100%, 4% 82%)',
+        }}
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{
