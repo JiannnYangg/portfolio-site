@@ -266,10 +266,11 @@ export function Header() {
           }}
         />
 
-        {/* graph-paper grid */}
+        {/* graph-paper grid: lines only, a further 40% lighter (opacity 0.6) */}
         <div
           className='absolute inset-0'
           style={{
+            opacity: 0.6,
             backgroundImage:
               'linear-gradient(to right, rgba(40,44,56,0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(40,44,56,0.55) 1px, transparent 1px)',
             backgroundSize: '33px 33px',
