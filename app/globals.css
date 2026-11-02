@@ -44,3 +44,21 @@
     }
   }
 }
+
+/* Hide the page scrollbar everywhere; the page still scrolls normally
+   (wheel, touch, keyboard, smooth scroll). Inner scroll areas keep the
+   thin styled bar above. */
+@layer base {
+  html,
+  body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* old Edge / IE */
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Edge, Safari */
+    width: 0;
+    height: 0;
+  }
+}
