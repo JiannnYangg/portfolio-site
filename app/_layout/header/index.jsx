@@ -33,9 +33,9 @@ const HIGHLIGHT_DELAY = 3.4;
 const HANDLES_DELAY = 3.9;
 const CALLOUT_DELAY = 4.2;
 const MARKER_DELAY = 4.1; // marker bar behind "seen." sweeps in once the last word has settled
-const SHINE_FIRST_DELAY = CALLOUT_DELAY + 1; // first pass 1s after the bubble appears
+const SHINE_FIRST_DELAY = CALLOUT_DELAY + 0.5; // first pass 0.5s after the bubble appears
 const SHINE_DURATION = 2.2; // slow sweep
-const SHINE_REPEAT_DELAY = 1; // 1s pause between passes
+const SHINE_REPEAT_DELAY = 0.5; // 0.5s pause between passes
 
 /** Scroll fade: every word fades + lifts, one after another in reading order */
 const SCROLL_FADE_START = 20; // px scrolled before the first word starts to fade
