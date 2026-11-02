@@ -11,7 +11,25 @@ const EASE_OUT_EXPO = [0.16, 1, 0.3, 1];
 const IOS_FONT =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
 const CALLOUT_ITEMS = ['Copy', 'Look Up', 'Translate'];
-const MENU_BG = 'rgba(44, 44, 46, 0.94)';
+
+/** Frosted dark glass: lighter at the top, deeper at the bottom */
+const GLASS_BG =
+  'linear-gradient(180deg, rgba(96,96,102,0.72) 0%, rgba(52,52,58,0.80) 52%, rgba(30,30,34,0.88) 100%)';
+const GLASS_FILTER = 'blur(22px) saturate(190%) brightness(1.05)';
+/** Bevel + depth: bright top lip, dark bottom lip, hairline rim, soft cast shadow */
+const GLASS_SHADOW = [
+  'inset 0 1px 0 rgba(255,255,255,0.38)',
+  'inset 0 -1px 0 rgba(0,0,0,0.55)',
+  'inset 1px 0 0 rgba(255,255,255,0.10)',
+  'inset -1px 0 0 rgba(255,255,255,0.06)',
+  'inset 0 0 0 0.5px rgba(255,255,255,0.14)',
+  '0 0 0 0.5px rgba(0,0,0,0.55)',
+  '0 1px 1px rgba(0,0,0,0.18)',
+  '0 6px 14px rgba(0,0,0,0.22)',
+  '0 16px 34px rgba(0,0,0,0.20)',
+].join(', ');
+const DIVIDER_BG =
+  'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%)';
 
 /** Key word inside the headline: ExtraBold Italic, same weight as the reference */
 function Emphasis({ children }) {
@@ -19,9 +37,9 @@ function Emphasis({ children }) {
 }
 
 /**
- * iOS edit menu (the black bubble shown when text is selected on iPhone):
- * dark translucent material, small radius, hairline dividers,
- * a trailing chevron for the overflow page and a pointer arrow.
+ * iOS edit menu (the bubble shown when text is selected on iPhone),
+ * built as a physical glass pill: frosted blur, gradient body,
+ * bevelled rim, top gloss sheen, etched dividers and a matching pointer.
  */
 function IosCallout() {
   const reduceMotion = useReducedMotion();
@@ -32,33 +50,63 @@ function IosCallout() {
       className='pointer-events-none absolute bottom-full left-1/2 z-10 mb-[16px] -translate-x-1/2'
     >
       <motion.span
-        className='relative flex select-none items-stretch whitespace-nowrap rounded-[9px] text-[12px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_6px_18px_rgba(0,0,0,0.28),0_0_0_0.5px_rgba(255,255,255,0.08)] backdrop-blur-xl backdrop-saturate-150'
+        className='relative flex select-none items-stretch whitespace-nowrap rounded-[10px] text-[12px] font-medium not-italic leading-none tracking-normal text-white'
         style={{
           fontFamily: IOS_FONT,
-          background: MENU_BG,
+          background: GLASS_BG,
+          backdropFilter: GLASS_FILTER,
+          WebkitBackdropFilter: GLASS_FILTER,
+          boxShadow: GLASS_SHADOW,
+          textShadow: '0 1px 1px rgba(0,0,0,0.45)',
           transformOrigin: '50% 100%',
         }}
         initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 4 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ delay: 1.9, duration: 0.22, ease: EASE_OUT_EXPO }}
       >
+        {/* top gloss sheen */}
+        <span
+          className='pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-[10px]'
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.04) 100%)',
+          }}
+        />
+
         {CALLOUT_ITEMS.map((item, index) => (
-          <span
-            key={item}
-            className={`flex items-center px-[10px] py-[9px] ${index > 0 ? 'border-l-[0.5px] border-white/25' : ''}`}
-          >
-            {item}
+          <span key={item} className='relative flex items-center'>
+            {index > 0 && (
+              <span
+                className='absolute inset-y-[7px] left-0 w-px'
+                style={{
+                  background: DIVIDER_BG,
+                  boxShadow: '1px 0 0 rgba(0,0,0,0.35)',
+                }}
+              />
+            )}
+            <span className='px-[11px] py-[9px]'>{item}</span>
           </span>
         ))}
-        <span className='flex items-center border-l-[0.5px] border-white/25 px-[6px]'>
+
+        <span className='relative flex items-center px-[7px]'>
+          <span
+            className='absolute inset-y-[7px] left-0 w-px'
+            style={{
+              background: DIVIDER_BG,
+              boxShadow: '1px 0 0 rgba(0,0,0,0.35)',
+            }}
+          />
           <ChevronRight size={12} strokeWidth={2.5} />
         </span>
 
-        {/* pointer arrow */}
+        {/* pointer arrow: same glass material, picks up the bottom colour */}
         <span
-          className='absolute left-1/2 top-full h-[6px] w-[12px] -translate-x-1/2'
+          className='absolute left-1/2 top-full h-[7px] w-[14px] -translate-x-1/2'
           style={{
-            background: MENU_BG,
+            background:
+              'linear-gradient(180deg, rgba(30,30,34,0.88) 0%, rgba(38,38,42,0.80) 100%)',
+            backdropFilter: GLASS_FILTER,
+            WebkitBackdropFilter: GLASS_FILTER,
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
           }}
         />
