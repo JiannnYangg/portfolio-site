@@ -43,6 +43,22 @@ const CTA_DELAY = WORD_DELAY + CTA_INDEX * WORD_STAGGER;
 /** Clips only the bottom edge, so the pill rises out of a mask */
 const CTA_CLIP = 'inset(-48px -48px 0px -48px)';
 
+/**
+ * CTA colours. The old neon lime is replaced by the theme blue (#445ae9, the
+ * Tailwind `primary`) as a soft diagonal gradient: a lighter periwinkle top
+ * left, the theme blue in the middle, a deeper indigo bottom right. White
+ * text on every stop stays readable (about 4.4:1 at the lightest stop, 5.4:1
+ * on the theme blue, 9:1 on the deep end; the label is 20px semibold, which
+ * counts as large text).
+ *
+ * CTA_SOLID is the fallback: it paints first, so a browser that can't draw
+ * the gradient still shows a solid theme-blue pill with white text.
+ */
+const CTA_SOLID = '#445ae9';
+const CTA_GRADIENT =
+  'linear-gradient(135deg, #5068f0 0%, #445ae9 48%, #2b3bb8 100%)';
+const CTA_DARK = '#1f2024';
+
 /** iOS-style dark translucent material with a light frosted blur */
 const MENU_BG = 'rgba(40, 40, 44, 0.82)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
@@ -425,11 +441,18 @@ export function Header() {
             </Line>
           </h1>
 
-          {/* CTA: exactly the reference design (no border, no shadow).
-              Near-white outer pill 225 x 62, 6px ring, 6px gap, 50px inner
-              buttons. Only the colours are themed. Resting state: lime label
-              with dark text, dark circle with a lime arrow. On hover the two
-              swap (dark label with lime text, lime circle with a dark arrow).
+          {/* CTA: same shape and sizing as the reference (no border, no
+              outer shadow). Near-white outer pill, 6px ring, 6px gap, 50px
+              inner buttons. Only the colours are themed.
+              Resting state: a blue gradient label with white text, and a
+              dark circle with a white arrow. On hover the two swap (dark
+              label, gradient circle). A CSS gradient can't be transitioned,
+              so each button has its resting fill as the background and the
+              other fill as an overlay that fades in on hover / keyboard
+              focus. The overlay sits behind the text (-z-10 inside an
+              `isolate` stacking context), so the label and arrow never
+              flicker. The solid theme blue is the fallback colour under the
+              gradient. A subtle top highlight gives the label some depth.
               Sits a deliberate, modest gap under the headline. It shares the
               headline's rise-from-mask intro and scroll fade (CtaReveal). */}
           <div className='mt-[60px] flex justify-center md:mt-[88px]'>
@@ -438,16 +461,40 @@ export function Header() {
                 type='button'
                 onClick={() => scrollToId('contact-footer')}
                 aria-label="Let's talk, go to contact"
-                className='group flex items-center gap-[6px] rounded-full bg-[#f4f4f5] p-[6px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f2024]'
+                className='group flex items-center gap-[6px] rounded-full bg-[#f4f4f5] p-[6px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f2024] motion-reduce:transition-none motion-reduce:hover:scale-100'
               >
-                <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-semibold leading-none tracking-[0.01em] text-[#1f2024] transition-colors duration-300 group-hover:bg-[#1f2024] group-hover:text-[#b6f500]'>
+                <span
+                  className='relative isolate flex h-[50px] w-[156px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full text-[20px] font-semibold leading-none tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]'
+                  style={{
+                    backgroundColor: CTA_SOLID,
+                    backgroundImage: CTA_GRADIENT,
+                  }}
+                >
+                  {/* hover / focus: dark fill fades in behind the text */}
+                  <span
+                    aria-hidden='true'
+                    className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
+                    style={{ backgroundColor: CTA_DARK }}
+                  />
                   Let&apos;s talk
                 </span>
-                <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#1f2024] transition-colors duration-300 group-hover:bg-[#b6f500]'>
+                <span
+                  className='relative isolate flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full'
+                  style={{ backgroundColor: CTA_DARK }}
+                >
+                  {/* hover / focus: the blue gradient fades in behind the arrow */}
+                  <span
+                    aria-hidden='true'
+                    className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
+                    style={{
+                      backgroundColor: CTA_SOLID,
+                      backgroundImage: CTA_GRADIENT,
+                    }}
+                  />
                   <ArrowUpRight
                     size={20}
                     strokeWidth={2.25}
-                    className='text-[#b6f500] transition-all duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#1f2024]'
+                    className='text-white transition-transform duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0'
                   />
                 </span>
               </button>
