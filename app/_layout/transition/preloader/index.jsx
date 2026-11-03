@@ -14,7 +14,7 @@ import { fade, slideUp } from './variants';
 const MotionComponent = motion(Center);
 
 /**
- * Deep forest green: the dark partner of the site's lime / mint blooms.
+ * Deep forest green: the dark partner of the site's lime theme.
  * Keep the container background and the curve fill on the SAME value, the
  * curved bottom edge is drawn in the fill colour.
  */
@@ -22,11 +22,11 @@ const BG = 'bg-[#0b1f14]';
 const CURVE_FILL = 'fill-[#0b1f14]';
 
 /**
- * Greeting text colour: the site's own palette (lime -> pale lime -> mint ->
- * aqua, the same hues as the backdrop blooms) as a left-to-right gradient.
+ * Greeting text colour: only the site's main theme colour (lime), taken from
+ * the backdrop palette: lime -> chartreuse -> pale lime.
  */
 const TEXT_GRADIENT =
-  'linear-gradient(100deg, #b6f500 0%, #d6f88c 38%, #b0eec8 70%, #aaecd6 100%)';
+  'linear-gradient(100deg, #b6f500 0%, #c8f56e 50%, #d6f88c 100%)';
 
 export function Preloader() {
   const [index, setIndex] = useState(0);
