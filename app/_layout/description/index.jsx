@@ -37,6 +37,13 @@ const segments = [
   },
 ];
 
+/**
+ * ONE font size for the whole side note (the intro line and the four D's), so
+ * both lines always match. It is as large as 1.125rem, and only steps down when
+ * the column is too narrow for the four D's to stay on a single line.
+ */
+const NOTE_TEXT = 'leading-loose [font-size:min(1.125rem,4.4cqw)]';
+
 function Words({ text, start, inMark }) {
   const words = text.split(' ');
 
@@ -87,7 +94,7 @@ export function Description() {
   return (
     <article className='container relative'>
       <Wrapper>
-        <div className='basis-full lg:basis-8/12'>
+        <div className='basis-full lg:basis-7/12'>
           <Frame>
             <FrameRect
               aria-hidden='true'
@@ -115,23 +122,17 @@ export function Description() {
 
         {/* side note: top-aligned with the text block, well away from the
             "About me" circle that hangs below the section. It is a size
-            container so the four D's line can scale to always fit on ONE line. */}
+            container so the text can scale to keep the four D's on ONE line. */}
         <div
-          className='basis-10/12 sm:basis-7/12 lg:basis-3/12 lg:self-start'
+          className='basis-full sm:basis-7/12 lg:basis-4/12 lg:self-start'
           style={{ containerType: 'inline-size' }}
         >
           <ParallaxFade>
-            <Balancer
-              as='p'
-              className='text-base leading-loose lg:text-lg lg:leading-loose'
-            >
+            <Balancer as='p' className={NOTE_TEXT}>
               We bring together the four D&rsquo;s:
             </Balancer>
-            {/* one line, never wraps; shrinks with the column if it must */}
-            <p
-              className='whitespace-nowrap text-base leading-loose lg:text-lg lg:leading-loose'
-              style={{ fontSize: 'min(1em, 4.2cqw)' }}
-            >
+            {/* one line, never wraps, same size as the line above */}
+            <p className={`whitespace-nowrap ${NOTE_TEXT}`}>
               <Highlight $variant='data'>Data</Highlight>,{' '}
               <Highlight $variant='design'>Design</Highlight>,{' '}
               <Highlight $variant='development'>Development</Highlight>,{' '}
