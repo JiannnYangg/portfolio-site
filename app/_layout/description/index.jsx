@@ -49,6 +49,16 @@ const NOTE_TEXT = 'leading-loose [font-size:min(1.3rem,4.4cqw)]';
 const CIRCLE_HOVER =
   'before:bg-[#b6f500] after:bg-[#b6f500] hover:text-[#1f2024]';
 
+/**
+ * Shape of the circle. The default "xl" button size is padding-driven, which
+ * made the box ~204x184px (an oval). A fixed square with no padding is a true
+ * circle. isolate + the radial mask make the rounded clip anti-alias cleanly
+ * while the hover layers animate inside it (the usual jagged-edge fix for
+ * overflow-hidden + border-radius + transforms).
+ */
+const CIRCLE_SHAPE =
+  'h-[12.5rem] w-[12.5rem] p-0 isolate will-change-transform [-webkit-mask-image:-webkit-radial-gradient(white,black)]';
+
 function Words({ text, start, inMark }) {
   const words = text.split(' ');
 
@@ -139,7 +149,7 @@ export function Description() {
             <MagneticButton
               variant='ghost'
               size='xl'
-              className={CIRCLE_HOVER}
+              className={`${CIRCLE_SHAPE} ${CIRCLE_HOVER}`}
             >
               About us
             </MagneticButton>
