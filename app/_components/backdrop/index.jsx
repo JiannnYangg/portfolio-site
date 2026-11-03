@@ -84,6 +84,75 @@ const between = (rand, min, max) => min + rand() * (max - min);
 const pick = (rand, list) => list[Math.floor(rand() * list.length)];
 
 /**
+ * The landing screen (band 0) is the ORIGINAL hero look, ported 1:1: same
+ * folds, blooms, lime glows and intensity. Every shape is an unclipped
+ * element (radii in % of the page width / screens), so a glow that touches
+ * the bottom edge of the first screen keeps fading out into the next one
+ * instead of being cut off by a hero edge. The layer opacities the old hero
+ * used (paper 0.6, blooms 0.7) are folded into the alphas.
+ */
+const LANDING_PAPER = 0.6;
+const LANDING_BLOOM = 0.7;
+const LANDING_BLOBS = [
+  // paper folds (radial)
+  { cx: 30, cy: 0.22, rx: 38, ry: 0.26, rgb: COLOR.fold, a: 0.09 * LANDING_PAPER },
+  { cx: 78, cy: 0.58, rx: 34, ry: 0.24, rgb: COLOR.fold, a: 0.07 * LANDING_PAPER },
+  { cx: 22, cy: 0.84, rx: 40, ry: 0.22, rgb: COLOR.fold, a: 0.08 * LANDING_PAPER },
+  { cx: 85, cy: 0.12, rx: 60, ry: 0.4, rgb: COLOR.white, a: 0.9 * LANDING_PAPER },
+  // soft blooms
+  { cx: 14, cy: 0.18, rx: 34, ry: 0.3, rgb: '214,248,140', a: 0.55 * LANDING_BLOOM },
+  { cx: 52, cy: 0.08, rx: 30, ry: 0.28, rgb: '232,250,160', a: 0.5 * LANDING_BLOOM },
+  { cx: 84, cy: 0.4, rx: 32, ry: 0.3, rgb: '176,238,200', a: 0.5 * LANDING_BLOOM },
+  { cx: 40, cy: 0.62, rx: 30, ry: 0.28, rgb: '200,245,110', a: 0.45 * LANDING_BLOOM },
+  { cx: 70, cy: 0.9, rx: 34, ry: 0.3, rgb: '170,236,214', a: 0.5 * LANDING_BLOOM },
+  { cx: 6, cy: 0.66, rx: 28, ry: 0.26, rgb: '247,250,170', a: 0.5 * LANDING_BLOOM },
+  // lime corner glows (fade out at 70% of the radius)
+  { cx: 100, cy: 0, rx: 55, ry: 0.42, rgb: COLOR.lime, a: 0.8, fade: 70 },
+  { cx: 0, cy: 1, rx: 50, ry: 0.38, rgb: COLOR.lime, a: 0.75, fade: 70 },
+];
+
+/** Diagonal paper folds of the old hero: one screen-sized layer, fully
+ *  transparent well before its bottom edge, so there is no seam. */
+const LANDING_FOLDS = [
+  'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
+  'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
+  'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
+].join(', ');
+
+function landingStyle({ cx, cy, rx, ry, rgb, a, fade = 100 }) {
+  return {
+    left: `${cx}%`,
+    top: `calc(var(--screen) * ${cy})`,
+    width: `${rx * 2}%`,
+    height: `calc(var(--screen) * ${ry * 2})`,
+    transform: 'translate(-50%, -50%)',
+    backgroundImage: `radial-gradient(ellipse closest-side, rgba(${rgb},${a.toFixed(3)}) 0%, rgba(${rgb},0) ${fade}%)`,
+  };
+}
+
+function LandingBand() {
+  return (
+    <>
+      <span
+        className='absolute left-0 top-0 block w-full'
+        style={{
+          height: 'var(--screen)',
+          opacity: LANDING_PAPER,
+          backgroundImage: LANDING_FOLDS,
+        }}
+      />
+      {LANDING_BLOBS.map((blob, index) => (
+        <span
+          key={index}
+          className='absolute block'
+          style={landingStyle(blob)}
+        />
+      ))}
+    </>
+  );
+}
+
+/**
  * The blobs of one band.
  * x: center, % of page width. y: center, in screens (band + fraction).
  * w: width in vw. h: height in screens. rot: tilt in degrees.
@@ -181,19 +250,6 @@ function bandBlobs(band) {
           },
         ];
 
-  // the landing screen keeps its signature second glow, bottom-left
-  if (band === 0) {
-    glows.push({
-      x: -3,
-      y: 0.93,
-      w: 46,
-      h: 0.5,
-      rot: 8,
-      rgb: COLOR.lime,
-      a: 0.5,
-    });
-  }
-
   return [...under, ...blooms, ...glows];
 }
 
@@ -212,6 +268,8 @@ function blobStyle({ x, y, w, h, rot, rgb, a }) {
 }
 
 const Band = memo(function Band({ band }) {
+  if (band === 0) return <LandingBand />;
+
   return bandBlobs(band).map((blob, index) => (
     <span
       key={index}
