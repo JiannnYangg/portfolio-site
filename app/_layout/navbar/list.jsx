@@ -24,7 +24,7 @@ export function NavbarList() {
         >
           {/* font size lives on the button (not on the span) because the label
               box is max-width: 14ch, and ch follows the button's font size */}
-          <MagneticButton className='text-sm'>
+          <MagneticButton className='text-[15px]'>
             {/* The hover dot below sits in normal flow and is 24px tall (even
                 while scaled to 0), which pushed the text up by 12px. This
                 24px spacer above balances it, so the TEXT itself is centred. */}

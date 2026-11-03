@@ -42,6 +42,13 @@ const segments = [
  */
 const NOTE_TEXT = 'leading-loose [font-size:min(1.3rem,4.4cqw)]';
 
+/**
+ * Hover colour of the circle: the theme lime (same as the CTA's hover) with
+ * dark text on top, instead of the default blue fill.
+ */
+const CIRCLE_HOVER =
+  'before:bg-[#b6f500] after:bg-[#b6f500] hover:text-[#1f2024]';
+
 function Words({ text, start, inMark }) {
   const words = text.split(' ');
 
@@ -118,7 +125,7 @@ export function Description() {
           </ParallaxFade>
         </div>
 
-        {/* "About me" circle: sits INSIDE the section, bottom-right, a little
+        {/* "About us" circle: sits INSIDE the section, bottom-right, a little
             above the dashed line and inside the right guide. On small screens
             it simply follows the text, right-aligned. */}
         <motion.div
@@ -129,8 +136,12 @@ export function Description() {
           transition={{ duration: 0.6 }}
         >
           <Link href='/about' passHref>
-            <MagneticButton variant='ghost' size='xl'>
-              About me
+            <MagneticButton
+              variant='ghost'
+              size='xl'
+              className={CIRCLE_HOVER}
+            >
+              About us
             </MagneticButton>
           </Link>
         </motion.div>
