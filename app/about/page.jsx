@@ -10,7 +10,7 @@ export const metadata = {
 export default function About() {
   return (
     <Transition>
-      <Navbar />
+      <Navbar tone='dark' />
       <AboutHero />
       <AboutBody />
       <Contact />

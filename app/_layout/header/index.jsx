@@ -2,15 +2,11 @@
 
 import { createContext, useCallback, useContext, useState } from 'react';
 
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 
-import { scrollToId } from '@/hooks';
+import { PAPER_RGB } from '@/components';
+import { scrollToId, useScrollFade } from '@/hooks';
 
 import { HeroLogos } from './hero-logos';
 import { slideUp } from './variants';
@@ -23,7 +19,8 @@ const CALLOUT_ITEMS = ['Copy', 'Look Up', 'Translate'];
 /**
  * Timeline (seconds). The header itself slides in at 2.5s (see variants.js),
  * so everything inside it is sequenced from there:
- * words rise in -> selection highlight -> handles -> callout -> light sweeps.
+ * words rise in -> CTA rises in -> selection highlight -> handles -> callout
+ * -> light sweeps.
  */
 const HERO_START = 2.5;
 const WORD_DELAY = HERO_START + 0.15;
@@ -37,44 +34,43 @@ const SHINE_FIRST_DELAY = CALLOUT_DELAY + 0.5; // first pass 0.5s after the bubb
 const SHINE_DURATION = 2.2; // slow sweep
 const SHINE_REPEAT_DELAY = 0.5; // 0.5s pause between passes
 
-/** Scroll fade: every word fades + lifts, one after another in reading order */
-const SCROLL_FADE_START = 20; // px scrolled before the first word starts to fade
-const SCROLL_FADE_STAGGER = 14; // extra px per word
-const SCROLL_FADE_DISTANCE = 260; // px over which a word fades out completely (was 320: stronger, quicker fade)
-const SCROLL_LIFT = -64; // px a word drifts up while fading (was -40)
+/**
+ * The CTA is the "11th word" of the hero: it rises right after the headline
+ * and joins the same scroll fade, one step after the last word (index 9).
+ */
+const CTA_INDEX = 10;
+const CTA_DELAY = WORD_DELAY + CTA_INDEX * WORD_STAGGER;
+/** Clips only the bottom edge, so the pill rises out of a mask */
+const CTA_CLIP = 'inset(-48px -48px 0px -48px)';
 
 /** iOS-style dark translucent material with a light frosted blur */
 const MENU_BG = 'rgba(40, 40, 44, 0.82)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
 /**
- * "Calm zones": the background (paper folds, grid, blooms, lime glows) is
- * faded down to CALM_OPACITY behind the headline and behind the CTA, and
- * nowhere else. Two soft elliptical masks are intersected, so each one only
- * dims its own area.
+ * "Calm zones": the site backdrop (paper folds, grid, blooms, lime glows) is
+ * washed back toward the paper colour behind the headline and behind the
+ * CTA, and nowhere else. The backdrop itself is now one fixed layer shared by
+ * every page, so the calm zones are a soft paper-coloured wash that belongs
+ * to the hero and scrolls away with it (a mask on the shared layer would
+ * stay stuck mid-screen on every other section).
+ *
+ * Same look as the previous mask: CALM_OPACITY 0.55 left the background at
+ * 55%, i.e. a 45% wash of paper on top, flat to 65% of the ellipse and
+ * fading to nothing at its edge.
  *
  * The zones follow the content: the headline + CTA are one block centered in
  * the hero, so the zone centers are offsets from the vertical middle
  * (--head-y / --cta-y, set per breakpoint on the wrapper below).
- *
- * CALM_OPACITY 0.55 = half the wash of the previous 0.1 (90% dimmed -> 45%).
  */
 const CALM_OPACITY = 0.55;
+const CALM_WASH = 1 - CALM_OPACITY;
 const calmZone = (size, centerY) =>
-  `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(0,0,0,${CALM_OPACITY}) 0%, rgba(0,0,0,${CALM_OPACITY}) 65%, #000 100%)`;
-const CALM_MASK = [
+  `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(${PAPER_RGB},${CALM_WASH}) 0%, rgba(${PAPER_RGB},${CALM_WASH}) 65%, rgba(${PAPER_RGB},0) 100%)`;
+const CALM_BACKGROUND = [
   calmZone('40% 26%', 'calc(50% + var(--head-y))'), // headline block
   calmZone('200px 80px', 'calc(50% + var(--cta-y))'), // CTA pill
 ].join(', ');
-
-/**
- * Graph-paper grid. It is drawn on TOP of the blooms and glows (so they can't
- * wash it out) in a deeper lime than the glows, so the lines stay readable on
- * both the off-white and the lime areas.
- * 0.2 -> 0.133 = one third less visible.
- */
-const GRID_COLOR = '140,190,0';
-const GRID_ALPHA = 0.133;
 
 /** Clips only the bottom edge of a line, so text rises out of a mask
  *  while the callout above the word stays visible. */
@@ -114,20 +110,13 @@ function Line({ className = '', children }) {
 function Word({ index, last = false, children }) {
   const reduceMotion = useReducedMotion();
   const settleLine = useContext(LineContext);
-
-  const { scrollY } = useScroll();
-  const start = SCROLL_FADE_START + index * SCROLL_FADE_STAGGER;
-  const range = [start, start + SCROLL_FADE_DISTANCE];
-  const scrollOpacity = useTransform(scrollY, range, [1, 0]);
-  const scrollLift = useTransform(scrollY, range, [0, SCROLL_LIFT]);
+  const { opacity, y } = useScrollFade(index);
 
   return (
     <motion.span
       className='inline-block'
       // scroll-linked fade + lift
-      style={
-        reduceMotion ? undefined : { opacity: scrollOpacity, y: scrollLift }
-      }
+      style={reduceMotion ? undefined : { opacity, y }}
     >
       {/* intro: rise out of the line mask while fading in */}
       <motion.span
@@ -144,6 +133,40 @@ function Word({ index, last = false, children }) {
         {children}
       </motion.span>
     </motion.span>
+  );
+}
+
+/**
+ * The CTA gets the very same two effects as the headline words:
+ * 1. intro: it rises out of a mask, right after the last word
+ * 2. scroll: it fades and lifts as the page scrolls (and returns when
+ *    scrolling back up), and stops taking clicks once it is invisible
+ * The mask is dropped when the intro ends so the hover scale isn't clipped.
+ */
+function CtaReveal({ children }) {
+  const reduceMotion = useReducedMotion();
+  const [settled, setSettled] = useState(false);
+  const { opacity, y, pointerEvents } = useScrollFade(CTA_INDEX);
+
+  return (
+    <motion.div
+      style={reduceMotion ? undefined : { opacity, y, pointerEvents }}
+    >
+      <div style={settled || reduceMotion ? undefined : { clipPath: CTA_CLIP }}>
+        <motion.div
+          initial={reduceMotion ? false : { y: '110%', opacity: 0 }}
+          animate={{ y: '0%', opacity: 1 }}
+          transition={{
+            duration: WORD_DURATION,
+            delay: CTA_DELAY,
+            ease: EASE_OUT_EXPO,
+          }}
+          onAnimationComplete={() => setSettled(true)}
+        >
+          {children}
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -322,79 +345,24 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='relative min-h-[100svh] overflow-hidden bg-[#f3f3f5] text-black selection:bg-[#d8f6a2] selection:text-[#3d5a0e]'
+      className='relative min-h-[100svh] overflow-hidden text-black selection:bg-[#d8f6a2] selection:text-[#3d5a0e]'
       variants={slideUp}
       initial='initial'
       animate='enter'
     >
-      {/* background: paper + soft blooms + lime corner glows + grid on top.
-          The mask dims it behind the headline and the CTA only; the two
-          zone centers (offsets from the vertical middle) differ per
+      {/* The paper, blooms, glows and grid now come from the site-wide
+          <SiteBackdrop /> (root layout), so the hero is transparent and shares
+          the exact same background as every other page. Only the two calm
+          zones live here: a soft paper wash behind the headline and the CTA.
+          The zone centers (offsets from the vertical middle) differ per
           breakpoint because the headline scales with the viewport.
           --cta-y moved down together with the CTA (+20px mobile, +32px
           desktop) so the calm light zone stays behind the pill. */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0 [--cta-y:97px] [--head-y:-59px] md:[--cta-y:172px] md:[--head-y:-74px]'
-        style={{
-          maskImage: CALM_MASK,
-          WebkitMaskImage: CALM_MASK,
-          maskComposite: 'intersect',
-          WebkitMaskComposite: 'source-in',
-        }}
-      >
-        {/* crumpled paper: soft grey folds on an off-white sheet */}
-        <div
-          className='absolute inset-0'
-          style={{
-            opacity: 0.6,
-            backgroundImage: [
-              'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
-              'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
-              'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
-              'radial-gradient(38% 26% at 30% 22%, rgba(80,80,90,0.09) 0%, rgba(80,80,90,0) 100%)',
-              'radial-gradient(34% 24% at 78% 58%, rgba(80,80,90,0.07) 0%, rgba(80,80,90,0) 100%)',
-              'radial-gradient(40% 22% at 22% 84%, rgba(80,80,90,0.08) 0%, rgba(80,80,90,0) 100%)',
-              'radial-gradient(60% 40% at 85% 12%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
-            ].join(', '),
-          }}
-        />
-
-        {/* soft blooms spread across the hero (pale lime, yellow-green,
-            chartreuse, mint, aqua-green, soft yellow). Layer opacity 0.7. */}
-        <div
-          className='absolute inset-0'
-          style={{
-            opacity: 0.7,
-            backgroundImage: [
-              'radial-gradient(34% 30% at 14% 18%, rgba(214,248,140,0.55) 0%, rgba(214,248,140,0) 100%)',
-              'radial-gradient(30% 28% at 52% 8%, rgba(232,250,160,0.50) 0%, rgba(232,250,160,0) 100%)',
-              'radial-gradient(32% 30% at 84% 40%, rgba(176,238,200,0.50) 0%, rgba(176,238,200,0) 100%)',
-              'radial-gradient(30% 28% at 40% 62%, rgba(200,245,110,0.45) 0%, rgba(200,245,110,0) 100%)',
-              'radial-gradient(34% 30% at 70% 90%, rgba(170,236,214,0.50) 0%, rgba(170,236,214,0) 100%)',
-              'radial-gradient(28% 26% at 6% 66%, rgba(247,250,170,0.50) 0%, rgba(247,250,170,0) 100%)',
-            ].join(', '),
-          }}
-        />
-
-        {/* lime corner glows */}
-        <div
-          className='absolute inset-0'
-          style={{
-            backgroundImage:
-              'radial-gradient(55% 42% at 100% 0%, rgba(182,245,0,0.8) 0%, rgba(182,245,0,0) 70%), radial-gradient(50% 38% at 0% 100%, rgba(182,245,0,0.75) 0%, rgba(182,245,0,0) 70%)',
-          }}
-        />
-
-        {/* graph-paper grid: 62px x 57px cells, 2px lines, on top of everything above */}
-        <div
-          className='absolute inset-0'
-          style={{
-            backgroundImage: `linear-gradient(to right, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px), linear-gradient(to bottom, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
-            backgroundSize: '62px 57px',
-          }}
-        />
-      </div>
+        style={{ backgroundImage: CALM_BACKGROUND }}
+      />
 
       {/* floating 3D logos: asymmetric scatter around the headline, lit from
           the top-left, sequenced right after the headline words */}
@@ -445,25 +413,28 @@ export function Header() {
               buttons. Only the colours are themed. Resting state: lime label
               with dark text, dark circle with a lime arrow. On hover the two
               swap (dark label with lime text, lime circle with a dark arrow).
-              Sits a deliberate, modest gap under the headline. */}
+              Sits a deliberate, modest gap under the headline. It shares the
+              headline's rise-from-mask intro and scroll fade (CtaReveal). */}
           <div className='mt-[60px] flex justify-center md:mt-[88px]'>
-            <button
-              type='button'
-              onClick={() => scrollToId('contact-footer')}
-              aria-label="Let's talk, go to contact"
-              className='group flex items-center gap-[6px] rounded-full bg-[#d9d9d9] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03]'
-            >
-              <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-normal leading-none tracking-[0.01em] text-[#1f2024] transition-colors duration-300 group-hover:bg-[#1f2024] group-hover:text-[#b6f500]'>
-                Let&apos;s talk
-              </span>
-              <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#1f2024] transition-colors duration-300 group-hover:bg-[#b6f500]'>
-                <ArrowUpRight
-                  size={20}
-                  strokeWidth={2.25}
-                  className='text-[#b6f500] transition-all duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#1f2024]'
-                />
-              </span>
-            </button>
+            <CtaReveal>
+              <button
+                type='button'
+                onClick={() => scrollToId('contact-footer')}
+                aria-label="Let's talk, go to contact"
+                className='group flex items-center gap-[6px] rounded-full bg-[#d9d9d9] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f2024]'
+              >
+                <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-normal leading-none tracking-[0.01em] text-[#1f2024] transition-colors duration-300 group-hover:bg-[#1f2024] group-hover:text-[#b6f500]'>
+                  Let&apos;s talk
+                </span>
+                <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#1f2024] transition-colors duration-300 group-hover:bg-[#b6f500]'>
+                  <ArrowUpRight
+                    size={20}
+                    strokeWidth={2.25}
+                    className='text-[#b6f500] transition-all duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#1f2024]'
+                  />
+                </span>
+              </button>
+            </CtaReveal>
           </div>
         </div>
       </div>

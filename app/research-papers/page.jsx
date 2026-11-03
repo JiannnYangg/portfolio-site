@@ -16,7 +16,7 @@ export const metadata = {
 export default function ResearchPapers() {
   return (
     <Transition>
-      <Navbar />
+      <Navbar tone='dark' />
       <ResearchHero />
       <ResearchList />
       <Contact />

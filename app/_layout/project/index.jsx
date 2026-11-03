@@ -29,7 +29,9 @@ export function Project() {
   return (
     <section ref={containerRef} className='relative z-10 mt-14'>
       <div className='grid items-center'>
-        <div className='bg-background'>
+        {/* No solid background here: the site-wide backdrop (paper, blooms,
+            grid) must show through between the sliders. */}
+        <div>
           <motion.div
             className='mb-10 flex gap-10'
             style={{
@@ -51,12 +53,11 @@ export function Project() {
           </motion.div>
         </div>
 
+        {/* Spacer that eases the gap above the footer closed as you scroll */}
         <motion.div
-          className='w-screen bg-background'
-          style={{
-            height: transformY,
-            borderRadius: '0 0 50% 50%',
-          }}
+          aria-hidden='true'
+          className='w-screen'
+          style={{ height: transformY }}
         />
       </div>
     </section>
