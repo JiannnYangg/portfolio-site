@@ -55,13 +55,12 @@ export function SiteGuides() {
 }
 
 /*
- * Glitch text for the labels.
+ * Glitch text for the labels: a slow "decode" that repeats forever.
  *
- * 1. DECODE: when the label scrolls into view its characters are random
- *    glyphs and lock into the real text one by one, left to right.
- * 2. IDLE GLITCH: every few seconds (random, so the labels don't pulse in
- *    sync) one or two characters flicker for a fraction of a second, with a
- *    thin red / cyan split on the letters.
+ * Every character starts as a random glyph and locks into the real text one
+ * by one, left to right. When the whole label is readable it holds for
+ * PAUSE_MS, then scrambles and decodes again, and so on. A thin red / cyan
+ * split on the letters shows while it is scrambling.
  *
  * The font is monospace, so the label never changes width while it scrambles.
  * Brackets and spaces are never scrambled. With reduced motion the label is
@@ -71,8 +70,16 @@ const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@$%&*+=<>/';
 const KEEP = /[()\s]/;
 const randomGlyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
 
-/** Thin colour split used while a glitch is running */
-const GLITCH_SHADOW = '1px 0 rgba(255, 46, 99, 0.85), -1px 0 rgba(8, 217, 214, 0.85)';
+/** Thin colour split used while the label is scrambling */
+const GLITCH_SHADOW =
+  '1px 0 rgba(255, 46, 99, 0.85), -1px 0 rgba(8, 217, 214, 0.85)';
+
+/** Speed knobs (ms). Bigger = slower. */
+const PAUSE_MS = 1000; // readable hold between two decodes
+const TICK_MS = 90; // how often the random glyphs change
+const FIRST_LOCK_MS = 350; // when the first character locks in
+const LOCK_STEP_MS = 170; // extra time for each following character
+const LOCK_JITTER_MS = 140; // random wobble so it doesn't feel mechanical
 
 function useGlitchText({ text, active, startDelayMs, reduceMotion }) {
   const [display, setDisplay] = useState(text);
@@ -91,43 +98,14 @@ function useGlitchText({ text, active, startDelayMs, reduceMotion }) {
       timers.push(id);
     };
 
-    // short flicker: a few frames where 1-2 characters are swapped
-    const idleGlitch = () => {
-      const swappable = chars
-        .map((c, i) => (KEEP.test(c) ? -1 : i))
-        .filter(i => i >= 0);
-      let frames = 4;
-      setGlitching(true);
-
-      const frame = () => {
-        if (frames === 0) {
-          setDisplay(text);
-          setGlitching(false);
-          later(idleGlitch, 3500 + Math.random() * 5500);
-          return;
-        }
-        frames -= 1;
-        const next = [...chars];
-        const count = 1 + Math.floor(Math.random() * 2);
-        for (let k = 0; k < count; k += 1) {
-          next[swappable[Math.floor(Math.random() * swappable.length)]] =
-            randomGlyph();
-        }
-        setDisplay(next.join(''));
-        later(frame, 55);
-      };
-
-      frame();
-    };
-
-    // decode-in: everything scrambled, then locks in left to right
-    setDisplay(chars.map(c => (KEEP.test(c) ? c : randomGlyph())).join(''));
-    setGlitching(true);
-
-    later(() => {
+    const decodeOnce = () => {
       const startedAt = performance.now();
-      const resolveAt = chars.map((_, i) => 160 + i * 75 + Math.random() * 120);
+      const resolveAt = chars.map(
+        (_, i) => FIRST_LOCK_MS + i * LOCK_STEP_MS + Math.random() * LOCK_JITTER_MS,
+      );
       const lastResolve = Math.max(...resolveAt);
+
+      setGlitching(true);
 
       const tick = () => {
         const elapsed = performance.now() - startedAt;
@@ -140,16 +118,19 @@ function useGlitchText({ text, active, startDelayMs, reduceMotion }) {
         );
 
         if (elapsed < lastResolve) {
-          later(tick, 45);
+          later(tick, TICK_MS);
         } else {
           setDisplay(text);
           setGlitching(false);
-          later(idleGlitch, 2500 + Math.random() * 4000);
+          // hold the readable label, then do it all again
+          later(decodeOnce, PAUSE_MS);
         }
       };
 
       tick();
-    }, startDelayMs);
+    };
+
+    later(decodeOnce, startDelayMs);
 
     return () => {
       cancelled = true;
