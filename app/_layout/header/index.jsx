@@ -397,7 +397,7 @@ export function Header() {
           stays hidden and it shows up after a small scroll. */}
       <div className='relative flex min-h-[100svh] items-center'>
         <div className='mx-auto w-full max-w-5xl px-6 pb-20 pt-[116px] md:px-10 md:pb-24 md:pt-36'>
-          <h1 className='mx-auto w-fit font-[family-name:var(--font-montserrat)] text-[clamp(2.5rem,6.4vw,5.5rem)] font-medium leading-[1.08] tracking-[-0.03em]'>
+          <h1 className='mx-auto w-fit font-[family-name:var(--font-inter-tight)] text-[clamp(2.5rem,6.4vw,5.5rem)] font-semibold leading-[1.08] tracking-[-0.03em]'>
             <Line>
               <Word index={0}>We</Word>{' '}
               <Word index={1}>
@@ -438,9 +438,9 @@ export function Header() {
                 type='button'
                 onClick={() => scrollToId('contact-footer')}
                 aria-label="Let's talk, go to contact"
-                className='group flex items-center gap-[6px] rounded-full bg-[#f4f4f5] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f2024]'
+                className='group flex items-center gap-[6px] rounded-full bg-[#f4f4f5] p-[6px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f2024]'
               >
-                <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-normal leading-none tracking-[0.01em] text-[#1f2024] transition-colors duration-300 group-hover:bg-[#1f2024] group-hover:text-[#b6f500]'>
+                <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-semibold leading-none tracking-[0.01em] text-[#1f2024] transition-colors duration-300 group-hover:bg-[#1f2024] group-hover:text-[#b6f500]'>
                   Let&apos;s talk
                 </span>
                 <span className='flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#1f2024] transition-colors duration-300 group-hover:bg-[#b6f500]'>
