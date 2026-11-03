@@ -194,11 +194,13 @@ export const LENS = {
   rimInward: 0, // extra inward pull at the rim
   rimFreq1: 2, // fluid wave frequency 1
   rimFreq2: 1, // fluid wave frequency 2
-  // The lens tint / ring color: the site's theme lime (same as the CTA, the
-  // hero marker and the "View" pill). It is written to the shader as-is
-  // (the lens pass has no color-space conversion), so what you set here is
-  // exactly what shows on screen.
-  ringColor: '#b6f500',
+  // The lens tint / ring color: the site's theme blue (the same blue as the
+  // dashed-line labels, the CTA gradient and the callout glass). It is
+  // written to the shader as-is (the lens pass has no color-space
+  // conversion), so what you set here is exactly what shows on screen. The
+  // shader scales the glow's channels together when it overdrives, so the
+  // ring peaks as a bright blue and keeps its hue instead of washing out.
+  ringColor: '#445ae9',
   rimLine: 1.4, // bright white border line intensity (0 = off)
   rimLinePos: 0.488, // where the white border sits (0..0.5)
   rimLineWidth: 0.003, // sharpness of the white border
