@@ -60,7 +60,8 @@ const shadowFor = depth =>
  *    it sits well clear of the right page guide.
  *  - runway: left side, below n8n and above GitHub, moved inwards so it sits
  *    clear of the left page guide, and up into the open space beside the
- *    "We build it." / "We get it" lines.
+ *    "We build it." / "We get it" lines. Smaller than the other supporting
+ *    logos on desktop.
  *  - github: dropped a little lower, away from the runway logo.
  *
  * Mobile positions are the base classes, md: classes take over on desktop.
@@ -161,15 +162,15 @@ const LOGOS = [
     float: [5, 5.4, 1.7, 0.9],
   },
   {
-    // Runway ML: left side, below n8n, above GitHub. Desktop: moved inwards
-    // (left 17% -> 21%) and upwards (bottom 31% -> 37%) into the open space
-    // beside the headline; mobile is unchanged.
+    // Runway ML: left side, below n8n, above GitHub. Desktop: smaller (max
+    // 74px -> 58px) and a bit higher (bottom 37% -> 41%), left 21% unchanged.
+    // Mobile is unchanged.
     id: 'runway',
     src: '/hero-logos/hero-letter-r-8156.png',
     width: 200,
     height: 200,
-    size: 'clamp(36px, 4.6vw, 74px)',
-    position: 'bottom-[24%] left-[14%] md:bottom-[37%] md:left-[21%]',
+    size: 'clamp(30px, 3.6vw, 58px)',
+    position: 'bottom-[24%] left-[14%] md:bottom-[41%] md:left-[21%]',
     rotate: -8,
     depth: 0.55,
     float: [5, 6.1, 1.5, 1.9],
