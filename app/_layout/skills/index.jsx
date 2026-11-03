@@ -73,16 +73,20 @@ const DASHES = `repeating-linear-gradient(to right, ${PARTITION_LINE} 0 7px, tra
 const INSET = 'clamp(2.5em, 4vw, 8em)';
 
 /**
- * The word reveal used by the intro paragraph (Description): every word sits
- * in its own mask and slides up from below it (y 100% -> 0%, 0.5s, tiny
- * per-word delay). Like the intro, it replays when the text scrolls out of
- * view and back in.
+ * The word reveal of the intro paragraph (Description): every word sits in its
+ * own mask and slides up from below it. Same motion, but a little slower and
+ * with a softer landing. Like the intro, it replays when the text scrolls out
+ * of view and back in.
  */
+const REVEAL_DURATION = 0.85;
+const REVEAL_EASE = [0.22, 1, 0.36, 1];
+const WORD_STEP = 0.035;
+
 const WORD = {
   initial: { y: '100%' },
   open: delay => ({
     y: '0%',
-    transition: { duration: 0.5, delay },
+    transition: { duration: REVEAL_DURATION, ease: REVEAL_EASE, delay },
   }),
 };
 
@@ -99,9 +103,9 @@ const WORD_GAP = '0.3em';
  */
 const MASK_PAD = '0.14em';
 
-/** Longest stagger between tags, so a long list never feels slow */
+/** Longest stagger between tags, so a long list never feels too slow */
 const MAX_STAGGER_STEPS = 10;
-const TAG_STAGGER = 0.05;
+const TAG_STAGGER = 0.09;
 
 /**
  * Text that pops up word by word, exactly like the intro paragraph.
@@ -112,7 +116,7 @@ const TAG_STAGGER = 0.05;
  * - Users who prefer reduced motion get the plain text, no movement.
  * - Empty or non-string text renders nothing instead of crashing.
  */
-function RevealText({ text, delay = 0, step = 0.01 }) {
+function RevealText({ text, delay = 0, step = WORD_STEP }) {
   const reduceMotion = useReducedMotion();
 
   if (typeof text !== 'string') return null;
@@ -173,7 +177,7 @@ function Tag({ tag, position }) {
     : {
         initial: { opacity: 0 },
         whileInView: { opacity: 1 },
-        transition: { duration: 0.4, delay },
+        transition: { duration: 0.7, ease: REVEAL_EASE, delay },
       };
 
   const dotMotion = reduceMotion
@@ -183,9 +187,9 @@ function Tag({ tag, position }) {
         whileInView: { scale: 1 },
         transition: {
           type: 'spring',
-          stiffness: 520,
+          stiffness: 320,
           damping: 16,
-          delay: delay + 0.12,
+          delay: delay + 0.2,
         },
       };
 
@@ -200,7 +204,7 @@ function Tag({ tag, position }) {
         className='h-1.5 w-1.5 shrink-0 rounded-full bg-primary'
       />
       <span>
-        <RevealText text={tag} delay={delay + 0.1} />
+        <RevealText text={tag} delay={delay + 0.15} />
       </span>
     </motion.li>
   );
@@ -221,7 +225,7 @@ function Group({ index, title, note, tags = [] }) {
             className='font-medium leading-none tracking-tight'
             style={{ fontSize: 'clamp(2rem, 3.4vw, 3.5rem)' }}
           >
-            <RevealText text={title} delay={0.1} />
+            <RevealText text={title} delay={0.15} />
           </h3>
         </div>
 
