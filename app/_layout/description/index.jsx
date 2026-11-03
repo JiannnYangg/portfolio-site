@@ -7,7 +7,6 @@ import Balancer from 'react-wrap-balancer';
 import { MagneticButton, ParallaxFade } from '@/components';
 
 import {
-  Dimension,
   Handle,
   Mark,
   Outline,
@@ -25,31 +24,18 @@ const reveal = {
   }),
 };
 
-/** Line draws itself left to right (inset is negative so end ticks aren't clipped) */
-const drawFrom = { clipPath: 'inset(-1em 100% -1em 0)' };
-const drawTo = { clipPath: 'inset(-1em 0% -1em 0)' };
-
 /**
- * The paragraph, split into plain runs and four editor's marks:
- *  - outline with two handles on a diagonal ("tested the waters")
- *  - dashed strike-through ("AI slop.")
- *  - dimension line with end ticks ("faster, better, scalable.")
- *  - closing outline, four handles, soft lift ("new status quo.")
+ * The paragraph with just two marks:
+ *  - dashed strike-through on "AI slop."
+ *  - closing selection box (four handles, soft lime lift) on "new status quo."
  */
 const segments = [
-  { text: 'We' },
-  { text: 'tested the waters', mark: 'outline', handles: ['tl', 'br'] },
-  { text: 'of automation. Now we’re diving in, leaving no space for' },
-  { text: 'AI slop.', mark: 'strike' },
-  { text: 'Shipping' },
-  { text: 'faster, better, scalable.', mark: 'dimension' },
-  { text: 'Together, we’ll set the' },
   {
-    text: 'new status quo.',
-    mark: 'outline',
-    handles: ['tl', 'tr', 'bl', 'br'],
-    tint: true,
+    text: 'We tested the waters of automation. Now we’re diving in, leaving no space for',
   },
+  { text: 'AI slop.', mark: 'strike' },
+  { text: 'Shipping faster, better, scalable. Together, we’ll set the' },
+  { text: 'new status quo.', mark: 'outline' },
 ];
 
 function Words({ text, start, inMark }) {
@@ -75,39 +61,36 @@ function Words({ text, start, inMark }) {
   ));
 }
 
-function Decoration({ segment, delay }) {
-  const { mark, handles = [], tint } = segment;
-
+function Decoration({ mark, delay }) {
   if (mark === 'outline') {
     return (
       <Outline
         aria-hidden='true'
-        $tint={tint}
+        $tint
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay }}
+        transition={{ duration: 0.6, delay }}
       >
         <svg>
           <rect
-            x='0.5'
-            y='0.5'
-            style={{ width: 'calc(100% - 1px)', height: 'calc(100% - 1px)' }}
+            x='1'
+            y='1'
+            rx='2'
+            style={{ width: 'calc(100% - 2px)', height: 'calc(100% - 2px)' }}
           />
         </svg>
-        {handles.map(pos => (
+        {['tl', 'tr', 'bl', 'br'].map(pos => (
           <Handle key={pos} $pos={pos} />
         ))}
       </Outline>
     );
   }
 
-  const Line = mark === 'strike' ? Strike : Dimension;
-
   return (
-    <Line
+    <Strike
       aria-hidden='true'
-      initial={drawFrom}
-      whileInView={drawTo}
+      initial={{ clipPath: 'inset(-1em 100% -1em 0)' }}
+      whileInView={{ clipPath: 'inset(-1em 0% -1em 0)' }}
       transition={{ duration: 0.6, ease: 'easeOut', delay }}
     />
   );
@@ -117,8 +100,7 @@ export function Description() {
   let cursor = 0;
   let markCount = 0;
 
-  const content = segments.map(segment => {
-    const { text, mark } = segment;
+  const content = segments.map(({ text, mark }) => {
     const start = cursor;
     cursor += text.split(' ').length;
 
@@ -126,17 +108,13 @@ export function Description() {
       return <Words key={start} text={text} start={start} />;
     }
 
-    const delay = 0.8 + markCount * 0.2;
+    const delay = 0.9 + markCount * 0.3;
     markCount += 1;
 
     return (
-      <Mark
-        key={start}
-        $outlined={mark === 'outline'}
-        $fade={mark === 'strike'}
-      >
+      <Mark key={start} $outlined={mark === 'outline'} $fade={mark === 'strike'}>
         <Words text={text} start={start} inMark />
-        <Decoration segment={segment} delay={delay} />
+        <Decoration mark={mark} delay={delay} />
       </Mark>
     );
   });

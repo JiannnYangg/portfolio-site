@@ -4,12 +4,13 @@ import { motion } from 'framer-motion';
 import { styled } from 'styled-components';
 
 /*
- * Editor's-markup style: hairline, broken strokes drawn in the text's own
- * colour (theme foreground), so nothing new is added to the palette.
- * Marks are used sparingly: one outline, one strike, one dimension line, one
- * closing outline.
+ * Marks are drawn in the site's lime (same family as the backdrop blooms and
+ * grid) with a soft lime glow. Only two marks on the whole paragraph: a strike
+ * on "AI slop." and a closing selection box on "new status quo."
  */
-const DASH = 'repeating-linear-gradient(to right, currentColor 0 6px, transparent 6px 10px)';
+const LIME = '#8fcf00';
+const GLOW = 'rgb(182 245 0 / 0.9)';
+const DASH = `repeating-linear-gradient(to right, ${LIME} 0 12px, transparent 12px 18px)`;
 
 export const Wrapper = styled.div`
   display: flex;
@@ -31,13 +32,12 @@ export const Title = styled.h4`
   line-height: 1.55;
 `;
 
-/* Layout box of a marked phrase. vertical-align: top keeps it locked to the
-   line grid (the old inline-block drifted upward and overlapped lines). */
+/* Layout box of a marked phrase. vertical-align: top keeps it on the line grid. */
 export const Mark = styled.span`
   position: relative;
   display: inline-block;
   vertical-align: top;
-  margin-inline: ${({ $outlined }) => ($outlined ? '0.3em 0.6em' : '0 0.5rem')};
+  margin-inline: ${({ $outlined }) => ($outlined ? '0.35em 0.2em' : '0 0.5rem')};
 
   /* struck-out words step back */
   ${({ $fade }) =>
@@ -49,15 +49,16 @@ export const Mark = styled.span`
   `}
 `;
 
-/* Hairline dashed outline that hugs the glyphs (not the full line height) */
+/* Dashed selection outline that hugs the glyphs */
 export const Outline = styled(motion.span)`
   position: absolute;
-  left: -0.3em;
-  right: -0.3em;
-  top: 0.2em;
-  bottom: 0.14em;
+  left: -0.35em;
+  right: -0.35em;
+  top: 0.18em;
+  bottom: 0.12em;
   pointer-events: none;
-  background-color: ${({ $tint }) => ($tint ? 'rgb(255 255 255 / 0.35)' : 'transparent')};
+  background-color: ${({ $tint }) => ($tint ? 'rgb(182 245 0 / 0.14)' : 'transparent')};
+  filter: drop-shadow(0 0 6px ${GLOW});
 
   svg {
     position: absolute;
@@ -65,15 +66,14 @@ export const Outline = styled(motion.span)`
     width: 100%;
     height: 100%;
     overflow: visible;
-    shape-rendering: crispEdges;
   }
 
   rect {
     fill: none;
-    stroke: currentColor;
-    stroke-width: 0.75;
-    stroke-opacity: 0.7;
-    stroke-dasharray: 5 4;
+    stroke: ${LIME};
+    stroke-width: 2;
+    stroke-dasharray: 9 6;
+    stroke-linecap: round;
   }
 `;
 
@@ -84,13 +84,14 @@ const corners = {
   br: 'bottom: 0; right: 0; transform: translate(50%, 50%);',
 };
 
-/* Tiny hollow square handle: paper fill, hairline ink stroke */
+/* Solid lime square handle with glow */
 export const Handle = styled.span`
   position: absolute;
-  width: max(5px, 0.2em);
-  height: max(5px, 0.2em);
-  background-color: var(--paper);
-  border: 1px solid currentColor;
+  width: max(9px, 0.3em);
+  height: max(9px, 0.3em);
+  background-color: ${LIME};
+  border-radius: 2px;
+  box-shadow: 0 0 8px 1px ${GLOW};
   pointer-events: none;
   ${({ $pos }) => corners[$pos]}
 `;
@@ -98,39 +99,12 @@ export const Handle = styled.span`
 /* Broken strike line through "AI slop." */
 export const Strike = styled(motion.span)`
   position: absolute;
-  left: -2%;
-  right: -2%;
+  left: -3%;
+  right: -3%;
   top: 56%;
-  height: 1px;
+  height: 3px;
   background-image: ${DASH};
+  border-radius: 2px;
+  filter: drop-shadow(0 0 5px ${GLOW});
   pointer-events: none;
-`;
-
-/* Technical dimension line under a phrase: dashed rule with end ticks */
-export const Dimension = styled(motion.span)`
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0.14em;
-  height: 1px;
-  background-image: ${DASH};
-  pointer-events: none;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -0.22em;
-    width: 1px;
-    height: 0.45em;
-    background-color: currentColor;
-  }
-
-  &::before {
-    left: 0;
-  }
-
-  &::after {
-    right: 0;
-  }
 `;
