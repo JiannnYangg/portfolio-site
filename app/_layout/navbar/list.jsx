@@ -13,7 +13,7 @@ export function NavbarList() {
   const items = navItems.slice(1).map(({ href, title }) => {
     const id = randomId();
     return (
-      //? flex + items-center: no inline baseline gap, so the link text sits on
+      //? flex + items-center: no inline baseline gap, so the link box sits on
       //? the true vertical centre of the navbar band
       <li key={id} className='group flex items-center p-4'>
         <Link
@@ -24,7 +24,11 @@ export function NavbarList() {
         >
           {/* font size lives on the button (not on the span) because the label
               box is max-width: 14ch, and ch follows the button's font size */}
-          <MagneticButton className='text-lg xl:text-xl'>
+          <MagneticButton className='text-base'>
+            {/* The hover dot below sits in normal flow and is 24px tall (even
+                while scaled to 0), which pushed the text up by 12px. This
+                24px spacer above balances it, so the TEXT itself is centred. */}
+            <span aria-hidden='true' className='block h-6' />
             <span className='capitalize'>{title}</span>
             <Center>
               <Dot className='scale-0 transition-transform duration-200 ease-in-expo group-hover:scale-100' />
@@ -38,10 +42,10 @@ export function NavbarList() {
   //? -me-6 cancels the last item's padding (li p-4 = 16px) AND the magnetic
   //? button's own p-2 (8px), so the last link's TEXT ends exactly at the
   //? navbar's right alignment line, the mirror of where the logo starts.
-  //? translate-y-[5px]: the logo image has the leaf above the wordmark, so
-  //? the letters sit ~5px below the image centre; the links follow the letters.
+  //? translate-y-[3px]: the logo image has the leaf above the wordmark, so
+  //? the letters sit ~3px below the image centre; the links follow the letters.
   return (
-    <ul className='-me-6 flex translate-y-[5px] items-center max-lg:hidden'>
+    <ul className='-me-6 flex translate-y-[3px] items-center max-lg:hidden'>
       {items}
     </ul>
   );
