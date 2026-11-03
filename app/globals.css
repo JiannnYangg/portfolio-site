@@ -22,28 +22,34 @@
   }
 
   body {
+    /* positioned so the site backdrop can cover the whole document and
+       scroll with it */
+    position: relative;
     background-color: var(--paper);
     color: theme(colors.foreground);
   }
 }
 
-/* Site-wide background layer (see _components/backdrop). Fixed to the
-   viewport behind all content. lvh (large viewport) keeps the gradients from
-   shifting when mobile browser bars collapse; vh is the fallback. */
+/* Site-wide background (see _components/backdrop). It is part of the page:
+   absolutely positioned over the whole <body>, so it scrolls with the
+   content instead of staying on screen. Sits behind all content. */
 @layer components {
   .site-backdrop {
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
+    position: absolute;
+    inset: 0;
     z-index: -10;
-    height: 100vh;
-    height: 100lvh;
     overflow: hidden;
     pointer-events: none;
     background-color: var(--paper);
-    /* own compositor layer: scrolling never repaints the gradients */
-    transform: translateZ(0);
+  }
+
+  /* One screen of gradients. svh keeps it stable while mobile browser bars
+     collapse; vh is the fallback. The first sheet is the landing hero. */
+  .backdrop-sheet {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    min-height: 480px;
   }
 }
 

@@ -1,19 +1,35 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+
 /**
- * Site-wide background: the landing page's paper, blooms, lime glows and
- * graph-paper grid, as ONE fixed layer mounted in the root layout.
+ * Site-wide background, painted ONTO THE PAGE (it scrolls with the content):
+ * the landing page's paper, blooms and lime glows, with the graph-paper grid
+ * on top.
  *
- * Why fixed + root layout:
- * - it is identical on every page and at every scroll position, so there are
- *   no seams, no repeating tiles and no per-page copies to keep in sync
- * - it is not remounted on navigation, so the grid never flashes or jumps
- * - the grid is anchored to the viewport, so every page shares the same lines
+ * How it works
+ * - It is absolutely positioned inside <body> and covers the whole document,
+ *   so scrolling moves the gradients exactly like any other part of the page.
+ *   Nothing is pinned to the screen.
+ * - The gradient composition is one "sheet" the height of a screen. The first
+ *   sheet is the landing hero, pixel for pixel. Sheets are stacked down the
+ *   page and every second one is flipped vertically, so the edge where two
+ *   sheets meet is a mirror image of itself: the blooms and glows continue
+ *   smoothly instead of being cut off (no visible seam, no hard repeat).
+ * - The grid is a single layer over the whole page (not per sheet), so its
+ *   lines are continuous and identical on every page.
+ * - The number of sheets follows the document height (ResizeObserver), so it
+ *   stays correct when the page grows, shrinks or the window is resized.
  *
  * Sections on top of it must stay transparent (the footer is the one
  * deliberate dark block).
  */
 
-/** Base sheet colour, also used as body background (see globals.css) */
+/** Base sheet colour (also the body background, see globals.css) */
 export const PAPER_RGB = '243,243,245';
+
+/** Enough sheets to cover a tall first paint before the measurement runs */
+const INITIAL_SHEETS = 8;
 
 /**
  * Graph-paper grid, drawn on TOP of the blooms and glows in a deeper lime so
@@ -55,9 +71,14 @@ const GRID = [
   `linear-gradient(to bottom, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
 ].join(', ');
 
-export function SiteBackdrop() {
+/** One screen of gradients. `flipped` mirrors it so neighbours join cleanly. */
+function Sheet({ flipped, sheetRef }) {
   return (
-    <div aria-hidden='true' className='site-backdrop'>
+    <div
+      ref={sheetRef}
+      className='backdrop-sheet'
+      style={flipped ? { transform: 'scaleY(-1)' } : undefined}
+    >
       <div
         className='absolute inset-0'
         style={{ opacity: 0.6, backgroundImage: PAPER_FOLDS }}
@@ -67,6 +88,47 @@ export function SiteBackdrop() {
         style={{ opacity: 0.7, backgroundImage: BLOOMS }}
       />
       <div className='absolute inset-0' style={{ backgroundImage: GLOWS }} />
+    </div>
+  );
+}
+
+export function SiteBackdrop() {
+  const firstSheet = useRef(null);
+  const [count, setCount] = useState(INITIAL_SHEETS);
+
+  useEffect(() => {
+    const body = document.body;
+
+    const update = () => {
+      const sheetHeight =
+        firstSheet.current?.offsetHeight || window.innerHeight || 1;
+      // +1 sheet of slack; the container clips whatever is beyond the page
+      setCount(Math.max(2, Math.ceil(body.scrollHeight / sheetHeight) + 1));
+    };
+
+    update();
+
+    // body grows/shrinks with page content (route changes, images, fonts)
+    const observer =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update);
+    observer?.observe(body);
+    window.addEventListener('resize', update);
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
+  return (
+    <div aria-hidden='true' className='site-backdrop'>
+      {Array.from({ length: count }, (_, index) => (
+        <Sheet
+          key={index}
+          flipped={index % 2 === 1}
+          sheetRef={index === 0 ? firstSheet : undefined}
+        />
+      ))}
       <div
         className='absolute inset-0'
         style={{ backgroundImage: GRID, backgroundSize: GRID_CELL }}
