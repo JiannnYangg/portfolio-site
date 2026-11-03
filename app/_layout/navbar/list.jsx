@@ -24,7 +24,7 @@ export function NavbarList() {
         >
           {/* font size lives on the button (not on the span) because the label
               box is max-width: 14ch, and ch follows the button's font size */}
-          <MagneticButton className='text-base'>
+          <MagneticButton className='text-sm'>
             {/* The hover dot below sits in normal flow and is 24px tall (even
                 while scaled to 0), which pushed the text up by 12px. This
                 24px spacer above balances it, so the TEXT itself is centred. */}
@@ -42,10 +42,10 @@ export function NavbarList() {
   //? -me-6 cancels the last item's padding (li p-4 = 16px) AND the magnetic
   //? button's own p-2 (8px), so the last link's TEXT ends exactly at the
   //? navbar's right alignment line, the mirror of where the logo starts.
-  //? translate-y-[3px]: the logo image has the leaf above the wordmark, so
-  //? the letters sit ~3px below the image centre; the links follow the letters.
+  //? translate-y-[9px]: sits the links a little below the logo's centre line,
+  //? level with the lower part of the logo letters.
   return (
-    <ul className='-me-6 flex translate-y-[3px] items-center max-lg:hidden'>
+    <ul className='-me-6 flex translate-y-[9px] items-center max-lg:hidden'>
       {items}
     </ul>
   );
