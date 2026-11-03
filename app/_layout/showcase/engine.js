@@ -3,7 +3,11 @@
 //
 // Changes made for embedding in this portfolio (everything else is upstream):
 //   - three.js is injected (createCarousel(THREE, ...)) so it can be loaded lazily
-//   - transparent canvas: the site backdrop shows through instead of white
+//   - transparent canvas: the site backdrop shows through instead of white.
+//     The lens shader is upstream's, unchanged, and runs on an opaque buffer
+//     cleared to the paper colour (LENS_BACKDROP) the way upstream clears to
+//     white. Only its last step is new: a matte that turns "final pixel vs
+//     paper" into premultiplied alpha, so untouched areas stay transparent
 //   - the carousel is a page section: the vertical wheel scrolls the page,
 //     pointer maths is relative to the canvas, touch keeps vertical page-scroll
 //   - pause()/resume() (render loop only runs while the section is on screen),
@@ -14,8 +18,8 @@
 //     wheel / drag / snap are off because the page scroll owns the row
 //   - reset(): replay the entry from the start (used when a page is restored
 //     from the back/forward cache)
-//   - the lens ring / tint color is the site's theme color (LENS.ringColor)
-//     and keeps its hue when the glow overdrives
+//   - the pixel ratio is also limited so the buffer never exceeds the GPU's
+//     maximum texture size (ultra-wide / 4K windows)
 //
 // The carousel itself — three.js + GSAP, no React. An infinite flat row of
 // image panels rendered into an offscreen buffer, then drawn to screen
@@ -42,6 +46,7 @@ import {
   FOCUS,
   INTERACT,
   LENS,
+  LENS_BACKDROP,
   PROJECTS,
   SCROLL,
 } from './config';
@@ -55,7 +60,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     onEntryDone = () => {},
     onModeChange = () => {},
     onContextLost = () => {},
-    maxDpr = 1.5, // pixel-ratio cap: the lens pass is fill-rate bound
+    maxDpr = 2, // pixel-ratio cap (same as upstream)
   } = callbacks;
   let destroyed = false;
   let running = true;
@@ -66,15 +71,32 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   let W = Math.max(1, mount.clientWidth);
   let H = Math.max(1, mount.clientHeight);
 
+  // The paper colour the lens buffer is cleared to (upstream clears to white,
+  // "match page bg so FBO gaps blend"). The lens pass writes raw values to the
+  // screen, so the colour is kept raw: no colour-space conversion.
+  const backdrop = new THREE.Color().setStyle(
+    LENS_BACKDROP,
+    THREE.LinearSRGBColorSpace,
+  );
+
   // ---- renderer / scene / camera (orthographic, 1 unit = 1 px) ----
   const renderer = new THREE.WebGLRenderer({
-    antialias: false, // final pass is one fullscreen quad: MSAA would be wasted
+    antialias: true,
     alpha: true,
     powerPreference: 'high-performance',
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
+  // Upstream's pixel-ratio cap, plus a guard so an ultra-wide / 4K window
+  // never asks for a buffer larger than the GPU's maximum texture size.
+  function fitPixelRatio() {
+    return Math.min(
+      window.devicePixelRatio || 1,
+      maxDpr,
+      renderer.capabilities.maxTextureSize / Math.max(W, H),
+    );
+  }
+  renderer.setPixelRatio(fitPixelRatio());
   renderer.setSize(W, H);
-  renderer.setClearColor(0x000000, 0); // transparent: the site backdrop shows through
+  renderer.setClearColor(backdrop, 1); // paper, so buffer gaps blend like upstream
   renderer.domElement.style.display = 'block';
   mount.appendChild(renderer.domElement);
   const onCtxLost = e => {
@@ -305,7 +327,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   // The carousel renders into rt at device resolution (CSS-sized would render
   // at 1x and upscale — blurry on retina); a fullscreen quad then samples it
   // through the lens shader.
-  const dpr = renderer.getPixelRatio();
+  let dpr = renderer.getPixelRatio();
   const px = v => Math.max(1, Math.round(v * dpr));
   let rt = new THREE.WebGLRenderTarget(px(W), px(H));
   const lensScene = new THREE.Scene();
@@ -326,7 +348,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     uGlow: { value: LENS.glow },
     uWhiteGlow: { value: LENS.whiteGlow },
     uNovaSize: { value: LENS.novaSize },
-    uRingIntensity: { value: LENS.ringIntensity },
+    uBlueRing: { value: LENS.blueRing },
     uRingRadius: { value: LENS.ringRadius },
     uRingWidth: { value: LENS.ringWidth },
     uShimmer: { value: LENS.shimmer ? 1.0 : 0.0 },
@@ -339,21 +361,14 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     uRimInward: { value: LENS.rimInward },
     uRimFreq1: { value: LENS.rimFreq1 },
     uRimFreq2: { value: LENS.rimFreq2 },
-    // The lens pass writes raw values to the screen (no color-space
-    // conversion), so the theme color is passed through unconverted: the
-    // ring shows exactly the hex set in LENS.ringColor.
-    uRingColor: {
-      value: new THREE.Color().setStyle(
-        LENS.ringColor,
-        THREE.LinearSRGBColorSpace,
-      ),
-    },
+    uBlueColor: { value: new THREE.Color(LENS.blueColor) },
     uRimLine: { value: LENS.rimLine },
     uRimLinePos: { value: LENS.rimLinePos },
     uRimLineWidth: { value: LENS.rimLineWidth },
     uVignette: { value: LENS.vignette },
     uVignetteSize: { value: LENS.vignetteSize },
     uSamples: { value: LENS.samples },
+    uBackdrop: { value: backdrop },
   };
   const lensMat = new THREE.ShaderMaterial({
     uniforms: lensUniforms,
@@ -377,7 +392,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       uniform float uGlow;
       uniform float uWhiteGlow;
       uniform float uNovaSize;
-      uniform float uRingIntensity;
+      uniform float uBlueRing;
       uniform float uRingRadius;
       uniform float uRingWidth;
       uniform float uShimmer;
@@ -390,7 +405,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       uniform float uRimInward;
       uniform float uRimFreq1;
       uniform float uRimFreq2;
-      uniform vec3  uRingColor;
+      uniform vec3  uBlueColor;
       uniform float uRimLine;
       uniform float uRimLinePos;
       uniform float uRimLineWidth;
@@ -400,6 +415,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       uniform float uSquareRound;  // corner rounding for square (0..1)
       uniform float uRotation;     // lens rotation in radians
       uniform int   uSamples;
+      uniform vec3  uBackdrop;     // page colour the buffer is cleared to (site-specific)
 
       const int MAX_SAMPLES = 16;
 
@@ -410,9 +426,8 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       }
 
       // Evaluate the disc lens centered at 'center' (screen-UV). Returns the
-      // lensed PREMULTIPLIED color + alpha; 'outA' = how opaque this lens is
-      // here (0 outside disc). (Alpha is carried so the page shows through.)
-      vec4 discLens(vec2 center, float aspectCorrect, out float outA) {
+      // lensed color; 'outA' = how opaque this lens is here (0 outside disc).
+      vec3 discLens(vec2 center, float aspectCorrect, out float outA) {
         // local coords, aspect-corrected so x/y are in the same screen units
         vec2 p = (vUv - center);
         p.x *= aspectCorrect;
@@ -434,7 +449,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         } else {
           maskND = dist;
         }
-        if (maskND > 1.0) return vec4(0.0);
+        if (maskND > 1.0) return vec3(0.0);
 
         // shapeND: 0 center .. 1 boundary, following the chosen shape. Used by
         // nova / ring / border so they take the SAME shape.
@@ -467,13 +482,11 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         if (N > MAX_SAMPLES) N = MAX_SAMPLES;
         vec3 col = vec3(0.0);
         vec3 caW = vec3(0.0);
-        float alphaAcc = 0.0;
         for (int i = 0; i < MAX_SAMPLES; i++) {
           if (i >= N) break;
           float t = float(i) / float(N - 1);
           vec2 sUV = baseUV + dispDir * (t - 0.5);
-          vec4 s4 = texture2D(uTex, sUV);
-          vec3 s = s4.rgb;
+          vec3 s = texture2D(uTex, sUV).rgb;
           vec3 w = vec3(
             exp(-pow((t - 0.00) / 0.38, 2.0)),
             exp(-pow((t - 0.50) / 0.38, 2.0)),
@@ -481,36 +494,28 @@ export function createCarousel(THREE, mount, callbacks = {}) {
           );
           col += s * w;
           caW += w;
-          alphaAcc += s4.a * (w.r + w.g + w.b) / 3.0;
         }
         col /= max(caW, vec3(0.001));
-        float alpha = alphaAcc / max((caW.r + caW.g + caW.b) / 3.0, 0.001);
 
         // optional blur near the rim
         float blurFade = 1.0 - smoothstep(0.72, 0.98, nd);
         if (uBlur > 0.01 && blurFade > 0.01) {
           vec2 blurRad = vec2(uBlur) / uRes * blurFade;
           vec3 bcol = vec3(0.0);
-          float bal = 0.0;
           float btw = 0.0;
           for (float a = 0.0; a < PI * 2.0; a += PI * 2.0 / 6.0) {
             for (float rr = 0.4; rr <= 1.001; rr += 0.3) {
               vec2 o = vec2(cos(a), sin(a)) * blurRad * rr;
               float w = 1.0 - rr * 0.38;
-              vec4 bs = texture2D(uTex, baseUV + o);
-              bcol += bs.rgb * w;
-              bal += bs.a * w;
+              bcol += texture2D(uTex, baseUV + o).rgb * w;
               btw += w;
             }
           }
           col = mix(bcol / btw, col, rimMask);
-          alpha = mix(bal / btw, alpha, rimMask);
         }
 
         // glassy darkening toward center
         col *= mix(0.91, 1.0, smoothstep(0.0, 0.38, shapeND));
-
-        vec3 colBeforeGlow = col;
 
         // white nova glow at center
         float r2 = shapeND * shapeND * 0.25;
@@ -519,41 +524,29 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         nova *= uWhiteGlow * (uGlow / 17.0) * 1.15;
         col += vec3(nova);
 
-        // theme-colored ring + aura
+        // blue ring + aura
         float dC = shapeND * 0.5;
         float tR = clamp(uRingRadius, 0.1, 0.49);
         float rW = max(uRingWidth, 0.003);
         float ring = exp(-pow((dC - tR) / rW, 2.0));
-        ring *= uRingIntensity * (uGlow / 17.0) * 1.8;
+        ring *= uBlueRing * (uGlow / 17.0) * 1.8;
         if (uShimmer > 0.5) ring *= sin(angle * uShimmerFreq + uTime * uShimmerSpeed) * uShimmerDepth + (1.0 - uShimmerDepth);
-        float ringAura = exp(-pow((dC - tR) / (rW * 6.0), 2.0)) * 0.28 * uRingIntensity * (uGlow / 17.0);
-        vec3 ringGlow = uRingColor * (ring + ringAura);
-        // When the glow overdrives, scale ALL channels together. Clipping
-        // each channel on its own would push a lime ring toward pure yellow
-        // (red and green both saturate); this keeps the theme hue intact.
-        float ringPeak = max(ringGlow.r, max(ringGlow.g, ringGlow.b));
-        ringGlow /= max(1.0, ringPeak);
-        col += ringGlow;
+        float ringAura = exp(-pow((dC - tR) / (rW * 6.0), 2.0)) * 0.28 * uBlueRing * (uGlow / 17.0);
+        col += uBlueColor * (ring + ringAura);
         // bright border line
         col += vec3(exp(-pow((dC - uRimLinePos) / max(uRimLineWidth, 0.0001), 2.0)) * uRimLine);
 
-        // the glow is light added on top: make it opaque enough to show on a
-        // transparent background, and keep the colour premultiplied-valid
-        vec3 glowAdd = max(col - colBeforeGlow, vec3(0.0));
-        alpha = clamp(alpha + max(glowAdd.r, max(glowAdd.g, glowAdd.b)), 0.0, 1.0);
-        col = min(col, vec3(alpha));
-
         // lens alpha: solid inside, soft falloff at the very edge
         outA = smoothstep(1.0, 0.93, maskND);
-        return vec4(col, alpha);
+        return col;
       }
 
       void main(){
-        vec4 base = texture2D(uTex, vUv);  // carousel, untouched
-        vec4 outc = base;
+        vec3 base = texture2D(uTex, vUv).rgb;  // carousel, untouched
+        vec3 outc = base;
 
         float a = 0.0;
-        vec4 c = discLens(uCenter, uAspect, a);
+        vec3 c = discLens(uCenter, uAspect, a);
         outc = mix(outc, c, a);
 
         // overall vignette: darken toward screen corners (aspect-correct)
@@ -562,12 +555,21 @@ export function createCarousel(THREE, mount, callbacks = {}) {
           vc.x *= uAspect;
           float d = length(vc) / max(uVignetteSize, 0.0001);
           float vig = 1.0 - uVignette * smoothstep(0.5, 1.0, d);
-          vig = clamp(vig, 0.0, 1.0);
-          outc.rgb *= vig;
-          outc.a += (1.0 - outc.a) * (1.0 - vig);
+          outc *= clamp(vig, 0.0, 1.0);
         }
 
-        gl_FragColor = outc; // premultiplied alpha
+        // Site-specific last step. Upstream ends with vec4(outc, 1.0) on a
+        // white page. Here the same opaque result 'lit' is converted to the
+        // smallest premultiplied alpha that, composited over the paper colour,
+        // gives back exactly 'lit': pixels equal to paper stay transparent and
+        // the site backdrop shows through them, everything the lens paints
+        // looks the way it does upstream.
+        vec3 lit = clamp(outc, 0.0, 1.0);
+        vec3 darker = 1.0 - lit / max(uBackdrop, vec3(0.001));
+        vec3 lighter = (lit - uBackdrop) / max(1.0 - uBackdrop, vec3(0.001));
+        vec3 need = max(darker, lighter);
+        float alpha = clamp(max(need.r, max(need.g, need.b)), 0.0, 1.0);
+        gl_FragColor = vec4(max(lit - (1.0 - alpha) * uBackdrop, vec3(0.0)), alpha);
       }
     `,
   });
@@ -604,7 +606,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   // lens props that fade out for focus/entry, with their full values
   const LENS_FX_KEYS = [
     'uDispersion',
-    'uRingIntensity',
+    'uBlueRing',
     'uRimLine',
     'uVignette',
     'uZoom',
@@ -1474,6 +1476,8 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     if (!nw || !nh || (nw === W && nh === H)) return; // hidden / unchanged
     W = nw;
     H = nh;
+    renderer.setPixelRatio(fitPixelRatio());
+    dpr = renderer.getPixelRatio();
     renderer.setSize(W, H);
     camera.left = -W / 2;
     camera.right = W / 2;
