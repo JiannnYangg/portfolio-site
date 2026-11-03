@@ -4,10 +4,12 @@
 // Changes made for embedding in this portfolio (everything else is upstream):
 //   - three.js is injected (createCarousel(THREE, ...)) so it can be loaded lazily
 //   - transparent canvas: the site backdrop shows through instead of white.
-//     The lens shader is upstream's, unchanged, and runs on an opaque buffer
-//     cleared to the paper colour (LENS_BACKDROP) the way upstream clears to
-//     white. Only its last step is new: a matte that turns "final pixel vs
-//     paper" into premultiplied alpha, so untouched areas stay transparent
+//     The lens shader is upstream's and runs on an opaque buffer cleared to
+//     the paper colour (LENS_BACKDROP) the way upstream clears to white. Two
+//     site-specific steps sit at its end: the lens's wash over empty paper is
+//     scaled to LENS_PAPER_GLOW (cards are untouched), then a matte turns
+//     "final pixel vs paper" into premultiplied alpha, so untouched areas stay
+//     transparent
 //   - the carousel is a page section: the vertical wheel scrolls the page,
 //     pointer maths is relative to the canvas, touch keeps vertical page-scroll
 //   - pause()/resume() (render loop only runs while the section is on screen),
@@ -47,6 +49,7 @@ import {
   INTERACT,
   LENS,
   LENS_BACKDROP,
+  LENS_PAPER_GLOW,
   PROJECTS,
   SCROLL,
 } from './config';
@@ -369,6 +372,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     uVignetteSize: { value: LENS.vignetteSize },
     uSamples: { value: LENS.samples },
     uBackdrop: { value: backdrop },
+    uPaperGlow: { value: LENS_PAPER_GLOW },
   };
   const lensMat = new THREE.ShaderMaterial({
     uniforms: lensUniforms,
@@ -416,6 +420,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       uniform float uRotation;     // lens rotation in radians
       uniform int   uSamples;
       uniform vec3  uBackdrop;     // page colour the buffer is cleared to (site-specific)
+      uniform float uPaperGlow;    // share of the lens wash kept over empty paper (site-specific)
 
       const int MAX_SAMPLES = 16;
 
@@ -427,7 +432,9 @@ export function createCarousel(THREE, mount, callbacks = {}) {
 
       // Evaluate the disc lens centered at 'center' (screen-UV). Returns the
       // lensed color; 'outA' = how opaque this lens is here (0 outside disc).
-      vec3 discLens(vec2 center, float aspectCorrect, out float outA) {
+      // 'outPaper' (site-specific) = how much of the picture under the glow is
+      // empty paper here (1 = no card behind, 0 = card).
+      vec3 discLens(vec2 center, float aspectCorrect, out float outA, out float outPaper) {
         // local coords, aspect-corrected so x/y are in the same screen units
         vec2 p = (vUv - center);
         p.x *= aspectCorrect;
@@ -438,6 +445,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         // elliptical distance: 0 center .. 1 boundary
         float dist = length(p / halfSize);
         outA = 0.0;
+        outPaper = 0.0;
 
         // mask shape: ellipse OR rounded rect, drives the cutoff.
         // maskND: 0 inside .. 1 at the shape boundary (>1 outside).
@@ -515,7 +523,12 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         }
 
         // glassy darkening toward center
-        col *= mix(0.91, 1.0, smoothstep(0.0, 0.38, shapeND));
+        float glassDark = mix(0.91, 1.0, smoothstep(0.0, 0.38, shapeND));
+        col *= glassDark;
+
+        // site-specific: is this still plain paper (no card) before any glow?
+        vec3 gap = abs(col - uBackdrop * glassDark);
+        outPaper = 1.0 - smoothstep(0.0, 0.04, max(gap.r, max(gap.g, gap.b)));
 
         // white nova glow at center
         float r2 = shapeND * shapeND * 0.25;
@@ -546,7 +559,8 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         vec3 outc = base;
 
         float a = 0.0;
-        vec3 c = discLens(uCenter, uAspect, a);
+        float onPaper = 0.0;
+        vec3 c = discLens(uCenter, uAspect, a, onPaper);
         outc = mix(outc, c, a);
 
         // overall vignette: darken toward screen corners (aspect-correct)
@@ -558,13 +572,16 @@ export function createCarousel(THREE, mount, callbacks = {}) {
           outc *= clamp(vig, 0.0, 1.0);
         }
 
-        // Site-specific last step. Upstream ends with vec4(outc, 1.0) on a
-        // white page. Here the same opaque result 'lit' is converted to the
-        // smallest premultiplied alpha that, composited over the paper colour,
-        // gives back exactly 'lit': pixels equal to paper stay transparent and
-        // the site backdrop shows through them, everything the lens paints
-        // looks the way it does upstream.
+        // Site-specific last steps. Upstream ends with vec4(outc, 1.0) on a
+        // white page.
+        // 1) Over empty paper (no card behind the lens) only uPaperGlow of the
+        //    lens's wash is kept; over cards nothing changes.
+        // 2) The result 'lit' is converted to the smallest premultiplied alpha
+        //    that, composited over the paper colour, gives back exactly 'lit':
+        //    pixels equal to paper stay transparent and the site backdrop shows
+        //    through them.
         vec3 lit = clamp(outc, 0.0, 1.0);
+        lit = mix(lit, mix(uBackdrop, lit, uPaperGlow), a * onPaper);
         vec3 darker = 1.0 - lit / max(uBackdrop, vec3(0.001));
         vec3 lighter = (lit - uBackdrop) / max(1.0 - uBackdrop, vec3(0.001));
         vec3 need = max(darker, lighter);

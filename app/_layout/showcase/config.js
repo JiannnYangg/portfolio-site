@@ -172,6 +172,11 @@ export const INTERACT = {
 // --paper in globals.css.
 export const LENS_BACKDROP = '#f3f3f5';
 
+// How much of the lens's white wash shows where it sits over empty paper
+// (no card behind it): 1 = full upstream white, 0 = fully transparent. Cards
+// are not affected. 0.2 keeps 20% of it.
+export const LENS_PAPER_GLOW = 0.2;
+
 // The liquid-glass lens (fullscreen post-process). Ported from a hero
 // explosion shader, hence some of the exotic knob names.
 export const LENS = {
