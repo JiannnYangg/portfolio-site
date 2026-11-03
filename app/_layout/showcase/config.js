@@ -165,6 +165,13 @@ export const INTERACT = {
   TOUCH_CLICK_SLOP: 12, // px of wobble still counted as a tap, not a drag
 };
 
+// The page colour the lens is rendered against. Upstream renders on an opaque
+// white page and clears its buffer to white; this site's sheet is paper, so
+// the lens buffer is cleared to the same colour and a final matte step turns
+// "pixel vs paper" back into transparency (see engine.js). Keep this equal to
+// --paper in globals.css.
+export const LENS_BACKDROP = '#f3f3f5';
+
 // The liquid-glass lens (fullscreen post-process). Ported from a hero
 // explosion shader, hence some of the exotic knob names.
 export const LENS = {
@@ -182,7 +189,7 @@ export const LENS = {
   glow: 4.2, // overall glow multiplier
   whiteGlow: 0.24, // central white nova intensity
   novaSize: 12, // nova size
-  ringIntensity: 6, // theme-colored ring + aura intensity
+  blueRing: 6, // blue ring intensity
   ringRadius: 0.49, // ring radius (0..0.5)
   ringWidth: 0.014, // ring width
   shimmer: true, // animated ring shimmer
@@ -194,13 +201,11 @@ export const LENS = {
   rimInward: 0, // extra inward pull at the rim
   rimFreq1: 2, // fluid wave frequency 1
   rimFreq2: 1, // fluid wave frequency 2
-  // The lens tint / ring color: the site's theme blue (the same blue as the
-  // dashed-line labels, the CTA gradient and the callout glass). It is
-  // written to the shader as-is (the lens pass has no color-space
-  // conversion), so what you set here is exactly what shows on screen. The
-  // shader scales the glow's channels together when it overdrives, so the
-  // ring peaks as a bright blue and keeps its hue instead of washing out.
-  ringColor: '#445ae9',
+  // The lens tint / ring colour, the one place to change it. Same value and
+  // same handling as upstream (three's default colour management, then added
+  // straight onto the picture), so the ring reads as upstream's cyan-blue
+  // rather than as the hex itself.
+  blueColor: '#009dff',
   rimLine: 1.4, // bright white border line intensity (0 = off)
   rimLinePos: 0.488, // where the white border sits (0..0.5)
   rimLineWidth: 0.003, // sharpness of the white border
