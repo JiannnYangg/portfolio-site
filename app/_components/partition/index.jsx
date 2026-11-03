@@ -19,10 +19,14 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
 /** Theme blue (same as the Tailwind `primary`, hsl 232 79% 59%): the labels */
 const BLUE = '#445ae9';
 /**
- * The dashed lines use the same blue. Exported so every dashed line on the
- * site (e.g. the dividers in Skills) shares one colour instead of a copy.
+ * The dashed lines are a dark slate that leans blue-black (between the theme
+ * blue and black / dark grey), so they read as quiet structure and the blue
+ * labels on the crossings stay the accent. Exported so every dashed line on
+ * the site (e.g. the dividers in Skills) shares one colour instead of a copy.
+ * Contrast on the paper sheet (#f3f3f5) is about 10:1, so the dashes stay
+ * visible on every screen.
  */
-export const PARTITION_LINE = BLUE;
+export const PARTITION_LINE = '#2f3550';
 /**
  * White label text: 5.4:1 on the blue. The old dark green only reaches about
  * 3.2:1 on it, too low for 10-11px bold text.
