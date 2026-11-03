@@ -1,6 +1,6 @@
 import { SiteBackdrop, SiteGuides } from '@/components';
 import { rootMetadata } from '@/config';
-import { montserrat, neue_montreal } from '@/fonts';
+import { inter_tight, neue_montreal } from '@/fonts';
 import { Offcanvas } from '@/layout';
 import { Providers } from '@/providers';
 import './globals.css';
@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
     <html
       lang='en'
       dir='ltr'
-      className={`${neue_montreal.variable} ${montserrat.variable}`}
+      className={`${neue_montreal.variable} ${inter_tight.variable}`}
     >
       <body className={neue_montreal.className}>
         <Providers>
