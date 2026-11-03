@@ -7,9 +7,12 @@ import { styled } from 'styled-components';
  * Selection-frame style from the reference: one dashed rectangle with solid
  * square handles on the four corners, drawn around the whole paragraph, in
  * the site's bright lime. One extra mark: a solid strike on "AI slop."
- * The four D's in the side note get hand-placed marker swatches in the same lime.
+ * The four D's in the side note get light, hand-placed marker swatches in the
+ * same lime, one per word.
  */
 const LIME = '#b6f500';
+/* Same lime, lightened: used for the marker swatches behind the four D's */
+const LIME_LIGHT = 'rgba(182, 245, 0, 0.36)';
 
 export const Wrapper = styled.div`
   display: flex;
@@ -106,24 +109,32 @@ export const Strike = styled(motion.span)`
   pointer-events: none;
 `;
 
-/* Four different marker swatches (position, tilt, shape), so the highlights
-   feel hand-placed and asymmetric rather than four identical bars. */
+/*
+ * Marker swatches for the four D's. Each one hugs its own word (a hair of
+ * overhang on both sides, never a whole letter), covers only the lower part
+ * of the letters like a highlighter stroke, and has its own uneven edges and
+ * tiny tilt, so the four read as hand-drawn and asymmetric, not as bars.
+ */
 const swatches = {
   data: `
-    left: -0.2em; right: -0.12em; top: 46%; bottom: 2%;
-    transform: rotate(-1.5deg);
+    left: -0.08em; right: -0.04em; top: 50%; bottom: 8%;
+    transform: rotate(-0.8deg);
+    clip-path: polygon(0 14%, 100% 0, 97% 100%, 2% 86%);
   `,
   design: `
-    left: -0.25em; right: -0.4em; top: 14%; bottom: 6%;
-    transform: skewX(-14deg);
+    left: -0.05em; right: -0.1em; top: 46%; bottom: 10%;
+    transform: rotate(0.6deg);
+    clip-path: polygon(3% 0, 98% 16%, 100% 92%, 0 100%);
   `,
   development: `
-    left: -0.12em; right: -0.25em; top: 58%; bottom: -6%;
-    transform: rotate(1.2deg);
+    left: -0.1em; right: -0.05em; top: 54%; bottom: 6%;
+    transform: rotate(-0.5deg);
+    clip-path: polygon(0 0, 99% 12%, 100% 100%, 4% 82%);
   `,
   distribution: `
-    left: -0.3em; right: -0.12em; top: 26%; bottom: 0;
-    clip-path: polygon(0 18%, 100% 0, 95% 100%, 3% 86%);
+    left: -0.04em; right: -0.09em; top: 48%; bottom: 9%;
+    transform: rotate(0.8deg);
+    clip-path: polygon(1% 16%, 100% 0, 95% 90%, 0 100%);
   `,
 };
 
@@ -136,7 +147,7 @@ export const Highlight = styled.span`
     content: '';
     position: absolute;
     z-index: -1;
-    background-color: ${LIME};
+    background-color: ${LIME_LIGHT};
     pointer-events: none;
     ${({ $variant }) => swatches[$variant]}
   }
