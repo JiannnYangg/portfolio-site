@@ -114,19 +114,29 @@ export function Description() {
         </div>
 
         {/* side note: top-aligned with the text block, well away from the
-            "About me" circle that hangs below the section */}
-        <div className='basis-10/12 sm:basis-7/12 lg:basis-3/12 lg:self-start'>
+            "About me" circle that hangs below the section. It is a size
+            container so the four D's line can scale to always fit on ONE line. */}
+        <div
+          className='basis-10/12 sm:basis-7/12 lg:basis-3/12 lg:self-start'
+          style={{ containerType: 'inline-size' }}
+        >
           <ParallaxFade>
             <Balancer
               as='p'
               className='text-base leading-loose lg:text-lg lg:leading-loose'
             >
-              We bring together the four D&rsquo;s:{' '}
+              We bring together the four D&rsquo;s:
+            </Balancer>
+            {/* one line, never wraps; shrinks with the column if it must */}
+            <p
+              className='whitespace-nowrap text-base leading-loose lg:text-lg lg:leading-loose'
+              style={{ fontSize: 'min(1em, 4.2cqw)' }}
+            >
               <Highlight $variant='data'>Data</Highlight>,{' '}
               <Highlight $variant='design'>Design</Highlight>,{' '}
               <Highlight $variant='development'>Development</Highlight>,{' '}
               <Highlight $variant='distribution'>Distribution</Highlight>.
-            </Balancer>
+            </p>
           </ParallaxFade>
         </div>
 
