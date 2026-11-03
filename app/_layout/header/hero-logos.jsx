@@ -43,9 +43,9 @@ const shadowFor = depth =>
 
 /**
  * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
- * the largest and close to the viewer; the three supporting logos (n8n,
- * github, elevenlabs) are small and sit further back, so they add texture
- * without competing.
+ * the largest and close to the viewer; the supporting logos (n8n, mylogo,
+ * elevenlabs, gitcat, letter-r) are small and sit further back, so they add
+ * texture without competing.
  * Nothing mirrors: sizes, edges and tilts all differ, but the visual weight is
  * balanced: big top-left vs big top-right, big mid-right vs small mid-left.
  *
@@ -108,10 +108,11 @@ const LOGOS = [
     float: [6, 6.8, 2, 1.6],
   },
   {
-    id: 'github',
-    src: '/hero-logos/hero-github-5918.png',
-    width: 176,
-    height: 173,
+    // own logo: replaces the old GitHub logo in the same spot
+    id: 'mylogo',
+    src: '/hero-logos/hero-mylogo-6382.png',
+    width: 193,
+    height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
     position: 'bottom-[19%] left-[36%] md:bottom-[22%] md:left-[20%]',
     rotate: 7,
@@ -128,6 +129,30 @@ const LOGOS = [
     rotate: 11,
     depth: 0.6,
     float: [5, 5.6, 1.4, 0.4],
+  },
+  {
+    // new, small: empty bottom-left corner
+    id: 'gitcat',
+    src: '/hero-logos/hero-gitcat-4719.png',
+    width: 190,
+    height: 200,
+    size: 'clamp(28px, 3.4vw, 54px)',
+    position: 'bottom-[9%] left-[6%] md:bottom-[11%] md:left-[7%]',
+    rotate: -6,
+    depth: 0.45,
+    float: [5, 5.9, 1.6, 0.7],
+  },
+  {
+    // new, small: empty bottom-right corner (clear of the elevenlabs logo)
+    id: 'letter-r',
+    src: '/hero-logos/hero-letter-r-8156.png',
+    width: 200,
+    height: 200,
+    size: 'clamp(28px, 3.4vw, 54px)',
+    position: 'bottom-[8%] right-[6%] md:bottom-[12%] md:right-[7%]',
+    rotate: 9,
+    depth: 0.55,
+    float: [5, 6.1, 1.5, 1.9],
   },
 ];
 
