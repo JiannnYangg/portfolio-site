@@ -43,11 +43,21 @@ const shadowFor = depth =>
 
 /**
  * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
- * the largest and close to the viewer; the supporting logos (n8n, mylogo,
- * elevenlabs, gitcat, letter-r) are small and sit further back, so they add
+ * the largest and close to the viewer; the supporting logos (n8n, github,
+ * elevenlabs, codex, runway) are small and sit further back, so they add
  * texture without competing.
  * Nothing mirrors: sizes, edges and tilts all differ, but the visual weight is
  * balanced: big top-left vs big top-right, big mid-right vs small mid-left.
+ *
+ * The original six positions are untouched. The new GitHub logo sits exactly
+ * where the old GitHub logo was. The two newer logos fill empty pockets:
+ *  - codex: in the blank space to the right of the "We build it." line (the
+ *    line is indented 1em and ends well before the line below it), centered
+ *    on that line vertically. The headline block is always centered in the
+ *    hero and its line 2 sits ~51px above the hero's vertical middle, so
+ *    top is calc(50% - 51px - half the logo height).
+ *  - runway: lower left, above the GitHub logo and below n8n, shifted right
+ *    of n8n so the three form a loose diagonal instead of a column.
  *
  * Mobile positions are the base classes, md: classes take over on desktop.
  * Everything stays in the empty bands above and below the headline and in
@@ -108,10 +118,11 @@ const LOGOS = [
     float: [6, 6.8, 2, 1.6],
   },
   {
-    // own logo: replaces the old GitHub logo in the same spot
-    id: 'mylogo',
-    src: '/hero-logos/hero-mylogo-6382.png',
-    width: 193,
+    // the new GitHub logo (octocat), back in the exact spot the old GitHub
+    // logo had: same position, size, tilt and float
+    id: 'github',
+    src: '/hero-logos/hero-gitcat-4719.png',
+    width: 190,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
     position: 'bottom-[19%] left-[36%] md:bottom-[22%] md:left-[20%]',
@@ -131,26 +142,29 @@ const LOGOS = [
     float: [5, 5.6, 1.4, 0.4],
   },
   {
-    // new, small: empty bottom-left corner
-    id: 'gitcat',
-    src: '/hero-logos/hero-gitcat-4719.png',
-    width: 190,
+    // Codex: same size as before. Sits in the blank space after "We build it."
+    // with a clear gap from the end of the line (about 120px at 1440px wide)
+    // and clear of the Comfy logo above it.
+    id: 'codex',
+    src: '/hero-logos/hero-mylogo-6382.png',
+    width: 193,
     height: 200,
-    size: 'clamp(28px, 3.4vw, 54px)',
-    position: 'bottom-[9%] left-[6%] md:bottom-[11%] md:left-[7%]',
-    rotate: -6,
-    depth: 0.45,
-    float: [5, 5.9, 1.6, 0.7],
+    size: 'clamp(34px, 4.2vw, 68px)',
+    position:
+      'right-[6%] top-[calc(50%_-_60px)] md:right-[24%] md:top-[calc(50%_-_84px)]',
+    rotate: 8,
+    depth: 0.6,
+    float: [5, 5.4, 1.7, 0.9],
   },
   {
-    // new, small: empty bottom-right corner (clear of the elevenlabs logo)
-    id: 'letter-r',
+    // Runway ML: lower left, above GitHub, below n8n, nudged right of n8n
+    id: 'runway',
     src: '/hero-logos/hero-letter-r-8156.png',
     width: 200,
     height: 200,
-    size: 'clamp(28px, 3.4vw, 54px)',
-    position: 'bottom-[8%] right-[6%] md:bottom-[12%] md:right-[7%]',
-    rotate: 9,
+    size: 'clamp(36px, 4.6vw, 74px)',
+    position: 'bottom-[24%] left-[9%] md:bottom-[31%] md:left-[11%]',
+    rotate: -8,
     depth: 0.55,
     float: [5, 6.1, 1.5, 1.9],
   },
