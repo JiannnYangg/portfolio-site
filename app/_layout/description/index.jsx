@@ -8,8 +8,6 @@ import { MagneticButton, ParallaxFade } from '@/components';
 
 import {
   Frame,
-  FrameRect,
-  Handle,
   Highlight,
   Mark,
   Strike,
@@ -96,26 +94,6 @@ export function Description() {
       <Wrapper>
         <div className='basis-full lg:basis-7/12'>
           <Frame>
-            <FrameRect
-              aria-hidden='true'
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-            >
-              <svg>
-                <rect
-                  x='1'
-                  y='1'
-                  style={{
-                    width: 'calc(100% - 2px)',
-                    height: 'calc(100% - 2px)',
-                  }}
-                />
-              </svg>
-              {['tl', 'tr', 'bl', 'br'].map(pos => (
-                <Handle key={pos} $pos={pos} />
-              ))}
-            </FrameRect>
             <Title>{content}</Title>
           </Frame>
         </div>

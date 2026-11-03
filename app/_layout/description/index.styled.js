@@ -4,9 +4,7 @@ import { motion } from 'framer-motion';
 import { styled } from 'styled-components';
 
 /*
- * Selection-frame style from the reference: one dashed rectangle with solid
- * square handles on the four corners, drawn around the whole paragraph, in
- * the site's bright lime. One extra mark: a solid strike on "AI slop."
+ * Intro paragraph: one extra mark, a solid lime strike on "AI slop."
  * The four D's in the side note get light, hand-placed marker swatches in the
  * same lime, one per word.
  */
@@ -19,8 +17,6 @@ export const Wrapper = styled.div`
   flex-wrap: wrap;
   align-items: stretch;
   justify-content: space-between;
-  /* generous gap so the frame (which reaches ~1.75rem outside the text)
-     never crowds the side note */
   gap: clamp(3.5rem, 6vw, 7rem);
   /* top padding lifted: text sits much closer to the section above */
   padding-block: clamp(3em, 6vw, 7em) clamp(5em, 14vh, 16em);
@@ -36,52 +32,9 @@ export const Title = styled.h4`
   line-height: 1.55;
 `;
 
-/* Positioning context for the frame around the whole paragraph */
+/* Positioning context for the paragraph */
 export const Frame = styled.div`
   position: relative;
-`;
-
-/* The big dashed rectangle, with breathing room around the text */
-export const FrameRect = styled(motion.span)`
-  position: absolute;
-  left: -1.75rem;
-  right: -1.75rem;
-  top: -1.5rem;
-  bottom: -1.5rem;
-  pointer-events: none;
-
-  svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  rect {
-    fill: none;
-    stroke: ${LIME};
-    stroke-width: 2;
-    stroke-dasharray: 7 6;
-  }
-`;
-
-const corners = {
-  tl: 'top: 0; left: 0; transform: translate(-50%, -50%);',
-  tr: 'top: 0; right: 0; transform: translate(50%, -50%);',
-  bl: 'bottom: 0; left: 0; transform: translate(-50%, 50%);',
-  br: 'bottom: 0; right: 0; transform: translate(50%, 50%);',
-};
-
-/* Solid square corner handle, as in the reference */
-export const Handle = styled.span`
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  background-color: ${LIME};
-  border-radius: 3px;
-  pointer-events: none;
-  ${({ $pos }) => corners[$pos]}
 `;
 
 /* Layout box of the struck phrase. vertical-align: top keeps it on the line grid. */

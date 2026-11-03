@@ -3,9 +3,7 @@
 import { motion } from 'framer-motion';
 
 /*
- * Page partitions: the site's lime dashed line (same colour and 7/6 dash
- * rhythm as the dashed frame round the intro paragraph) used as a layout
- * system.
+ * Page partitions: a dashed line used as a layout system.
  *
  * - <SiteGuides />  two vertical dashed guides, running the whole page, at the
  *   left and right edge of the content column.
@@ -16,8 +14,11 @@ import { motion } from 'framer-motion';
  *
  * Both are decorative (aria-hidden, no pointer events).
  */
+/** Bright lime: the labels */
 const LIME = '#b6f500';
-/** Deep forest green, the same dark as the intro screen */
+/** Deeper lime (darker, not black): the dashed lines */
+const LINE = '#6f9c00';
+/** Deep forest green, the same dark as the intro screen: the label text */
 const INK = '#0b1f14';
 
 /**
@@ -27,7 +28,7 @@ const INK = '#0b1f14';
 const GUIDE_X = 'calc((100% - min(100%, 1400px)) / 2 + 2rem)';
 
 const dashes = direction =>
-  `repeating-linear-gradient(${direction}, ${LIME} 0 7px, transparent 7px 13px)`;
+  `repeating-linear-gradient(${direction}, ${LINE} 0 7px, transparent 7px 13px)`;
 
 /** Vertical guides, painted on the page behind the content (like the backdrop) */
 export function SiteGuides() {
