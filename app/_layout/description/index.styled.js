@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { styled } from 'styled-components';
 
 /*
- * Marks are drawn in the site's own bright lime (the same lime as the
- * backdrop glows). Only two marks on the whole paragraph: a strike on
- * "AI slop." and a closing selection box on "new status quo."
+ * Selection-frame style from the reference: one dashed rectangle with solid
+ * square handles on the four corners, drawn around the whole paragraph, in
+ * the site's bright lime. One extra mark: a dashed strike on "AI slop."
  */
 const LIME = '#b6f500';
 const DASH = `repeating-linear-gradient(to right, ${LIME} 0 12px, transparent 12px 18px)`;
@@ -18,7 +18,7 @@ export const Wrapper = styled.div`
   justify-content: space-between;
   gap: 2.5rem;
   /* top padding lifted: text sits much closer to the section above */
-  padding-block: clamp(2.5em, 6vw, 7em) clamp(5em, 14vh, 16em);
+  padding-block: clamp(3em, 6vw, 7em) clamp(5em, 14vh, 16em);
   padding-inline: clamp(2.5em, 4vw, 8em);
 
   @media screen and (min-width: ${({ theme }) => theme?.breakpoints?.lg}) {
@@ -31,35 +31,19 @@ export const Title = styled.h4`
   line-height: 1.55;
 `;
 
-/* Layout box of a marked phrase. vertical-align: top keeps it on the line grid.
-   isolation lets the outline sit BEHIND the words (so the tint never greys them). */
-export const Mark = styled.span`
+/* Positioning context for the frame around the whole paragraph */
+export const Frame = styled.div`
   position: relative;
-  display: inline-block;
-  vertical-align: top;
-  isolation: isolate;
-  margin-inline: ${({ $outlined }) => ($outlined ? '0.35em 0.2em' : '0 0.5rem')};
-
-  /* struck-out words step back */
-  ${({ $fade }) =>
-    $fade &&
-    `
-    > span:not([aria-hidden='true']) {
-      opacity: 0.5;
-    }
-  `}
 `;
 
-/* Dashed selection outline that hugs the glyphs */
-export const Outline = styled(motion.span)`
+/* The big dashed rectangle, with breathing room around the text */
+export const FrameRect = styled(motion.span)`
   position: absolute;
-  z-index: -1;
-  left: -0.35em;
-  right: -0.35em;
-  top: 0.18em;
-  bottom: 0.12em;
+  left: -1.75rem;
+  right: -1.75rem;
+  top: -1.5rem;
+  bottom: -1.5rem;
   pointer-events: none;
-  background-color: ${({ $tint }) => ($tint ? 'rgb(182 245 0 / 0.16)' : 'transparent')};
 
   svg {
     position: absolute;
@@ -73,8 +57,7 @@ export const Outline = styled(motion.span)`
     fill: none;
     stroke: ${LIME};
     stroke-width: 2;
-    stroke-dasharray: 9 6;
-    stroke-linecap: round;
+    stroke-dasharray: 7 6;
   }
 `;
 
@@ -85,15 +68,28 @@ const corners = {
   br: 'bottom: 0; right: 0; transform: translate(50%, 50%);',
 };
 
-/* Solid lime square handle */
+/* Solid square corner handle, as in the reference */
 export const Handle = styled.span`
   position: absolute;
-  width: max(9px, 0.3em);
-  height: max(9px, 0.3em);
+  width: 14px;
+  height: 14px;
   background-color: ${LIME};
   border-radius: 2px;
   pointer-events: none;
   ${({ $pos }) => corners[$pos]}
+`;
+
+/* Layout box of the struck phrase. vertical-align: top keeps it on the line grid. */
+export const Mark = styled.span`
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  margin-inline: 0 0.5rem;
+
+  /* struck-out words step back */
+  > span:not([aria-hidden='true']) {
+    opacity: 0.5;
+  }
 `;
 
 /* Broken strike line through "AI slop." */

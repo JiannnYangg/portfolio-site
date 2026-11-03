@@ -7,9 +7,10 @@ import Balancer from 'react-wrap-balancer';
 import { MagneticButton, ParallaxFade } from '@/components';
 
 import {
+  Frame,
+  FrameRect,
   Handle,
   Mark,
-  Outline,
   Strike,
   Title,
   Wrapper,
@@ -24,18 +25,15 @@ const reveal = {
   }),
 };
 
-/**
- * The paragraph with just two marks:
- *  - dashed strike-through on "AI slop."
- *  - closing selection box (four handles, soft lime lift) on "new status quo."
- */
+/** The paragraph, with one dashed strike on "AI slop." */
 const segments = [
   {
     text: 'We tested the waters of automation. Now we’re diving in, leaving no space for',
   },
-  { text: 'AI slop.', mark: 'strike' },
-  { text: 'Shipping faster, better, scalable. Together, we’ll set the' },
-  { text: 'new status quo.', mark: 'outline' },
+  { text: 'AI slop.', strike: true },
+  {
+    text: 'Shipping faster, better, scalable. Together, we’ll set the new status quo.',
+  },
 ];
 
 function Words({ text, start, inMark }) {
@@ -61,60 +59,26 @@ function Words({ text, start, inMark }) {
   ));
 }
 
-function Decoration({ mark, delay }) {
-  if (mark === 'outline') {
-    return (
-      <Outline
-        aria-hidden='true'
-        $tint
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay }}
-      >
-        <svg>
-          <rect
-            x='1'
-            y='1'
-            rx='2'
-            style={{ width: 'calc(100% - 2px)', height: 'calc(100% - 2px)' }}
-          />
-        </svg>
-        {['tl', 'tr', 'bl', 'br'].map(pos => (
-          <Handle key={pos} $pos={pos} />
-        ))}
-      </Outline>
-    );
-  }
-
-  return (
-    <Strike
-      aria-hidden='true'
-      initial={{ clipPath: 'inset(-1em 100% -1em 0)' }}
-      whileInView={{ clipPath: 'inset(-1em 0% -1em 0)' }}
-      transition={{ duration: 0.6, ease: 'easeOut', delay }}
-    />
-  );
-}
-
 export function Description() {
   let cursor = 0;
-  let markCount = 0;
 
-  const content = segments.map(({ text, mark }) => {
+  const content = segments.map(({ text, strike }) => {
     const start = cursor;
     cursor += text.split(' ').length;
 
-    if (!mark) {
+    if (!strike) {
       return <Words key={start} text={text} start={start} />;
     }
 
-    const delay = 0.9 + markCount * 0.3;
-    markCount += 1;
-
     return (
-      <Mark key={start} $outlined={mark === 'outline'} $fade={mark === 'strike'}>
+      <Mark key={start}>
         <Words text={text} start={start} inMark />
-        <Decoration mark={mark} delay={delay} />
+        <Strike
+          aria-hidden='true'
+          initial={{ clipPath: 'inset(-1em 100% -1em 0)' }}
+          whileInView={{ clipPath: 'inset(-1em 0% -1em 0)' }}
+          transition={{ duration: 0.6, ease: 'easeOut', delay: 1.1 }}
+        />
       </Mark>
     );
   });
@@ -123,7 +87,29 @@ export function Description() {
     <article className='container relative'>
       <Wrapper>
         <div className='basis-full lg:basis-9/12'>
-          <Title>{content}</Title>
+          <Frame>
+            <FrameRect
+              aria-hidden='true'
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+            >
+              <svg>
+                <rect
+                  x='1'
+                  y='1'
+                  style={{
+                    width: 'calc(100% - 2px)',
+                    height: 'calc(100% - 2px)',
+                  }}
+                />
+              </svg>
+              {['tl', 'tr', 'bl', 'br'].map(pos => (
+                <Handle key={pos} $pos={pos} />
+              ))}
+            </FrameRect>
+            <Title>{content}</Title>
+          </Frame>
         </div>
 
         <div className='basis-7/12 lg:basis-3/12'>
