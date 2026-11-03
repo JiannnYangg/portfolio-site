@@ -27,7 +27,7 @@ const reveal = {
 /** The paragraph, with one solid strike on "AI slop." */
 const segments = [
   {
-    text: 'We tested the waters of automation. Now we’re diving in, leaving no space for',
+    text: 'We automate everything except taste, killing',
   },
   { text: 'AI slop.', strike: true },
   {
