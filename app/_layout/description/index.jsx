@@ -25,7 +25,7 @@ const reveal = {
   }),
 };
 
-/** The paragraph, with one dashed strike on "AI slop." */
+/** The paragraph, with one solid strike on "AI slop." */
 const segments = [
   {
     text: 'We tested the waters of automation. Now we’re diving in, leaving no space for',
@@ -86,7 +86,7 @@ export function Description() {
   return (
     <article className='container relative'>
       <Wrapper>
-        <div className='basis-full lg:basis-9/12'>
+        <div className='basis-full lg:basis-8/12'>
           <Frame>
             <FrameRect
               aria-hidden='true'
@@ -112,10 +112,18 @@ export function Description() {
           </Frame>
         </div>
 
-        <div className='basis-7/12 lg:basis-3/12'>
+        {/* side note: sits at the bottom edge of the text block on desktop,
+            so its last line lines up with the last line of the paragraph */}
+        <div className='basis-10/12 sm:basis-7/12 lg:basis-3/12 lg:self-end'>
           <ParallaxFade>
-            <Balancer as='p' className='mt-2 text-base lg:text-lg'>
-              My passion for designing, developing, distributing &amp; data these 4 D&apos;s position me in a unique place.
+            <Balancer
+              as='p'
+              className='text-base leading-relaxed lg:text-lg'
+            >
+              We bring together the four D&rsquo;s:{' '}
+              <span className='font-medium'>
+                Data, Design, Development, Distribution.
+              </span>
             </Balancer>
           </ParallaxFade>
         </div>

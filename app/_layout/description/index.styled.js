@@ -15,7 +15,9 @@ export const Wrapper = styled.div`
   flex-wrap: wrap;
   align-items: stretch;
   justify-content: space-between;
-  gap: 2.5rem;
+  /* generous gap so the frame (which reaches ~1.75rem outside the text)
+     never crowds the side note */
+  gap: clamp(3.5rem, 6vw, 7rem);
   /* top padding lifted: text sits much closer to the section above */
   padding-block: clamp(3em, 6vw, 7em) clamp(5em, 14vh, 16em);
   padding-inline: clamp(2.5em, 4vw, 8em);
