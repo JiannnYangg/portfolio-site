@@ -58,11 +58,11 @@ const shadowFor = depth =>
  *    desktop the offset is larger than the line's own centre, so the logo
  *    floats a little above the line. Nudged inwards (toward the headline) so
  *    it sits well clear of the right page guide.
- *  - runway: left side, below n8n and above GitHub, moved inwards so it sits
- *    clear of the left page guide, and up into the open space beside the
- *    "We build it." / "We get it" lines. Smaller than the other supporting
- *    logos on desktop.
- *  - github: dropped a little lower, away from the runway logo.
+ *  - runway: left side, below n8n and above GitHub, in the open space beside
+ *    the "We build it." / "We get it" lines, clear of the left page guide.
+ *    Smaller than the other supporting logos on desktop.
+ *  - github: lower left, a little lower than before and nudged left, away
+ *    from the runway logo.
  *
  * Mobile positions are the base classes, md: classes take over on desktop.
  * Everything stays in the empty bands above and below the headline and in
@@ -123,14 +123,15 @@ const LOGOS = [
     float: [6, 6.8, 2, 1.6],
   },
   {
-    // the new GitHub logo (octocat). Lowered a little (md: 22% -> 16% from
-    // the bottom, mobile 19% -> 16%), same left position, size, tilt, float
+    // the new GitHub logo (octocat). Desktop: lowered (bottom 22% -> 16%) and
+    // moved a bit left (left 20% -> 17%); mobile only lowered (19% -> 16%).
+    // Same size, tilt and float as before.
     id: 'github',
     src: '/hero-logos/hero-gitcat-4719.png',
     width: 190,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
-    position: 'bottom-[16%] left-[36%] md:bottom-[16%] md:left-[20%]',
+    position: 'bottom-[16%] left-[36%] md:bottom-[16%] md:left-[17%]',
     rotate: 7,
     depth: 0.5,
     float: [5, 5.2, 1.8, 1.1],
@@ -163,14 +164,14 @@ const LOGOS = [
   },
   {
     // Runway ML: left side, below n8n, above GitHub. Desktop: smaller (max
-    // 74px -> 58px) and a bit higher (bottom 37% -> 41%), left 21% unchanged.
-    // Mobile is unchanged.
+    // 74px -> 58px), higher (bottom 41%) and a bit to the right (left 21% ->
+    // 24%). Mobile is unchanged.
     id: 'runway',
     src: '/hero-logos/hero-letter-r-8156.png',
     width: 200,
     height: 200,
     size: 'clamp(30px, 3.6vw, 58px)',
-    position: 'bottom-[24%] left-[14%] md:bottom-[41%] md:left-[21%]',
+    position: 'bottom-[24%] left-[14%] md:bottom-[41%] md:left-[24%]',
     rotate: -8,
     depth: 0.55,
     float: [5, 6.1, 1.5, 1.9],
