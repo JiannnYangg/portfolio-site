@@ -4,6 +4,8 @@ import { Fragment } from 'react';
 
 import { motion } from 'framer-motion';
 
+import { PARTITION_LINE } from '@/components';
+
 /**
  * Skill groups, in the order a project actually flows:
  * Create (make the thing) -> Grow (get it seen and converting) -> Build (the
@@ -61,9 +63,8 @@ const GROUPS = [
   },
 ];
 
-/** Same deeper lime and dash rhythm as the site-wide <Partition /> line */
-const LINE = '#6f9c00';
-const DASHES = `repeating-linear-gradient(to right, ${LINE} 0 7px, transparent 7px 13px)`;
+/** Same colour and dash rhythm as the site-wide <Partition /> line */
+const DASHES = `repeating-linear-gradient(to right, ${PARTITION_LINE} 0 7px, transparent 7px 13px)`;
 
 /**
  * Same inset the intro box above uses (Description), so the text sits inside

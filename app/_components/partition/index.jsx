@@ -10,18 +10,24 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
  * - <SiteGuides />  two vertical dashed guides, running the whole page, at the
  *   left and right edge of the content column.
  * - <Partition />   a full-width horizontal dashed line that marks where one
- *   section ends and the next begins. It crosses the guides, and a small lime
+ *   section ends and the next begins. It crosses the guides, and a small blue
  *   label sits on each crossing: the section name on the left, its number on
  *   the right, like a drawing sheet.
  *
  * Both are decorative (aria-hidden, no pointer events).
  */
-/** Bright lime: the labels */
-const LIME = '#b6f500';
-/** Deeper lime (darker, not black): the dashed lines */
-const LINE = '#6f9c00';
-/** Deep forest green, the same dark as the intro screen: the label text */
-const INK = '#0b1f14';
+/** Theme blue (same as the Tailwind `primary`, hsl 232 79% 59%): the labels */
+const BLUE = '#445ae9';
+/**
+ * The dashed lines use the same blue. Exported so every dashed line on the
+ * site (e.g. the dividers in Skills) shares one colour instead of a copy.
+ */
+export const PARTITION_LINE = BLUE;
+/**
+ * White label text: 5.4:1 on the blue. The old dark green only reaches about
+ * 3.2:1 on it, too low for 10-11px bold text.
+ */
+const LABEL_TEXT = '#ffffff';
 
 /**
  * x of a guide, measured from the page edge. Mirrors the Tailwind `container`
@@ -31,7 +37,7 @@ const INK = '#0b1f14';
 export const GUIDE_X = 'calc((100% - min(100%, 1400px)) / 2 + 2rem)';
 
 const dashes = direction =>
-  `repeating-linear-gradient(${direction}, ${LINE} 0 7px, transparent 7px 13px)`;
+  `repeating-linear-gradient(${direction}, ${PARTITION_LINE} 0 7px, transparent 7px 13px)`;
 
 /** Vertical guides, painted on the page behind the content (like the backdrop) */
 export function SiteGuides() {
@@ -141,7 +147,7 @@ function useGlitchText({ text, active, startDelayMs, reduceMotion }) {
   return { display, glitching };
 }
 
-/** Small lime label sitting on a guide crossing */
+/** Small blue label sitting on a guide crossing */
 function Tag({ side, delay, text }) {
   const ref = useRef(null);
   const reduceMotion = useReducedMotion();
@@ -162,8 +168,8 @@ function Tag({ side, delay, text }) {
         [side]: GUIDE_X,
         x: side === 'left' ? '-50%' : '50%',
         y: '-50%',
-        backgroundColor: LIME,
-        color: INK,
+        backgroundColor: BLUE,
+        color: LABEL_TEXT,
         textShadow: glitching ? GLITCH_SHADOW : 'none',
         // paper-coloured ring so the label cuts cleanly through the dashes
         boxShadow: '0 0 0 3px rgba(243, 243, 245, 0.95)',
