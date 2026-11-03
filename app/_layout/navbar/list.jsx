@@ -42,10 +42,10 @@ export function NavbarList() {
   //? -me-6 cancels the last item's padding (li p-4 = 16px) AND the magnetic
   //? button's own p-2 (8px), so the last link's TEXT ends exactly at the
   //? navbar's right alignment line, the mirror of where the logo starts.
-  //? translate-y-[9px]: sits the links a little below the logo's centre line,
-  //? level with the lower part of the logo letters.
+  //? translate-y-[3px]: the logo letters sit a few px below the band centre,
+  //? so the links are nudged down just enough to share their centre line.
   return (
-    <ul className='-me-6 flex translate-y-[9px] items-center max-lg:hidden'>
+    <ul className='-me-6 flex translate-y-[3px] items-center max-lg:hidden'>
       {items}
     </ul>
   );
