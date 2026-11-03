@@ -6,10 +6,9 @@ import { styled } from 'styled-components';
 /*
  * Selection-frame style from the reference: one dashed rectangle with solid
  * square handles on the four corners, drawn around the whole paragraph, in
- * the site's bright lime. One extra mark: a dashed strike on "AI slop."
+ * the site's bright lime. One extra mark: a solid strike on "AI slop."
  */
 const LIME = '#b6f500';
-const DASH = `repeating-linear-gradient(to right, ${LIME} 0 12px, transparent 12px 18px)`;
 
 export const Wrapper = styled.div`
   display: flex;
@@ -71,10 +70,10 @@ const corners = {
 /* Solid square corner handle, as in the reference */
 export const Handle = styled.span`
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 22px;
+  height: 22px;
   background-color: ${LIME};
-  border-radius: 2px;
+  border-radius: 3px;
   pointer-events: none;
   ${({ $pos }) => corners[$pos]}
 `;
@@ -92,14 +91,14 @@ export const Mark = styled.span`
   }
 `;
 
-/* Broken strike line through "AI slop." */
+/* Solid strike line through "AI slop." */
 export const Strike = styled(motion.span)`
   position: absolute;
   left: -3%;
   right: -3%;
   top: 56%;
   height: 3px;
-  background-image: ${DASH};
+  background-color: ${LIME};
   border-radius: 2px;
   pointer-events: none;
 `;
