@@ -37,10 +37,10 @@ const segments = [
 
 /**
  * ONE font size for the whole side note (the intro line and the four D's), so
- * both lines always match. It is as large as 1.125rem, and only steps down when
+ * both lines always match. It is as large as 1.3rem, and only steps down when
  * the column is too narrow for the four D's to stay on a single line.
  */
-const NOTE_TEXT = 'leading-loose [font-size:min(1.125rem,4.4cqw)]';
+const NOTE_TEXT = 'leading-loose [font-size:min(1.3rem,4.4cqw)]';
 
 function Words({ text, start, inMark }) {
   const words = text.split(' ');
@@ -92,17 +92,16 @@ export function Description() {
   return (
     <article className='container relative'>
       <Wrapper>
-        <div className='basis-full lg:basis-7/12'>
+        <div className='basis-full lg:basis-[54%]'>
           <Frame>
             <Title>{content}</Title>
           </Frame>
         </div>
 
-        {/* side note: top-aligned with the text block, well away from the
-            "About me" circle that hangs below the section. It is a size
-            container so the text can scale to keep the four D's on ONE line. */}
+        {/* side note: top-aligned with the paragraph. It is a size container so
+            the text can scale to keep the four D's on ONE line. */}
         <div
-          className='basis-full sm:basis-7/12 lg:basis-4/12 lg:self-start'
+          className='basis-full sm:basis-7/12 lg:basis-[38%] lg:self-start lg:pt-2'
           style={{ containerType: 'inline-size' }}
         >
           <ParallaxFade>
@@ -119,20 +118,21 @@ export function Description() {
           </ParallaxFade>
         </div>
 
+        {/* "About me" circle: sits INSIDE the section, bottom-right, a little
+            above the dashed line and inside the right guide. On small screens
+            it simply follows the text, right-aligned. */}
         <motion.div
-          whileInView={{ y: '-15%' }}
+          className='flex basis-full justify-end lg:absolute lg:bottom-12 lg:right-14 lg:basis-auto'
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{
-            duration: 0.5,
-          }}
+          transition={{ duration: 0.6 }}
         >
-          <div className='absolute right-0 top-full lg:me-10'>
-            <Link href='/about' passHref>
-              <MagneticButton variant='ghost' size='xl'>
-                About me
-              </MagneticButton>
-            </Link>
-          </div>
+          <Link href='/about' passHref>
+            <MagneticButton variant='ghost' size='xl'>
+              About me
+            </MagneticButton>
+          </Link>
         </motion.div>
       </Wrapper>
     </article>

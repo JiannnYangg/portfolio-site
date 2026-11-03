@@ -24,8 +24,9 @@ const INK = '#0b1f14';
 /**
  * x of a guide, measured from the page edge. Mirrors the Tailwind `container`
  * (max 1400px, centred, 2rem side padding) so guides line up with content.
+ * Exported so the navbar can align the logo and the links to the same guides.
  */
-const GUIDE_X = 'calc((100% - min(100%, 1400px)) / 2 + 2rem)';
+export const GUIDE_X = 'calc((100% - min(100%, 1400px)) / 2 + 2rem)';
 
 const dashes = direction =>
   `repeating-linear-gradient(${direction}, ${LINE} 0 7px, transparent 7px 13px)`;
@@ -52,7 +53,7 @@ export function SiteGuides() {
 }
 
 /** Small lime label sitting on a guide crossing */
-function Tag({ side, children }) {
+function Tag({ side, delay, children }) {
   return (
     <motion.span
       className='absolute top-1/2 z-10 whitespace-nowrap rounded-md px-2 font-mono text-[10px] font-bold leading-5 tracking-tight sm:text-[11px]'
@@ -68,7 +69,7 @@ function Tag({ side, children }) {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.4, delay: 0.7 }}
+      transition={{ duration: 0.4, delay: 0.7 + delay }}
     >
       {children}
     </motion.span>
@@ -76,10 +77,11 @@ function Tag({ side, children }) {
 }
 
 /**
- * @param {{ name: string, index: string }} props
+ * @param {{ name: string, index: string, delay?: number }} props
  * name: section name (left label). index: section number (right label).
+ * delay: seconds to wait before drawing (used under the intro screen).
  */
-export function Partition({ name, index }) {
+export function Partition({ name, index, delay = 0 }) {
   return (
     <div
       aria-hidden='true'
@@ -92,10 +94,14 @@ export function Partition({ name, index }) {
         initial={{ scaleX: 0 }}
         whileInView={{ scaleX: 1 }}
         viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-        transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
+        transition={{ duration: 1, ease: [0.76, 0, 0.24, 1], delay }}
       />
-      <Tag side='left'>({name})</Tag>
-      <Tag side='right'>({index})</Tag>
+      <Tag side='left' delay={delay}>
+        ({name})
+      </Tag>
+      <Tag side='right' delay={delay}>
+        ({index})
+      </Tag>
     </div>
   );
 }

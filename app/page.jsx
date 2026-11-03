@@ -19,7 +19,7 @@ export const metadata = {
 export default function Home() {
   return (
     <Transition>
-      <Navbar tone='dark' />
+      <Navbar tone='dark' partition={{ name: 'Home', index: '00' }} />
       <Header />
       <main>
         <Partition name='About' index='01' />

@@ -30,5 +30,7 @@ export function NavbarList() {
     );
   });
 
-  return <ul className='flex items-center max-lg:hidden'>{items}</ul>;
+  //? -me-4 cancels the last item's padding, so the last link's text ends
+  //? exactly at the navbar's right alignment line (the right page guide)
+  return <ul className='-me-4 flex items-center max-lg:hidden'>{items}</ul>;
 }
