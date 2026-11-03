@@ -26,7 +26,11 @@ export default function Home() {
         <Description />
         <Partition name='Skills' index='02' />
         <Skills />
-        <Partition name='Showcase' index='03' />
+        {/* "Our works" nav target: scrolls so the Showcase partition line sits
+            at the top of the screen and the pinned showcase fills it. */}
+        <div id='our-works' data-scroll-align='start'>
+          <Partition name='Showcase' index='03' />
+        </div>
         <Showcase />
       </main>
       <Partition name='Contact' index='04' />

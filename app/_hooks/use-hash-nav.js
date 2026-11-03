@@ -4,11 +4,17 @@ import { useCallback } from 'react';
 
 import { usePathname } from 'next/navigation';
 
-/** Smoothly scrolls to the element with the given id (bottom aligned). */
+/**
+ * Smoothly scrolls to the element with the given id.
+ * Bottom aligned by default (right for the contact footer). An element can
+ * opt into top alignment with `data-scroll-align='start'`, which is what a
+ * section like "Our works" wants: it should open at its top edge.
+ */
 export function scrollToId(id) {
   const element = document.getElementById(id);
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    const block = element.dataset.scrollAlign === 'start' ? 'start' : 'end';
+    element.scrollIntoView({ behavior: 'smooth', block });
   } else {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
