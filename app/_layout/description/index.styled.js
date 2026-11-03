@@ -7,6 +7,7 @@ import { styled } from 'styled-components';
  * Selection-frame style from the reference: one dashed rectangle with solid
  * square handles on the four corners, drawn around the whole paragraph, in
  * the site's bright lime. One extra mark: a solid strike on "AI slop."
+ * The four D's in the side note get hand-placed marker swatches in the same lime.
  */
 const LIME = '#b6f500';
 
@@ -103,4 +104,40 @@ export const Strike = styled(motion.span)`
   background-color: ${LIME};
   border-radius: 2px;
   pointer-events: none;
+`;
+
+/* Four different marker swatches (position, tilt, shape), so the highlights
+   feel hand-placed and asymmetric rather than four identical bars. */
+const swatches = {
+  data: `
+    left: -0.2em; right: -0.12em; top: 46%; bottom: 2%;
+    transform: rotate(-1.5deg);
+  `,
+  design: `
+    left: -0.25em; right: -0.4em; top: 14%; bottom: 6%;
+    transform: skewX(-14deg);
+  `,
+  development: `
+    left: -0.12em; right: -0.25em; top: 58%; bottom: -6%;
+    transform: rotate(1.2deg);
+  `,
+  distribution: `
+    left: -0.3em; right: -0.12em; top: 26%; bottom: 0;
+    clip-path: polygon(0 18%, 100% 0, 95% 100%, 3% 86%);
+  `,
+};
+
+export const Highlight = styled.span`
+  position: relative;
+  isolation: isolate;
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    background-color: ${LIME};
+    pointer-events: none;
+    ${({ $variant }) => swatches[$variant]}
+  }
 `;

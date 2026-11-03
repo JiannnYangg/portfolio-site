@@ -10,6 +10,7 @@ import {
   Frame,
   FrameRect,
   Handle,
+  Highlight,
   Mark,
   Strike,
   Title,
@@ -112,18 +113,19 @@ export function Description() {
           </Frame>
         </div>
 
-        {/* side note: sits at the bottom edge of the text block on desktop,
-            so its last line lines up with the last line of the paragraph */}
-        <div className='basis-10/12 sm:basis-7/12 lg:basis-3/12 lg:self-end'>
+        {/* side note: top-aligned with the text block, well away from the
+            "About me" circle that hangs below the section */}
+        <div className='basis-10/12 sm:basis-7/12 lg:basis-3/12 lg:self-start'>
           <ParallaxFade>
             <Balancer
               as='p'
-              className='text-base leading-relaxed lg:text-lg'
+              className='text-base leading-loose lg:text-lg lg:leading-loose'
             >
               We bring together the four D&rsquo;s:{' '}
-              <span className='font-medium'>
-                Data, Design, Development, Distribution.
-              </span>
+              <Highlight $variant='data'>Data</Highlight>,{' '}
+              <Highlight $variant='design'>Design</Highlight>,{' '}
+              <Highlight $variant='development'>Development</Highlight>,{' '}
+              <Highlight $variant='distribution'>Distribution</Highlight>.
             </Balancer>
           </ParallaxFade>
         </div>
@@ -135,7 +137,7 @@ export function Description() {
             duration: 0.5,
           }}
         >
-          <div className='absolute right-0 top-3/4 lg:top-full lg:me-10'>
+          <div className='absolute right-0 top-full lg:me-10'>
             <Link href='/about' passHref>
               <MagneticButton variant='ghost' size='xl'>
                 About me
