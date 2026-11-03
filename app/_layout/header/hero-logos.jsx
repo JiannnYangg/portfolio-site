@@ -49,15 +49,17 @@ const shadowFor = depth =>
  * Nothing mirrors: sizes, edges and tilts all differ, but the visual weight is
  * balanced: big top-left vs big top-right, big mid-right vs small mid-left.
  *
- * The original six positions are untouched. The new GitHub logo sits exactly
- * where the old GitHub logo was. The two newer logos fill empty pockets:
+ * The original six positions are untouched. The two newer logos fill empty
+ * pockets:
  *  - codex: in the blank space to the right of the "We build it." line (the
  *    line is indented 1em and ends well before the line below it), centered
  *    on that line vertically. The headline block is always centered in the
  *    hero and its line 2 sits ~51px above the hero's vertical middle, so
- *    top is calc(50% - 51px - half the logo height).
- *  - runway: lower left, above the GitHub logo and below n8n, shifted right
- *    of n8n so the three form a loose diagonal instead of a column.
+ *    top is calc(50% - 51px - half the logo height). Nudged inwards (toward
+ *    the headline) so it sits well clear of the right page guide.
+ *  - runway: lower left, above the GitHub logo and below n8n, moved inwards
+ *    so it sits clear of the left page guide instead of on top of it.
+ *  - github: dropped a little lower, away from the runway logo.
  *
  * Mobile positions are the base classes, md: classes take over on desktop.
  * Everything stays in the empty bands above and below the headline and in
@@ -118,14 +120,14 @@ const LOGOS = [
     float: [6, 6.8, 2, 1.6],
   },
   {
-    // the new GitHub logo (octocat), back in the exact spot the old GitHub
-    // logo had: same position, size, tilt and float
+    // the new GitHub logo (octocat). Lowered a little (md: 22% -> 16% from
+    // the bottom, mobile 19% -> 16%), same left position, size, tilt, float
     id: 'github',
     src: '/hero-logos/hero-gitcat-4719.png',
     width: 190,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
-    position: 'bottom-[19%] left-[36%] md:bottom-[22%] md:left-[20%]',
+    position: 'bottom-[16%] left-[36%] md:bottom-[16%] md:left-[20%]',
     rotate: 7,
     depth: 0.5,
     float: [5, 5.2, 1.8, 1.1],
@@ -143,27 +145,29 @@ const LOGOS = [
   },
   {
     // Codex: same size as before. Sits in the blank space after "We build it."
-    // with a clear gap from the end of the line (about 120px at 1440px wide)
-    // and clear of the Comfy logo above it.
+    // Moved a bit inwards on desktop (right 24% -> 27%), so it is further from
+    // the right page guide; mobile is unchanged.
     id: 'codex',
     src: '/hero-logos/hero-mylogo-6382.png',
     width: 193,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
     position:
-      'right-[6%] top-[calc(50%_-_60px)] md:right-[24%] md:top-[calc(50%_-_84px)]',
+      'right-[6%] top-[calc(50%_-_60px)] md:right-[27%] md:top-[calc(50%_-_84px)]',
     rotate: 8,
     depth: 0.6,
     float: [5, 5.4, 1.7, 0.9],
   },
   {
-    // Runway ML: lower left, above GitHub, below n8n, nudged right of n8n
+    // Runway ML: lower left, above GitHub, below n8n. Moved inwards (md: left
+    // 11% -> 17%, mobile 9% -> 14%) so it clears the left page guide and sits
+    // in the open space between n8n and GitHub.
     id: 'runway',
     src: '/hero-logos/hero-letter-r-8156.png',
     width: 200,
     height: 200,
     size: 'clamp(36px, 4.6vw, 74px)',
-    position: 'bottom-[24%] left-[9%] md:bottom-[31%] md:left-[11%]',
+    position: 'bottom-[24%] left-[14%] md:bottom-[31%] md:left-[17%]',
     rotate: -8,
     depth: 0.55,
     float: [5, 6.1, 1.5, 1.9],
