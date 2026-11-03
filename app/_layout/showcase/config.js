@@ -88,6 +88,8 @@ export const PROJECTS = [
 // Layout + scroll feel. Wheel and drag both move a target, the scroll lerps
 // after it. Once input has been idle for SNAP_IDLE_MS the target is redirected
 // onto the nearest panel center, so the row always settles on an image.
+// (In scroll-driven mode, see SCROLL below, the page scroll owns the row:
+// wheel / drag / snap are not used.)
 export const CONFIG = {
   PANEL_H: 450, // px height — same for every panel
   GAP: 12, // px gap between panels
@@ -108,12 +110,48 @@ export const CONFIG = {
   SHRINK_DECAY: 0.06, // how fast they grow back when settling
 };
 
+// Scroll-driven mode: the section is pinned to the screen and the page's
+// vertical scroll slides the row from the first card to the last one. The
+// footer only arrives once the last card has been reached. The row is a
+// finite strip in this mode (no looping), so it really has a start and an end.
+//
+// Phones / tablets / reduced-motion keep the plain strip (see strip.jsx):
+// hijacking the scroll there would hurt more than it helps.
+export const SCROLL = {
+  enabled: true,
+  // page px scrolled per px the row travels. Lower = shorter section / faster
+  // cards, higher = longer section / slower cards.
+  pxPerPx: 0.75,
+  ease: 0.14, // lerp toward the scroll position (page scroll is already smoothed)
+  holdStart: 0.03, // first card rests centered for this share of the scroll
+  holdEnd: 0.06, // last card rests centered for this share before the footer
+  // scrolling this far (share of the section) while a card is focused closes it
+  focusCloseDelta: 0.03,
+};
+
+/** Distance (px) from the first panel's center to the last panel's center. */
+export function getCarouselTravel() {
+  const n = PROJECTS.length;
+  if (n < 2) return 0;
+  const slot = i => (PROJECTS[i].aspect || 1) * CONFIG.PANEL_H + CONFIG.GAP;
+  let sum = 0;
+  for (let i = 0; i < n - 1; i++) sum += slot(i);
+  return sum + (slot(n - 1) - slot(0)) / 2;
+}
+
+/** How many px of page scroll the pinned section lasts (0 when not pinned). */
+export function getScrollLength() {
+  if (!SCROLL.enabled) return 0;
+  return Math.round(getCarouselTravel() * SCROLL.pxPerPx);
+}
+
 // Interaction modes — both toggleable live from the GUI.
 //   drag    : click/touch and pull the row sideways. Swaps the cursor to
 //             grab / grabbing over the carousel instead of the pointer hand.
 //   noClick : kill click-to-focus entirely, for when you only want to browse.
 // Invariant: noClick implies drag (there'd be nothing left to do with the
 // mouse otherwise), and turning drag off releases noClick.
+// (Drag is ignored in scroll-driven mode: the page scroll owns the row.)
 export const INTERACT = {
   drag: true, // drag-to-scroll enabled
   noClick: false, // true = clicking a panel no longer opens focus mode
@@ -144,7 +182,7 @@ export const LENS = {
   glow: 4.2, // overall glow multiplier
   whiteGlow: 0.24, // central white nova intensity
   novaSize: 12, // nova size
-  blueRing: 6, // blue ring intensity
+  ringIntensity: 6, // theme-colored ring + aura intensity
   ringRadius: 0.49, // ring radius (0..0.5)
   ringWidth: 0.014, // ring width
   shimmer: true, // animated ring shimmer
@@ -156,7 +194,11 @@ export const LENS = {
   rimInward: 0, // extra inward pull at the rim
   rimFreq1: 2, // fluid wave frequency 1
   rimFreq2: 1, // fluid wave frequency 2
-  blueColor: '#009dff', // the soul: blue tint / ring color
+  // The lens tint / ring color: the site's theme lime (same as the CTA, the
+  // hero marker and the "View" pill). It is written to the shader as-is
+  // (the lens pass has no color-space conversion), so what you set here is
+  // exactly what shows on screen.
+  ringColor: '#b6f500',
   rimLine: 1.4, // bright white border line intensity (0 = off)
   rimLinePos: 0.488, // where the white border sits (0..0.5)
   rimLineWidth: 0.003, // sharpness of the white border
