@@ -28,6 +28,14 @@ const CURVE_FILL = 'fill-[#0b1f14]';
 const TEXT_GRADIENT =
   'linear-gradient(100deg, #b6f500 0%, #c8f56e 50%, #d6f88c 100%)';
 
+/**
+ * Timing (ms). The whole intro is FIRST + (greetings - 1) * EACH, and the
+ * Transition timer must match it so the last greeting gets its full time and
+ * the screen slides away straight after it, with no extra pause.
+ */
+const FIRST_MS = 600;
+const EACH_MS = 300;
+
 export function Preloader() {
   const [index, setIndex] = useState(0);
   const { width, height } = useDimensions();
@@ -37,10 +45,9 @@ export function Preloader() {
 
   useTimeOut({
     callback: () => {
-      //? Hold on the last greeting instead of running past the list
       setIndex(prevIndex => Math.min(prevIndex + 1, lastIndex));
     },
-    duration: index === 0 ? 500 : 260,
+    duration: index === 0 ? FIRST_MS : EACH_MS,
     deps: [index],
   });
 

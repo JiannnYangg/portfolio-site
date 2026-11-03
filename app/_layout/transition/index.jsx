@@ -25,8 +25,9 @@ export function Transition({ children }) {
         setTimeout(() => scrollToId(hash.slice(1)), 100);
       }
     },
-    //? 5 greetings: 500ms for the first, 260ms each after, plus a short hold
-    duration: 2000,
+    //? Must equal FIRST_MS + (greetings - 1) * EACH_MS in preloader/index.jsx
+    //? (600 + 5 * 300): the last greeting plays fully, then the screen leaves
+    duration: 2100,
     deps: [],
   });
 

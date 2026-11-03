@@ -6,6 +6,7 @@
  * - Gujarati: કેમ છો (kem chho, "how are you" is the everyday hello)
  * - Tamil: வணக்கம் (vanakkam)
  * - Bengali: নমস্কার (nomoshkar)
+ * - Punjabi: ਸਤ ਸ੍ਰੀ ਅਕਾਲ (sat sri akal)
  *
  * `lang` lets the browser pick the right system font for each script.
  */
@@ -15,6 +16,7 @@ export const preloaderGreetings = [
   { text: 'કેમ છો', lang: 'gu' },
   { text: 'வணக்கம்', lang: 'ta' },
   { text: 'নমস্কার', lang: 'bn' },
+  { text: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', lang: 'pa' },
 ];
 
 /** Plain-string list, kept for anything that only needs the words */
