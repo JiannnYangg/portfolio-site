@@ -1,3 +1,4 @@
+import { Partition } from '@/components';
 import {
   Contact,
   Description,
@@ -7,7 +8,6 @@ import {
   Thumbnail,
   Transition,
 } from '@/layout';
-import { Partition } from '@/components';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
