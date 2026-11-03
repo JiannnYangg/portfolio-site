@@ -1,4 +1,4 @@
-import { SiteBackdrop, SiteGuides } from '@/components';
+import { SiteBackdrop, SiteGuides, SmoothCursor } from '@/components';
 import { rootMetadata } from '@/config';
 import { inter_tight, neue_montreal } from '@/fonts';
 import { Offcanvas } from '@/layout';
@@ -23,6 +23,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <SiteBackdrop />
           <SiteGuides />
+          <SmoothCursor />
           <Offcanvas />
           {children}
         </Providers>
