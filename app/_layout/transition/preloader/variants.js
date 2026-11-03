@@ -15,7 +15,7 @@ export const fade = {
     opacity: 0,
   },
   enter: {
-    opacity: 0.75,
-    transition: { duration: 1, delay: 0.2 },
+    opacity: 1,
+    transition: { duration: 0.6, delay: 0.1 },
   },
 };

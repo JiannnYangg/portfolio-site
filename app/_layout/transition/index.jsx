@@ -25,7 +25,8 @@ export function Transition({ children }) {
         setTimeout(() => scrollToId(hash.slice(1)), 100);
       }
     },
-    duration: 2000,
+    //? 8 greetings: 500ms for the first, 260ms each after, plus a short hold
+    duration: 2600,
     deps: [],
   });
 
