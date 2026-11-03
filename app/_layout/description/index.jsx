@@ -7,10 +7,10 @@ import Balancer from 'react-wrap-balancer';
 import { MagneticButton, ParallaxFade } from '@/components';
 
 import {
-  Box,
-  Frame,
-  FrameRect,
+  Dimension,
   Handle,
+  Mark,
+  Outline,
   Strike,
   Title,
   Wrapper,
@@ -25,26 +25,34 @@ const reveal = {
   }),
 };
 
+/** Line draws itself left to right (inset is negative so end ticks aren't clipped) */
+const drawFrom = { clipPath: 'inset(-1em 100% -1em 0)' };
+const drawTo = { clipPath: 'inset(-1em 0% -1em 0)' };
+
 /**
- * The paragraph, split into plain runs and boxed phrases.
- * Each box gets its own handle layout so the frames feel asymmetric:
- *  - diagonal pair, opposite diagonal + strike, three handles, all four + tint.
+ * The paragraph, split into plain runs and four editor's marks:
+ *  - outline with two handles on a diagonal ("tested the waters")
+ *  - dashed strike-through ("AI slop.")
+ *  - dimension line with end ticks ("faster, better, scalable.")
+ *  - closing outline, four handles, soft lift ("new status quo.")
  */
 const segments = [
   { text: 'We' },
-  { text: 'tested the waters', box: { handles: ['tl', 'br'] } },
+  { text: 'tested the waters', mark: 'outline', handles: ['tl', 'br'] },
   { text: 'of automation. Now we’re diving in, leaving no space for' },
-  { text: 'AI slop.', box: { handles: ['tr', 'bl'], strike: true } },
+  { text: 'AI slop.', mark: 'strike' },
   { text: 'Shipping' },
-  { text: 'faster, better, scalable.', box: { handles: ['tl', 'tr', 'br'] } },
+  { text: 'faster, better, scalable.', mark: 'dimension' },
   { text: 'Together, we’ll set the' },
   {
     text: 'new status quo.',
-    box: { handles: ['tl', 'tr', 'bl', 'br'], tint: true },
+    mark: 'outline',
+    handles: ['tl', 'tr', 'bl', 'br'],
+    tint: true,
   },
 ];
 
-function Words({ text, start, inBox }) {
+function Words({ text, start, inMark }) {
   const words = text.split(' ');
 
   return words.map((word, n) => (
@@ -52,7 +60,7 @@ function Words({ text, start, inBox }) {
       // eslint-disable-next-line react/no-array-index-key
       key={`${start}-${n}`}
       className={`inline-flex overflow-hidden ${
-        inBox && n === words.length - 1 ? '' : 'me-2'
+        inMark && n === words.length - 1 ? '' : 'me-2'
       }`}
     >
       <motion.span
@@ -67,43 +75,69 @@ function Words({ text, start, inBox }) {
   ));
 }
 
+function Decoration({ segment, delay }) {
+  const { mark, handles = [], tint } = segment;
+
+  if (mark === 'outline') {
+    return (
+      <Outline
+        aria-hidden='true'
+        $tint={tint}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay }}
+      >
+        <svg>
+          <rect
+            x='0.5'
+            y='0.5'
+            style={{ width: 'calc(100% - 1px)', height: 'calc(100% - 1px)' }}
+          />
+        </svg>
+        {handles.map(pos => (
+          <Handle key={pos} $pos={pos} />
+        ))}
+      </Outline>
+    );
+  }
+
+  const Line = mark === 'strike' ? Strike : Dimension;
+
+  return (
+    <Line
+      aria-hidden='true'
+      initial={drawFrom}
+      whileInView={drawTo}
+      transition={{ duration: 0.6, ease: 'easeOut', delay }}
+    />
+  );
+}
+
 export function Description() {
   let cursor = 0;
-  let boxCount = 0;
+  let markCount = 0;
 
-  const content = segments.map(({ text, box }) => {
+  const content = segments.map(segment => {
+    const { text, mark } = segment;
     const start = cursor;
     cursor += text.split(' ').length;
 
-    if (!box) {
+    if (!mark) {
       return <Words key={start} text={text} start={start} />;
     }
 
-    const delay = 0.7 + boxCount * 0.18;
-    boxCount += 1;
+    const delay = 0.8 + markCount * 0.2;
+    markCount += 1;
 
     return (
-      <Box
+      <Mark
         key={start}
-        $tint={box.tint}
-        $strike={box.strike}
-        initial={{ opacity: 0, scale: 0.94 }}
-        whileInView={{ opacity: box.strike ? 0.75 : 1, scale: 1 }}
-        transition={{ duration: 0.45, delay }}
+        $outlined={mark === 'outline'}
+        $fade={mark === 'strike'}
       >
-        <Words text={text} start={start} inBox />
-        {box.handles.map(pos => (
-          <Handle key={pos} $pos={pos} aria-hidden='true' />
-        ))}
-        {box.strike && (
-          <Strike
-            aria-hidden='true'
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 0.5, delay: delay + 0.45 }}
-          />
-        )}
-      </Box>
+        <Words text={text} start={start} inMark />
+        <Decoration segment={segment} delay={delay} />
+      </Mark>
     );
   });
 
@@ -111,18 +145,7 @@ export function Description() {
     <article className='container relative'>
       <Wrapper>
         <div className='basis-full lg:basis-9/12'>
-          <Frame>
-            <FrameRect
-              aria-hidden='true'
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Handle $pos='tl' />
-              <Handle $pos='br' />
-            </FrameRect>
-            <Title style={{ fontSize: 'inherit' }}>{content}</Title>
-          </Frame>
+          <Title>{content}</Title>
         </div>
 
         <div className='basis-7/12 lg:basis-3/12'>

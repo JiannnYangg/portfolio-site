@@ -44,9 +44,10 @@ const INITIAL_BANDS = 8;
 /**
  * Graph-paper grid, drawn on TOP of the blooms in a deeper lime so the lines
  * stay readable on both the off-white and the lime areas.
+ * Alpha lowered ~40% (0.133 -> 0.08) so the grid sits quietly behind the text.
  */
 const GRID_COLOR = '140,190,0';
-const GRID_ALPHA = 0.133;
+const GRID_ALPHA = 0.08;
 const GRID_CELL = '62px 57px';
 const GRID = [
   `linear-gradient(to right, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
