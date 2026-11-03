@@ -55,6 +55,55 @@
   }
 }
 
+/* Page shell (see layout/transition). It clips sideways overflow like
+   `overflow: hidden` did, but `overflow: clip` does not turn it into a scroll
+   container, so `position: sticky` inside it (the pinned showcase) keeps
+   sticking to the viewport. flow-root keeps the block formatting context the
+   old `overflow: hidden` gave for free (no margin collapsing through it).
+   Browsers without `overflow: clip` stay on `hidden`; there the showcase
+   falls back to its plain strip and nothing is pinned. */
+@layer components {
+  .page-shell {
+    display: flow-root;
+    overflow: hidden;
+  }
+
+  @supports (overflow: clip) {
+    .page-shell {
+      overflow: clip;
+    }
+  }
+}
+
+/* Pinned showcase (see layout/showcase). The section is one screen plus the
+   scroll length (--showcase-travel, set from the carousel config); its stage
+   is exactly one screen and sticks to the top while that scroll length is
+   used up. svh keeps the stage stable while mobile bars collapse (vh is the
+   fallback); the 560px floor matches the carousel's minimum height. */
+@layer components {
+  .showcase-pin {
+    --showcase-stage: max(560px, 100vh);
+
+    position: relative;
+    width: 100%;
+    height: calc(var(--showcase-stage) + var(--showcase-travel, 0px));
+  }
+
+  .showcase-stage {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: var(--showcase-stage);
+    overflow: hidden;
+  }
+
+  @supports (height: 100svh) {
+    .showcase-pin {
+      --showcase-stage: max(560px, 100svh);
+    }
+  }
+}
+
 @layer base {
   /* Firefox */
   * {

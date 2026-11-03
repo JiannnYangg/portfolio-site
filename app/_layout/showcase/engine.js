@@ -8,6 +8,14 @@
 //     pointer maths is relative to the canvas, touch keeps vertical page-scroll
 //   - pause()/resume() (render loop only runs while the section is on screen),
 //     ResizeObserver, context-loss callback, texture error handling, cleanup
+//   - scroll-driven mode (scrollDriven: true): the host pins the section and
+//     feeds the page's scroll progress in through setProgress(); the row is a
+//     finite strip (first card .. last card) instead of an endless loop, and
+//     wheel / drag / snap are off because the page scroll owns the row
+//   - reset(): replay the entry from the start (used when a page is restored
+//     from the back/forward cache)
+//   - the lens ring / tint color is the site's theme color (LENS.ringColor)
+//     and keeps its hue when the glow overdrives
 //
 // The carousel itself — three.js + GSAP, no React. An infinite flat row of
 // image panels rendered into an offscreen buffer, then drawn to screen
@@ -16,21 +24,32 @@
 //
 //   const carousel = createCarousel(THREE, mountEl, {
 //     cursorElement,           // optional "View" label that trails the pointer
+//     scrollDriven,            // true = page scroll drives the row (setProgress)
 //     onActiveChange(i) {},    // centered image changed
 //     onFocusChange(open) {},  // focus mode opened / closed
 //     onEntryDone(done) {},    // entry animation settled
 //     onContextLost() {},      // GPU context lost
 //   });
+//   carousel.setProgress(0..1); carousel.reset();
 //   carousel.closeFocus(); carousel.replayEntry(); carousel.pause();
 //   carousel.resume(); carousel.destroy();
 
 import { gsap } from 'gsap';
 
-import { CONFIG, ENTRY, FOCUS, INTERACT, LENS, PROJECTS } from './config';
+import {
+  CONFIG,
+  ENTRY,
+  FOCUS,
+  INTERACT,
+  LENS,
+  PROJECTS,
+  SCROLL,
+} from './config';
 
 export function createCarousel(THREE, mount, callbacks = {}) {
   const {
     cursorElement = null,
+    scrollDriven = false,
     onActiveChange = () => {},
     onFocusChange = () => {},
     onEntryDone = () => {},
@@ -40,6 +59,9 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   } = callbacks;
   let destroyed = false;
   let running = true;
+
+  // drag is a free-scroll feature: in scroll-driven mode the page owns the row
+  const dragEnabled = () => INTERACT.drag && !scrollDriven;
 
   let W = Math.max(1, mount.clientWidth);
   let H = Math.max(1, mount.clientHeight);
@@ -110,7 +132,13 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         // aspect is now known -> rebuild slot offsets so spacing matches widths,
         // and re-center the row while the user hasn't scrolled yet
         recomputeTotal();
-        if (!userInteracted) {
+        if (scrollDriven) {
+          // the row follows the page scroll, not a free-scroll position
+          if (!focusState.active) {
+            scroll = scrollForProgress(progress);
+            target = scroll;
+          }
+        } else if (!userInteracted) {
           scroll = centerForIndex(0);
           target = scroll;
         }
@@ -151,9 +179,25 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     return offsets[s] + slotWidth(s) / 2 - CONFIG.GAP / 2 + loop * totalWidth;
   }
 
+  // closest real panel to `value` on the finite (non-looping) row
+  function nearestFinite(value) {
+    let best = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < sources.length; i++) {
+      const center = offsets[i] + slotWidth(i) / 2 - CONFIG.GAP / 2;
+      const dist = Math.abs(center - value);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    }
+    return best;
+  }
+
   // integer index (including loop) whose center is closest to `value`
   function nearestIndex(value) {
     if (!totalWidth) return 0;
+    if (scrollDriven) return nearestFinite(value);
     const N = sources.length;
     let best = 0;
     let bestDist = Infinity;
@@ -172,6 +216,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   // which source index is closest to screen center (for the overlay text)
   function centerIndex(value) {
     if (!totalWidth) return 0;
+    if (scrollDriven) return nearestFinite(value);
     let bestI = 0;
     let bestDist = Infinity;
     for (let i = 0; i < sources.length; i++) {
@@ -189,7 +234,8 @@ export function createCarousel(THREE, mount, callbacks = {}) {
 
   // ---- mesh pool ----
   // REPEATS copies of the whole image set so wide screens never run dry.
-  const REPEATS = 4;
+  // The scroll-driven row is a single finite strip: one copy is enough.
+  const REPEATS = scrollDriven ? 1 : 4;
   const pool = [];
   for (let r = 0; r < REPEATS; r++) {
     for (let i = 0; i < sources.length; i++) {
@@ -214,6 +260,46 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   let pendingFocus = null; // {srcIndex} — open focus once a click-to-center settles
   let lastInput = performance.now(); // timestamp of last wheel/drag input
   let snapped = false; // have we already snapped since the last input?
+
+  // ---- page-scroll progress (scroll-driven mode) ----
+  // progress is 0..1 over the whole pinned section. The first / last card rest
+  // centered for a short "hold" at each end, so the row doesn't leave the
+  // screen the instant it arrives.
+  let progress = 0;
+  let focusProgress = 0; // progress when focus opened (scrolling on closes it)
+
+  function scrollForProgress(p) {
+    const first = centerForIndex(0);
+    const last = centerForIndex(sources.length - 1);
+    const span = Math.max(0.05, 1 - SCROLL.holdStart - SCROLL.holdEnd);
+    const q = Math.min(1, Math.max(0, (p - SCROLL.holdStart) / span));
+    return first + (last - first) * q;
+  }
+
+  // Point the row at the page-scroll position. Skipped while something else
+  // owns the row (entry, focus, click-to-center): progress is remembered and
+  // applied the moment that finishes.
+  function applyProgress() {
+    if (!scrollDriven || destroyed || inputLocked() || pendingFocus) return;
+    target = scrollForProgress(progress);
+  }
+
+  function setProgress(value) {
+    if (!scrollDriven || destroyed) return;
+    const next = Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
+    if (next === progress) return;
+    progress = next;
+    if (focusState.active) {
+      // scrolling on while a card is focused means "I'm done looking"
+      if (
+        !focusState.closing &&
+        Math.abs(next - focusProgress) > SCROLL.focusCloseDelta
+      )
+        closeFocus();
+      return;
+    }
+    applyProgress();
+  }
 
   // ---- liquid-glass lens: FBO + fullscreen pass ----
   // The carousel renders into rt at device resolution (CSS-sized would render
@@ -240,7 +326,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     uGlow: { value: LENS.glow },
     uWhiteGlow: { value: LENS.whiteGlow },
     uNovaSize: { value: LENS.novaSize },
-    uBlueRing: { value: LENS.blueRing },
+    uRingIntensity: { value: LENS.ringIntensity },
     uRingRadius: { value: LENS.ringRadius },
     uRingWidth: { value: LENS.ringWidth },
     uShimmer: { value: LENS.shimmer ? 1.0 : 0.0 },
@@ -253,7 +339,15 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     uRimInward: { value: LENS.rimInward },
     uRimFreq1: { value: LENS.rimFreq1 },
     uRimFreq2: { value: LENS.rimFreq2 },
-    uBlueColor: { value: new THREE.Color(LENS.blueColor) },
+    // The lens pass writes raw values to the screen (no color-space
+    // conversion), so the theme color is passed through unconverted: the
+    // ring shows exactly the hex set in LENS.ringColor.
+    uRingColor: {
+      value: new THREE.Color().setStyle(
+        LENS.ringColor,
+        THREE.LinearSRGBColorSpace,
+      ),
+    },
     uRimLine: { value: LENS.rimLine },
     uRimLinePos: { value: LENS.rimLinePos },
     uRimLineWidth: { value: LENS.rimLineWidth },
@@ -283,7 +377,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       uniform float uGlow;
       uniform float uWhiteGlow;
       uniform float uNovaSize;
-      uniform float uBlueRing;
+      uniform float uRingIntensity;
       uniform float uRingRadius;
       uniform float uRingWidth;
       uniform float uShimmer;
@@ -296,7 +390,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       uniform float uRimInward;
       uniform float uRimFreq1;
       uniform float uRimFreq2;
-      uniform vec3  uBlueColor;
+      uniform vec3  uRingColor;
       uniform float uRimLine;
       uniform float uRimLinePos;
       uniform float uRimLineWidth;
@@ -425,15 +519,21 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         nova *= uWhiteGlow * (uGlow / 17.0) * 1.15;
         col += vec3(nova);
 
-        // blue ring + aura
+        // theme-colored ring + aura
         float dC = shapeND * 0.5;
         float tR = clamp(uRingRadius, 0.1, 0.49);
         float rW = max(uRingWidth, 0.003);
         float ring = exp(-pow((dC - tR) / rW, 2.0));
-        ring *= uBlueRing * (uGlow / 17.0) * 1.8;
+        ring *= uRingIntensity * (uGlow / 17.0) * 1.8;
         if (uShimmer > 0.5) ring *= sin(angle * uShimmerFreq + uTime * uShimmerSpeed) * uShimmerDepth + (1.0 - uShimmerDepth);
-        float ringAura = exp(-pow((dC - tR) / (rW * 6.0), 2.0)) * 0.28 * uBlueRing * (uGlow / 17.0);
-        col += uBlueColor * (ring + ringAura);
+        float ringAura = exp(-pow((dC - tR) / (rW * 6.0), 2.0)) * 0.28 * uRingIntensity * (uGlow / 17.0);
+        vec3 ringGlow = uRingColor * (ring + ringAura);
+        // When the glow overdrives, scale ALL channels together. Clipping
+        // each channel on its own would push a lime ring toward pure yellow
+        // (red and green both saturate); this keeps the theme hue intact.
+        float ringPeak = max(ringGlow.r, max(ringGlow.g, ringGlow.b));
+        ringGlow /= max(1.0, ringPeak);
+        col += ringGlow;
         // bright border line
         col += vec3(exp(-pow((dC - uRimLinePos) / max(uRimLineWidth, 0.0001), 2.0)) * uRimLine);
 
@@ -479,6 +579,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   // except the focused one slides down off-screen, staggered center-out.
   const focusState = {
     active: false,
+    closing: false, // the close timeline is running (active stays true until it ends)
     srcIndex: -1,
     poolIdx: -1,
     lensFx: ENTRY.enabled ? 0 : 1, // 0 during entry; blooms in later
@@ -503,7 +604,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   // lens props that fade out for focus/entry, with their full values
   const LENS_FX_KEYS = [
     'uDispersion',
-    'uBlueRing',
+    'uRingIntensity',
     'uRimLine',
     'uVignette',
     'uZoom',
@@ -527,13 +628,16 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       const i = p.srcIndex;
       const src = sources[i];
 
-      // slot center within one loop, shifted by scroll, wrapped, then pushed
-      // out by this pool entry's repetition rung
+      // slot center within one loop, shifted by scroll. The endless row wraps
+      // it and pushes it out by this pool entry's repetition rung; the
+      // scroll-driven row is one finite strip and never wraps.
       const slotCenterInLoop = offsets[i] + slotWidth(i) / 2 - CONFIG.GAP / 2;
       let x = slotCenterInLoop - scroll;
-      x = ((x % totalWidth) + totalWidth) % totalWidth;
-      x += (rep - Math.floor(REPEATS / 2)) * totalWidth;
-      if (x > half + totalWidth) x -= totalWidth * REPEATS;
+      if (!scrollDriven) {
+        x = ((x % totalWidth) + totalWidth) % totalWidth;
+        x += (rep - Math.floor(REPEATS / 2)) * totalWidth;
+        if (x > half + totalWidth) x -= totalWidth * REPEATS;
+      }
 
       const centerX = x;
       const inEntry = entryActive || entrySettled;
@@ -734,7 +838,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     if (focusState.active || entryActive || entrySettled) return setCursor('');
     if (dragging) return setCursor('grabbing');
     if (!hoverPanel) return setCursor(''); // off the carousel, plain arrow
-    if (INTERACT.drag) return setCursor('grab');
+    if (dragEnabled()) return setCursor('grab');
     return setCursor(INTERACT.noClick ? '' : 'pointer');
   }
 
@@ -793,6 +897,9 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   }
 
   function onWheel(e) {
+    // Scroll-driven: the page scroll owns the row, so every wheel gesture
+    // (vertical or not) is left to the page.
+    if (scrollDriven) return;
     // The carousel is a section of a longer page: a plain vertical wheel must
     // keep scrolling the page. Only horizontal gestures (trackpad swipe,
     // shift+wheel) move the row.
@@ -811,7 +918,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
 
   function onPointerDown(e) {
     suppressClick = false;
-    if (!INTERACT.drag || inputLocked()) return;
+    if (!dragEnabled() || inputLocked()) return;
     if (dragging) return; // a second finger never hijacks a live drag
     if (e.button !== 0 && e.pointerType === 'mouse') return; // left button only
     dragging = true;
@@ -956,9 +1063,11 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     if (!src || !src.tex) return;
 
     focusState.active = true;
+    focusState.closing = false;
     focusState.srcIndex = centeredPanel.srcIndex;
     const focusPoolIdx = centeredPanel.poolIdx;
     focusState.poolIdx = focusPoolIdx;
+    focusProgress = progress; // scrolling on from here closes the focus
 
     // pull scroll precisely to center so the focused panel is dead-centre
     target = centerForIndex(nearestIndex(scroll));
@@ -1017,7 +1126,10 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   }
 
   function closeFocus() {
-    if (!focusState.active) return;
+    // already closing: a second Escape / click / scroll must not restart the
+    // return wave halfway through
+    if (!focusState.active || focusState.closing) return;
+    focusState.closing = true;
     if (focusState.anim) focusState.anim.kill();
 
     // return wave: farthest cards first (edges-in), symmetric pairs together
@@ -1044,8 +1156,10 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     const tl = gsap.timeline({
       onComplete: () => {
         focusState.active = false;
+        focusState.closing = false;
         focusState.srcIndex = -1;
         updateCursor(); // grab / pointer comes back
+        applyProgress(); // scroll-driven: rejoin the page scroll position
       },
     });
     tl.to(
@@ -1089,8 +1203,10 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     for (let k = 0; k < growArr.length; k++) growArr[k] = 0;
     focusState.lensFx = 0; // no lens distortion during entry
 
-    // center a panel cleanly; that panel rises first
-    target = centerForIndex(nearestIndex(scroll));
+    // center a panel cleanly; that panel rises first. Scroll-driven: the
+    // panel the page scroll is currently pointing at.
+    const from = scrollDriven ? scrollForProgress(progress) : scroll;
+    target = centerForIndex(nearestIndex(from));
     scroll = target;
     velocity = 0;
     snapped = true;
@@ -1174,11 +1290,40 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         for (let k = 0; k < growArr.length; k++) growArr[k] = 1;
         onEntryDone(true);
         updateCursor(); // input unlocks -> show the grab hand
+        applyProgress(); // scroll-driven: catch up with wherever the page is now
       },
       null,
       growEnd,
     );
     entryAnim = tl;
+  }
+
+  // Start over: drop any focus / click-to-center / momentum and replay the
+  // entry from the first state. (A normal page refresh needs none of this — it
+  // builds a brand-new carousel. This is for a page restored from the
+  // back/forward cache, where the old instance comes back mid-animation.)
+  function reset() {
+    if (destroyed) return;
+    if (focusState.anim) focusState.anim.kill();
+    focusState.anim = null;
+    const wasFocused = focusState.active;
+    focusState.active = false;
+    focusState.closing = false;
+    focusState.srcIndex = -1;
+    focusState.poolIdx = -1;
+    focusScale = 1;
+    drop.fill(0);
+    pendingFocus = null;
+    velocity = 0;
+    scrollEnergy = 0;
+    lastCenter = -1; // re-announce the centered card
+    if (wasFocused) onFocusChange(false);
+    if (ENTRY.enabled) {
+      playEntry();
+    } else {
+      focusState.lensFx = 1;
+      if (scrollDriven) scroll = target = scrollForProgress(progress);
+    }
   }
 
   el.addEventListener('wheel', onWheel, { passive: false });
@@ -1201,9 +1346,11 @@ export function createCarousel(THREE, mount, callbacks = {}) {
 
       // Settle-snap once input has actually stopped (idle time since the last
       // wheel/drag event). Retargets from the CURRENT scroll so it always
-      // locks onto whichever panel is truly nearest right now.
+      // locks onto whichever panel is truly nearest right now. Not used when
+      // scroll-driven: the page scroll decides where the row rests.
       if (
         CONFIG.SNAP &&
+        !scrollDriven &&
         !snapped &&
         !focusState.active &&
         performance.now() - lastInput > CONFIG.SNAP_IDLE_MS
@@ -1219,12 +1366,17 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     // physically touching the row.
     // (a click-to-center travel keeps the normal ease — it's a journey across
     // the row, not a settle, and SNAP_EASE would make it crawl)
+    // Scroll-driven: follow the (already smoothed) page scroll fairly tightly.
     const follow =
       dragging && dragPointerType !== 'mouse'
         ? INTERACT.TOUCH_EASE
-        : snapped && !pendingFocus
-          ? CONFIG.SNAP_EASE
-          : CONFIG.EASE;
+        : pendingFocus
+          ? CONFIG.EASE
+          : scrollDriven
+            ? SCROLL.ease
+            : snapped
+              ? CONFIG.SNAP_EASE
+              : CONFIG.EASE;
     scroll += (target - scroll) * follow;
 
     // tell the host which image is centered (overlay text)
@@ -1253,8 +1405,8 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       if (Math.abs(target - scroll) < 0.5) {
         const pf = pendingFocus;
         pendingFocus = null;
-        if (centeredPanel && centeredPanel.srcIndex === pf.srcIndex)
-          openFocus();
+        if (centeredPanel && centeredPanel.srcIndex === pf.srcIndex) openFocus();
+        else applyProgress(); // nothing to focus: rejoin the page scroll
       }
     }
 
@@ -1289,6 +1441,9 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   function resume() {
     if (running || destroyed) return;
     running = true;
+    // Scroll-driven: the page scrolled while we were off screen, so jump to
+    // where it put the row instead of visibly gliding across the whole strip.
+    if (scrollDriven && !inputLocked() && !pendingFocus) scroll = target;
     prevScroll = scroll; // no fake "speed" spike from the paused gap
     lastInput = performance.now();
     raf = requestAnimationFrame(tick);
@@ -1368,6 +1523,8 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   return {
     closeFocus,
     replayEntry: playEntry,
+    reset, // start over (focus dropped, entry replayed)
+    setProgress, // scroll-driven: page scroll progress 0..1
     pause, // stop rendering (section off screen)
     resume,
     refreshLayout: recomputeTotal, // call after changing PANEL_H / GAP
