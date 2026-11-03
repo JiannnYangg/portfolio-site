@@ -59,8 +59,15 @@ const CTA_GRADIENT =
   'linear-gradient(135deg, #5068f0 0%, #445ae9 48%, #2b3bb8 100%)';
 const CTA_DARK = '#1f2024';
 
-/** iOS-style dark translucent material with a light frosted blur */
-const MENU_BG = 'rgba(40, 40, 44, 0.82)';
+/**
+ * Blue glass for the iOS-style callout: the theme blue (#445ae9) pushed a
+ * touch deeper and kept 88% opaque, with the same frosted blur behind it.
+ * Over the light paper background it blends to about 5.4:1 with the white
+ * 12px label, above the 4.5:1 needed for small text. Because it is nearly
+ * opaque, it still reads as a solid blue bubble in a browser without
+ * backdrop-filter support.
+ */
+const MENU_BG = 'rgba(56, 76, 214, 0.88)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
 /**
@@ -240,7 +247,7 @@ function Marker({ children }) {
 
 /**
  * iOS edit menu (the bubble shown when text is selected on iPhone):
- * flat dark translucent material with a soft blur, small radius,
+ * frosted blue glass (see MENU_BG) with a soft blur, small radius,
  * hairline dividers, a trailing chevron and a pointer arrow.
  * A slim, soft sheen sweeps slowly across it, like light catching glass.
  */
@@ -253,7 +260,7 @@ function IosCallout() {
       className='pointer-events-none absolute bottom-full left-1/2 z-10 mb-[16px] -translate-x-1/2'
     >
       <motion.span
-        className='relative flex select-none items-stretch whitespace-nowrap rounded-[9px] text-[12px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_4px_16px_rgba(0,0,0,0.25),0_0_0_0.5px_rgba(255,255,255,0.08)]'
+        className='relative flex select-none items-stretch whitespace-nowrap rounded-[9px] text-[12px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_6px_20px_rgba(68,90,233,0.35),0_0_0_0.5px_rgba(255,255,255,0.22)]'
         style={{
           fontFamily: IOS_FONT,
           background: MENU_BG,
@@ -272,12 +279,12 @@ function IosCallout() {
         {CALLOUT_ITEMS.map((item, index) => (
           <span
             key={item}
-            className={`flex items-center px-[10px] py-[9px] ${index > 0 ? 'border-l-[0.5px] border-white/20' : ''}`}
+            className={`flex items-center px-[10px] py-[9px] ${index > 0 ? 'border-l-[0.5px] border-white/25' : ''}`}
           >
             {item}
           </span>
         ))}
-        <span className='flex items-center border-l-[0.5px] border-white/20 px-[6px]'>
+        <span className='flex items-center border-l-[0.5px] border-white/25 px-[6px]'>
           <ChevronRight size={12} strokeWidth={2.5} />
         </span>
 
