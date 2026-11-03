@@ -37,7 +37,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { createPortal } from 'react-dom';
 
-import { ENTRY, PROJECTS, SCROLL, UI_ANIM, getScrollLength } from './config';
+import { ENTRY, getScrollLength, PROJECTS, SCROLL, UI_ANIM } from './config';
 import { ShowcaseStrip } from './strip';
 
 /** Same cut-off as the original carousel: a wide-screen experience */
