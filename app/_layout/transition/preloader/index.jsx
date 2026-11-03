@@ -21,6 +21,13 @@ const MotionComponent = motion(Center);
 const BG = 'bg-[#0b1f14]';
 const CURVE_FILL = 'fill-[#0b1f14]';
 
+/**
+ * Greeting text colour: the site's own palette (lime -> pale lime -> mint ->
+ * aqua, the same hues as the backdrop blooms) as a left-to-right gradient.
+ */
+const TEXT_GRADIENT =
+  'linear-gradient(100deg, #b6f500 0%, #d6f88c 38%, #b0eec8 70%, #aaecd6 100%)';
+
 export function Preloader() {
   const [index, setIndex] = useState(0);
   const { width, height } = useDimensions();
@@ -65,23 +72,21 @@ export function Preloader() {
     >
       {width > 0 ? (
         <>
-          {/* soft lime glow behind the greeting, echoing the site backdrop */}
-          <span
-            aria-hidden='true'
-            className='pointer-events-none absolute inset-0'
-            style={{
-              backgroundImage:
-                'radial-gradient(ellipse 55% 45% at 50% 50%, rgba(182,245,0,0.16) 0%, rgba(182,245,0,0.05) 45%, rgba(182,245,0,0) 100%)',
-            }}
-          />
           <MotionComponent
-            className='relative text-4xl font-medium text-[#f3f3f5] md:text-6xl'
+            className='relative text-2xl font-medium md:text-4xl'
             variants={fade}
             initial='initial'
             animate='enter'
           >
-            <Dot size={56} className='me-2 text-[#b6f500]' strokeWidth={4} />
-            <p lang={greeting.lang} className='leading-[1.5]'>
+            <Dot size={40} className='me-1 text-[#b6f500]' strokeWidth={4} />
+            <p
+              lang={greeting.lang}
+              className='inline-block bg-clip-text py-1 leading-[1.6] text-transparent'
+              style={{
+                backgroundImage: TEXT_GRADIENT,
+                WebkitBackgroundClip: 'text',
+              }}
+            >
               {greeting.text}
             </p>
           </MotionComponent>
