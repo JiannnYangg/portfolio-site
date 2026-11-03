@@ -4,12 +4,11 @@ import { motion } from 'framer-motion';
 import { styled } from 'styled-components';
 
 /*
- * Marks are drawn in the site's lime (same family as the backdrop blooms and
- * grid) with a soft lime glow. Only two marks on the whole paragraph: a strike
- * on "AI slop." and a closing selection box on "new status quo."
+ * Marks are drawn in the site's own bright lime (the same lime as the
+ * backdrop glows). Only two marks on the whole paragraph: a strike on
+ * "AI slop." and a closing selection box on "new status quo."
  */
-const LIME = '#8fcf00';
-const GLOW = 'rgb(182 245 0 / 0.9)';
+const LIME = '#b6f500';
 const DASH = `repeating-linear-gradient(to right, ${LIME} 0 12px, transparent 12px 18px)`;
 
 export const Wrapper = styled.div`
@@ -32,11 +31,13 @@ export const Title = styled.h4`
   line-height: 1.55;
 `;
 
-/* Layout box of a marked phrase. vertical-align: top keeps it on the line grid. */
+/* Layout box of a marked phrase. vertical-align: top keeps it on the line grid.
+   isolation lets the outline sit BEHIND the words (so the tint never greys them). */
 export const Mark = styled.span`
   position: relative;
   display: inline-block;
   vertical-align: top;
+  isolation: isolate;
   margin-inline: ${({ $outlined }) => ($outlined ? '0.35em 0.2em' : '0 0.5rem')};
 
   /* struck-out words step back */
@@ -52,13 +53,13 @@ export const Mark = styled.span`
 /* Dashed selection outline that hugs the glyphs */
 export const Outline = styled(motion.span)`
   position: absolute;
+  z-index: -1;
   left: -0.35em;
   right: -0.35em;
   top: 0.18em;
   bottom: 0.12em;
   pointer-events: none;
-  background-color: ${({ $tint }) => ($tint ? 'rgb(182 245 0 / 0.14)' : 'transparent')};
-  filter: drop-shadow(0 0 6px ${GLOW});
+  background-color: ${({ $tint }) => ($tint ? 'rgb(182 245 0 / 0.16)' : 'transparent')};
 
   svg {
     position: absolute;
@@ -84,14 +85,13 @@ const corners = {
   br: 'bottom: 0; right: 0; transform: translate(50%, 50%);',
 };
 
-/* Solid lime square handle with glow */
+/* Solid lime square handle */
 export const Handle = styled.span`
   position: absolute;
   width: max(9px, 0.3em);
   height: max(9px, 0.3em);
   background-color: ${LIME};
   border-radius: 2px;
-  box-shadow: 0 0 8px 1px ${GLOW};
   pointer-events: none;
   ${({ $pos }) => corners[$pos]}
 `;
@@ -105,6 +105,5 @@ export const Strike = styled(motion.span)`
   height: 3px;
   background-image: ${DASH};
   border-radius: 2px;
-  filter: drop-shadow(0 0 5px ${GLOW});
   pointer-events: none;
 `;
