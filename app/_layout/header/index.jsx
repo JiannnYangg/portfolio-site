@@ -59,17 +59,29 @@ const MENU_FILTER = 'blur(20px) saturate(180%)';
  * 55%, i.e. a 45% wash of paper on top, flat to 65% of the ellipse and
  * fading to nothing at its edge.
  *
+ * The CTA zone is the exception: the pill is now a near-white, so a paper
+ * (near-white) wash behind it made it vanish. Its wash uses a slightly darker
+ * cool grey, and a bit stronger, so the pill reads clearly while the area
+ * still looks calm.
+ *
  * The zones follow the content: the headline + CTA are one block centered in
  * the hero, so the zone centers are offsets from the vertical middle
  * (--head-y / --cta-y, set per breakpoint on the wrapper below).
  */
 const CALM_OPACITY = 0.55;
 const CALM_WASH = 1 - CALM_OPACITY;
-const calmZone = (size, centerY) =>
-  `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(${PAPER_RGB},${CALM_WASH}) 0%, rgba(${PAPER_RGB},${CALM_WASH}) 65%, rgba(${PAPER_RGB},0) 100%)`;
+const CTA_WASH_RGB = '222,224,229';
+const CTA_WASH = 0.75;
+const calmZone = (size, centerY, rgb = PAPER_RGB, wash = CALM_WASH) =>
+  `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(${rgb},${wash}) 0%, rgba(${rgb},${wash}) 65%, rgba(${rgb},0) 100%)`;
 const CALM_BACKGROUND = [
   calmZone('40% 26%', 'calc(50% + var(--head-y))'), // headline block
-  calmZone('200px 80px', 'calc(50% + var(--cta-y))'), // CTA pill
+  calmZone(
+    '200px 80px',
+    'calc(50% + var(--cta-y))',
+    CTA_WASH_RGB,
+    CTA_WASH
+  ), // CTA pill
 ].join(', ');
 
 /** Clips only the bottom edge of a line, so text rises out of a mask
@@ -353,7 +365,9 @@ export function Header() {
       {/* The paper, blooms, glows and grid now come from the site-wide
           <SiteBackdrop /> (root layout), so the hero is transparent and shares
           the exact same background as every other page. Only the two calm
-          zones live here: a soft paper wash behind the headline and the CTA.
+          zones live here: a soft paper wash behind the headline and a slightly
+          darker, cooler wash behind the CTA (so the near-white pill stands
+          out).
           The zone centers (offsets from the vertical middle) differ per
           breakpoint because the headline scales with the viewport.
           The offsets follow the block's bottom padding: when it was cut
@@ -412,7 +426,7 @@ export function Header() {
           </h1>
 
           {/* CTA: exactly the reference design (no border, no shadow).
-              Light grey outer pill 225 x 62, 6px ring, 6px gap, 50px inner
+              Near-white outer pill 225 x 62, 6px ring, 6px gap, 50px inner
               buttons. Only the colours are themed. Resting state: lime label
               with dark text, dark circle with a lime arrow. On hover the two
               swap (dark label with lime text, lime circle with a dark arrow).
@@ -424,7 +438,7 @@ export function Header() {
                 type='button'
                 onClick={() => scrollToId('contact-footer')}
                 aria-label="Let's talk, go to contact"
-                className='group flex items-center gap-[6px] rounded-full bg-[#d9d9d9] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f2024]'
+                className='group flex items-center gap-[6px] rounded-full bg-[#f4f4f5] p-[6px] font-[family-name:var(--font-montserrat)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f2024]'
               >
                 <span className='flex h-[50px] w-[156px] items-center justify-center whitespace-nowrap rounded-full bg-[#b6f500] text-[20px] font-normal leading-none tracking-[0.01em] text-[#1f2024] transition-colors duration-300 group-hover:bg-[#1f2024] group-hover:text-[#b6f500]'>
                   Let&apos;s talk
