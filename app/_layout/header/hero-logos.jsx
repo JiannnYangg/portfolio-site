@@ -52,13 +52,15 @@ const shadowFor = depth =>
  * The original six positions are untouched. The two newer logos fill empty
  * pockets:
  *  - codex: in the blank space to the right of the "We build it." line (the
- *    line is indented 1em and ends well before the line below it), centered
- *    on that line vertically. The headline block is always centered in the
- *    hero and its line 2 sits ~51px above the hero's vertical middle, so
- *    top is calc(50% - 51px - half the logo height). Nudged inwards (toward
- *    the headline) so it sits well clear of the right page guide.
- *  - runway: lower left, above the GitHub logo and below n8n, moved inwards
- *    so it sits clear of the left page guide instead of on top of it.
+ *    line is indented 1em and ends well before the line below it). The
+ *    headline block is always centered in the hero and its line 2 sits ~51px
+ *    above the hero's vertical middle, so top is calc(50% - offset). On
+ *    desktop the offset is larger than the line's own centre, so the logo
+ *    floats a little above the line. Nudged inwards (toward the headline) so
+ *    it sits well clear of the right page guide.
+ *  - runway: left side, below n8n and above GitHub, moved inwards so it sits
+ *    clear of the left page guide, and up into the open space beside the
+ *    "We build it." / "We get it" lines.
  *  - github: dropped a little lower, away from the runway logo.
  *
  * Mobile positions are the base classes, md: classes take over on desktop.
@@ -145,29 +147,29 @@ const LOGOS = [
   },
   {
     // Codex: same size as before. Sits in the blank space after "We build it."
-    // Moved a bit inwards on desktop (right 24% -> 27%), so it is further from
-    // the right page guide; mobile is unchanged.
+    // Moved inwards on desktop (right 24% -> 27%) and a bit upwards (offset
+    // 84px -> 112px above the middle); mobile is unchanged.
     id: 'codex',
     src: '/hero-logos/hero-mylogo-6382.png',
     width: 193,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
     position:
-      'right-[6%] top-[calc(50%_-_60px)] md:right-[27%] md:top-[calc(50%_-_84px)]',
+      'right-[6%] top-[calc(50%_-_60px)] md:right-[27%] md:top-[calc(50%_-_112px)]',
     rotate: 8,
     depth: 0.6,
     float: [5, 5.4, 1.7, 0.9],
   },
   {
-    // Runway ML: lower left, above GitHub, below n8n. Moved inwards (md: left
-    // 11% -> 17%, mobile 9% -> 14%) so it clears the left page guide and sits
-    // in the open space between n8n and GitHub.
+    // Runway ML: left side, below n8n, above GitHub. Desktop: moved inwards
+    // (left 17% -> 21%) and upwards (bottom 31% -> 37%) into the open space
+    // beside the headline; mobile is unchanged.
     id: 'runway',
     src: '/hero-logos/hero-letter-r-8156.png',
     width: 200,
     height: 200,
     size: 'clamp(36px, 4.6vw, 74px)',
-    position: 'bottom-[24%] left-[14%] md:bottom-[31%] md:left-[17%]',
+    position: 'bottom-[24%] left-[14%] md:bottom-[37%] md:left-[21%]',
     rotate: -8,
     depth: 0.55,
     float: [5, 6.1, 1.5, 1.9],
