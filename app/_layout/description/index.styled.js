@@ -18,8 +18,10 @@ export const Wrapper = styled.div`
   align-items: stretch;
   justify-content: space-between;
   gap: clamp(3.5rem, 6vw, 7rem);
-  /* top padding lifted: text sits much closer to the section above */
-  padding-block: clamp(3em, 6vw, 7em) clamp(5em, 14vh, 16em);
+  /* top padding lifted again (was clamp(3em, 6vw, 7em)): the paragraph, the
+     side note and the "About me" circle (pinned to the bottom) all sit higher,
+     closer to the dashed line above */
+  padding-block: clamp(2em, 3.6vw, 4.25em) clamp(5em, 14vh, 16em);
   padding-inline: clamp(2.5em, 4vw, 8em);
 
   @media screen and (min-width: ${({ theme }) => theme?.breakpoints?.lg}) {

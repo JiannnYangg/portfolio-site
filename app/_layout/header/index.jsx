@@ -356,11 +356,14 @@ export function Header() {
           zones live here: a soft paper wash behind the headline and the CTA.
           The zone centers (offsets from the vertical middle) differ per
           breakpoint because the headline scales with the viewport.
-          --cta-y moved down together with the CTA (+20px mobile, +32px
-          desktop) so the calm light zone stays behind the pill. */}
+          The offsets follow the block's bottom padding: when it was cut
+          (pb-28 -> pb-20 mobile, pb-36 -> pb-24 desktop) the block moved
+          down by half of that cut relative to the hero's middle, so
+          --head-y / --cta-y grew by the same half (+16px mobile, +24px
+          desktop) and the calm light zones stay behind the text and the pill. */}
       <div
         aria-hidden='true'
-        className='pointer-events-none absolute inset-0 [--cta-y:97px] [--head-y:-59px] md:[--cta-y:172px] md:[--head-y:-74px]'
+        className='pointer-events-none absolute inset-0 [--cta-y:113px] [--head-y:-43px] md:[--cta-y:196px] md:[--head-y:-50px]'
         style={{ backgroundImage: CALM_BACKGROUND }}
       />
 
@@ -372,14 +375,14 @@ export function Header() {
           them is constant on every screen (it can't drift apart on tall
           viewports like it did with the CTA pinned to the bottom).
           The headline is a shrink-to-fit block so the staggered lines sit
-          optically centered. Padding is slightly bottom-heavy, which keeps
-          the whole block a touch above true center.
-          The CTA was moved down by +20px (mobile) / +32px (desktop): the CTA
-          margin grew by that amount and the top padding grew by the same
-          amount, so the block's centering cancels out and the headline stays
-          exactly where it was. */}
+          optically centered. The padding is bottom-light on purpose: the
+          space under the CTA used to be 112/144px and made the page feel
+          empty right after the hero. It is now 80/96px. The hero is still
+          at least one full screen tall (min-h-[100svh]), so the dashed
+          "About" line below it never starts above the fold: on landing it
+          stays hidden and it shows up after a small scroll. */}
       <div className='relative flex min-h-[100svh] items-center'>
-        <div className='mx-auto w-full max-w-5xl px-6 pb-28 pt-[116px] md:px-10 md:pb-36 md:pt-36'>
+        <div className='mx-auto w-full max-w-5xl px-6 pb-20 pt-[116px] md:px-10 md:pb-24 md:pt-36'>
           <h1 className='mx-auto w-fit font-[family-name:var(--font-montserrat)] text-[clamp(2.5rem,6.4vw,5.5rem)] font-medium leading-[1.08] tracking-[-0.03em]'>
             <Line>
               <Word index={0}>We</Word>{' '}
