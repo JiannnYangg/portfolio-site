@@ -32,9 +32,14 @@
 
 /* Site-wide background (see _components/backdrop). It is part of the page:
    absolutely positioned over the whole <body>, so it scrolls with the
-   content instead of staying on screen. Sits behind all content. */
+   content instead of staying on screen. Sits behind all content.
+   --screen is one screen of height; the blooms are placed in screens. svh
+   keeps it stable while mobile browser bars collapse (vh is the fallback),
+   and the 480px floor keeps blooms from squashing on short windows. */
 @layer components {
   .site-backdrop {
+    --screen: max(480px, 100vh);
+
     position: absolute;
     inset: 0;
     z-index: -10;
@@ -43,13 +48,10 @@
     background-color: var(--paper);
   }
 
-  /* One screen of gradients. svh keeps it stable while mobile browser bars
-     collapse; vh is the fallback. The first sheet is the landing hero. */
-  .backdrop-sheet {
-    position: relative;
-    height: 100vh;
-    height: 100svh;
-    min-height: 480px;
+  @supports (height: 100svh) {
+    .site-backdrop {
+      --screen: max(480px, 100svh);
+    }
   }
 }
 

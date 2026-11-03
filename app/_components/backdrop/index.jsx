@@ -1,25 +1,35 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 
 /**
- * Site-wide background, painted ONTO THE PAGE (it scrolls with the content):
- * the landing page's paper, blooms and lime glows, with the graph-paper grid
- * on top.
+ * Site-wide background, painted ONTO THE PAGE (it scrolls with the content).
  *
- * How it works
- * - It is absolutely positioned inside <body> and covers the whole document,
- *   so scrolling moves the gradients exactly like any other part of the page.
- *   Nothing is pinned to the screen.
- * - The gradient composition is one "sheet" the height of a screen. The first
- *   sheet is the landing hero, pixel for pixel. Sheets are stacked down the
- *   page and every second one is flipped vertically, so the edge where two
- *   sheets meet is a mirror image of itself: the blooms and glows continue
- *   smoothly instead of being cut off (no visible seam, no hard repeat).
- * - The grid is a single layer over the whole page (not per sheet), so its
- *   lines are continuous and identical on every page.
- * - The number of sheets follows the document height (ResizeObserver), so it
- *   stays correct when the page grows, shrinks or the window is resized.
+ * Art direction: an asymmetric, art-directed wash of soft blooms. Nothing
+ * mirrors or repeats screen to screen. For every screen-height "band" of the
+ * page the layout is generated from a fixed seed with rules, so it varies the
+ * way a designer would vary it by hand:
+ *   - the big bloom swaps sides from band to band (left, right, left ...)
+ *   - the smaller counter-bloom sits on the opposite side, tilted the other way
+ *   - an elongated accent drifts near the middle on two bands out of three
+ *   - a strong lime glow bleeds off one edge, alternating top-right / lower-left
+ *   - faint grey folds and white highlights keep the "paper" feel
+ *   - every band has its own intensity, so the page breathes: loud, quiet,
+ *     medium, quiet, ...
+ * Shapes are ellipses with their own width, height and tilt, so no two
+ * blooms look alike.
+ *
+ * Technical notes
+ * - Absolutely positioned inside <body> over the whole document: it scrolls
+ *   with the content, nothing is pinned to the screen.
+ * - Blobs are plain positioned elements (no blur filters), sized in vw and in
+ *   screens, and are not clipped per band, so they cross band boundaries
+ *   freely. No seams, no tiles.
+ * - The generator is seeded (integer hash, no Math.random / Math.sin), so the
+ *   server and client render identical markup: no hydration mismatch.
+ * - The graph-paper grid is ONE layer over the whole page, so its lines are
+ *   continuous and the same on every page.
+ * - The number of bands follows the document height (ResizeObserver).
  *
  * Sections on top of it must stay transparent (the footer is the one
  * deliberate dark block).
@@ -28,82 +38,201 @@ import { useEffect, useRef, useState } from 'react';
 /** Base sheet colour (also the body background, see globals.css) */
 export const PAPER_RGB = '243,243,245';
 
-/** Enough sheets to cover a tall first paint before the measurement runs */
-const INITIAL_SHEETS = 8;
+/** Enough bands to cover a tall first paint before the measurement runs */
+const INITIAL_BANDS = 8;
 
 /**
- * Graph-paper grid, drawn on TOP of the blooms and glows in a deeper lime so
- * the lines stay readable on both the off-white and the lime areas.
+ * Graph-paper grid, drawn on TOP of the blooms in a deeper lime so the lines
+ * stay readable on both the off-white and the lime areas.
  */
 const GRID_COLOR = '140,190,0';
 const GRID_ALPHA = 0.133;
 const GRID_CELL = '62px 57px';
-
-/** crumpled paper: soft grey folds on an off-white sheet */
-const PAPER_FOLDS = [
-  'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
-  'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
-  'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
-  'radial-gradient(38% 26% at 30% 22%, rgba(80,80,90,0.09) 0%, rgba(80,80,90,0) 100%)',
-  'radial-gradient(34% 24% at 78% 58%, rgba(80,80,90,0.07) 0%, rgba(80,80,90,0) 100%)',
-  'radial-gradient(40% 22% at 22% 84%, rgba(80,80,90,0.08) 0%, rgba(80,80,90,0) 100%)',
-  'radial-gradient(60% 40% at 85% 12%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
-].join(', ');
-
-/** soft blooms (pale lime, yellow-green, chartreuse, mint, aqua-green, soft yellow) */
-const BLOOMS = [
-  'radial-gradient(34% 30% at 14% 18%, rgba(214,248,140,0.55) 0%, rgba(214,248,140,0) 100%)',
-  'radial-gradient(30% 28% at 52% 8%, rgba(232,250,160,0.50) 0%, rgba(232,250,160,0) 100%)',
-  'radial-gradient(32% 30% at 84% 40%, rgba(176,238,200,0.50) 0%, rgba(176,238,200,0) 100%)',
-  'radial-gradient(30% 28% at 40% 62%, rgba(200,245,110,0.45) 0%, rgba(200,245,110,0) 100%)',
-  'radial-gradient(34% 30% at 70% 90%, rgba(170,236,214,0.50) 0%, rgba(170,236,214,0) 100%)',
-  'radial-gradient(28% 26% at 6% 66%, rgba(247,250,170,0.50) 0%, rgba(247,250,170,0) 100%)',
-].join(', ');
-
-/** lime corner glows */
-const GLOWS = [
-  'radial-gradient(55% 42% at 100% 0%, rgba(182,245,0,0.8) 0%, rgba(182,245,0,0) 70%)',
-  'radial-gradient(50% 38% at 0% 100%, rgba(182,245,0,0.75) 0%, rgba(182,245,0,0) 70%)',
-].join(', ');
-
 const GRID = [
   `linear-gradient(to right, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
   `linear-gradient(to bottom, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
 ].join(', ');
 
-/** One screen of gradients. `flipped` mirrors it so neighbours join cleanly. */
-function Sheet({ flipped, sheetRef }) {
-  return (
-    <div
-      ref={sheetRef}
-      className='backdrop-sheet'
-      style={flipped ? { transform: 'scaleY(-1)' } : undefined}
-    >
-      <div
-        className='absolute inset-0'
-        style={{ opacity: 0.6, backgroundImage: PAPER_FOLDS }}
-      />
-      <div
-        className='absolute inset-0'
-        style={{ opacity: 0.7, backgroundImage: BLOOMS }}
-      />
-      <div className='absolute inset-0' style={{ backgroundImage: GLOWS }} />
-    </div>
-  );
+const COLOR = {
+  lime: '182,245,0',
+  paleLime: '214,248,140',
+  yellow: '236,250,160',
+  chartreuse: '200,245,110',
+  mint: '176,238,200',
+  aqua: '170,236,214',
+  white: '255,255,255',
+  fold: '80,80,90',
+};
+
+/** How loud each band is. Cycles, so the page has a rhythm. */
+const INTENSITY = [1, 0.72, 0.95, 0.58, 0.85, 0.68];
+
+/* eslint-disable no-bitwise */
+/** Small seeded PRNG (mulberry32): identical output on server and client */
+function seeded(seed) {
+  let a = seed;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+/* eslint-enable no-bitwise */
+
+const between = (rand, min, max) => min + rand() * (max - min);
+const pick = (rand, list) => list[Math.floor(rand() * list.length)];
+
+/**
+ * The blobs of one band.
+ * x: center, % of page width. y: center, in screens (band + fraction).
+ * w: width in vw. h: height in screens. rot: tilt in degrees.
+ * a: peak alpha (already multiplied by the band intensity).
+ */
+function bandBlobs(band) {
+  const rand = seeded(band * 7919 + 101);
+  const power = INTENSITY[band % INTENSITY.length];
+  const leftFirst = band % 2 === 0;
+  const dir = leftFirst ? 1 : -1;
+
+  const bigX = leftFirst ? between(rand, 8, 24) : between(rand, 76, 92);
+  const counterX = leftFirst ? between(rand, 72, 90) : between(rand, 10, 28);
+
+  // under-layer: paper folds + highlight
+  const under = [
+    {
+      x: between(rand, 25, 75),
+      y: band + between(rand, 0.25, 0.55),
+      w: between(rand, 50, 70),
+      h: between(rand, 0.3, 0.5),
+      rot: between(rand, -40, 40),
+      rgb: COLOR.fold,
+      a: between(rand, 0.05, 0.08),
+    },
+    {
+      x: counterX,
+      y: band + between(rand, 0.05, 0.2),
+      w: between(rand, 45, 65),
+      h: between(rand, 0.3, 0.45),
+      rot: -dir * between(rand, 5, 25),
+      rgb: COLOR.white,
+      a: between(rand, 0.55, 0.8),
+    },
+  ];
+
+  // blooms
+  const blooms = [
+    {
+      x: bigX,
+      y: band + between(rand, 0.1, 0.3),
+      w: between(rand, 55, 80),
+      h: between(rand, 0.55, 0.8),
+      rot: dir * between(rand, 10, 35),
+      rgb: pick(rand, [COLOR.paleLime, COLOR.yellow, COLOR.chartreuse]),
+      a: between(rand, 0.45, 0.6) * power,
+    },
+    {
+      x: counterX,
+      y: band + between(rand, 0.45, 0.65),
+      w: between(rand, 40, 60),
+      h: between(rand, 0.4, 0.6),
+      rot: -dir * between(rand, 8, 28),
+      rgb: pick(rand, [COLOR.mint, COLOR.aqua]),
+      a: between(rand, 0.4, 0.55) * power,
+    },
+  ];
+
+  // elongated accent near the middle, two bands out of three
+  if (band % 3 !== 1) {
+    blooms.push({
+      x: between(rand, 30, 70),
+      y: band + between(rand, 0.78, 0.93),
+      w: between(rand, 28, 42),
+      h: between(rand, 0.22, 0.34),
+      rot: between(rand, -20, 20),
+      rgb: pick(rand, [COLOR.chartreuse, COLOR.paleLime]),
+      a: between(rand, 0.3, 0.42) * power,
+    });
+  }
+
+  // lime glow bleeding off an edge: top-right on even bands, lower-left on odd
+  const glows =
+    band % 2 === 0
+      ? [
+          {
+            x: 104,
+            y: band + 0.04,
+            w: between(rand, 48, 62),
+            h: between(rand, 0.5, 0.7),
+            rot: between(rand, -12, 12),
+            rgb: COLOR.lime,
+            a: between(rand, 0.5, 0.65) * power,
+          },
+        ]
+      : [
+          {
+            x: -4,
+            y: band + between(rand, 0.7, 0.85),
+            w: between(rand, 44, 58),
+            h: between(rand, 0.45, 0.65),
+            rot: between(rand, -14, 14),
+            rgb: COLOR.lime,
+            a: between(rand, 0.45, 0.6) * power,
+          },
+        ];
+
+  // the landing screen keeps its signature second glow, bottom-left
+  if (band === 0) {
+    glows.push({
+      x: -3,
+      y: 0.93,
+      w: 46,
+      h: 0.5,
+      rot: 8,
+      rgb: COLOR.lime,
+      a: 0.5,
+    });
+  }
+
+  return [...under, ...blooms, ...glows];
 }
 
+/** Soft, gaussian-ish falloff: strong core, long gentle tail */
+function blobStyle({ x, y, w, h, rot, rgb, a }) {
+  const stop = factor => `rgba(${rgb},${(a * factor).toFixed(3)})`;
+
+  return {
+    left: `${x.toFixed(2)}%`,
+    top: `calc(var(--screen) * ${y.toFixed(3)})`,
+    width: `${w.toFixed(2)}vw`,
+    height: `calc(var(--screen) * ${h.toFixed(3)})`,
+    transform: `translate(-50%, -50%) rotate(${rot.toFixed(1)}deg)`,
+    backgroundImage: `radial-gradient(ellipse closest-side, ${stop(1)} 0%, ${stop(0.55)} 40%, ${stop(0.18)} 72%, rgba(${rgb},0) 100%)`,
+  };
+}
+
+const Band = memo(function Band({ band }) {
+  return bandBlobs(band).map((blob, index) => (
+    <span
+      key={index}
+      className='absolute block'
+      style={blobStyle(blob)}
+    />
+  ));
+});
+
 export function SiteBackdrop() {
-  const firstSheet = useRef(null);
-  const [count, setCount] = useState(INITIAL_SHEETS);
+  const probe = useRef(null);
+  const [bands, setBands] = useState(INITIAL_BANDS);
 
   useEffect(() => {
     const body = document.body;
 
     const update = () => {
-      const sheetHeight =
-        firstSheet.current?.offsetHeight || window.innerHeight || 1;
-      // +1 sheet of slack; the container clips whatever is beyond the page
-      setCount(Math.max(2, Math.ceil(body.scrollHeight / sheetHeight) + 1));
+      // one screen in px, exactly as the CSS defines it (svh, 480px floor)
+      const screen = probe.current?.offsetHeight || window.innerHeight || 1;
+      // +1 band of slack; the container clips whatever is past the page
+      setBands(Math.max(2, Math.ceil(body.scrollHeight / screen) + 1));
     };
 
     update();
@@ -122,12 +251,14 @@ export function SiteBackdrop() {
 
   return (
     <div aria-hidden='true' className='site-backdrop'>
-      {Array.from({ length: count }, (_, index) => (
-        <Sheet
-          key={index}
-          flipped={index % 2 === 1}
-          sheetRef={index === 0 ? firstSheet : undefined}
-        />
+      {/* measures one screen the same way the blobs are sized */}
+      <span
+        ref={probe}
+        className='absolute left-0 top-0 w-px opacity-0'
+        style={{ height: 'var(--screen)' }}
+      />
+      {Array.from({ length: bands }, (_, band) => (
+        <Band key={band} band={band} />
       ))}
       <div
         className='absolute inset-0'
