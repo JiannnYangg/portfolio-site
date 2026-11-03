@@ -4,6 +4,14 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Same sheet colour as the site backdrop (PAPER_RGB 243,243,245) */
+    --paper: #f3f3f5;
+    /* Slightly stronger than the default so dividers and pill outlines stay
+       readable on the paper + grid background */
+    --border: 220 4% 82%;
+  }
+
   * {
     border-color: theme(colors.border);
   }
@@ -14,8 +22,28 @@
   }
 
   body {
-    background-color: theme(colors.background);
+    background-color: var(--paper);
     color: theme(colors.foreground);
+  }
+}
+
+/* Site-wide background layer (see _components/backdrop). Fixed to the
+   viewport behind all content. lvh (large viewport) keeps the gradients from
+   shifting when mobile browser bars collapse; vh is the fallback. */
+@layer components {
+  .site-backdrop {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: -10;
+    height: 100vh;
+    height: 100lvh;
+    overflow: hidden;
+    pointer-events: none;
+    background-color: var(--paper);
+    /* own compositor layer: scrolling never repaints the gradients */
+    transform: translateZ(0);
   }
 }
 
