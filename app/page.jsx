@@ -4,6 +4,7 @@ import {
   Description,
   Header,
   Navbar,
+  Showcase,
   Skills,
   Transition,
 } from '@/layout';
@@ -25,8 +26,10 @@ export default function Home() {
         <Description />
         <Partition name='Skills' index='02' />
         <Skills />
+        <Partition name='Showcase' index='03' />
+        <Showcase />
       </main>
-      <Partition name='Contact' index='03' />
+      <Partition name='Contact' index='04' />
       <Contact />
     </Transition>
   );

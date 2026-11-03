@@ -7,6 +7,7 @@ export * from './offcanvas';
 export * from './page-hero';
 export * from './project';
 export * from './research';
+export * from './showcase';
 export * from './skills';
 export * from './thumbnail';
 export * from './transition';
