@@ -1,3 +1,4 @@
+import { Partition } from '@/components';
 import { AboutBody, AboutHero, Contact, Navbar, Transition } from '@/layout';
 
 /** @type {import('next').Metadata} */
@@ -12,7 +13,9 @@ export default function About() {
     <Transition>
       <Navbar tone='dark' />
       <AboutHero />
+      <Partition name='Story' index='01' />
       <AboutBody />
+      <Partition name='Contact' index='02' />
       <Contact />
     </Transition>
   );

@@ -7,6 +7,7 @@ import {
   Thumbnail,
   Transition,
 } from '@/layout';
+import { Partition } from '@/components';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
@@ -21,10 +22,14 @@ export default function Home() {
       <Navbar tone='dark' />
       <Header />
       <main>
+        <Partition name='About' index='01' />
         <Description />
+        <Partition name='Work' index='02' />
         <Thumbnail />
+        <Partition name='Gallery' index='03' />
         <Project />
       </main>
+      <Partition name='Contact' index='04' />
       <Contact />
     </Transition>
   );

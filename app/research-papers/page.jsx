@@ -1,3 +1,4 @@
+import { Partition } from '@/components';
 import {
   Contact,
   Navbar,
@@ -18,7 +19,9 @@ export default function ResearchPapers() {
     <Transition>
       <Navbar tone='dark' />
       <ResearchHero />
+      <Partition name='Papers' index='01' />
       <ResearchList />
+      <Partition name='Contact' index='02' />
       <Contact />
     </Transition>
   );
