@@ -22,11 +22,10 @@ const BG = 'bg-[#0b1f14]';
 const CURVE_FILL = 'fill-[#0b1f14]';
 
 /**
- * Greeting text colour: only the site's main theme colour (lime), taken from
- * the backdrop palette: lime -> chartreuse -> pale lime.
+ * Greeting colour: ONE flat, light lime (the same pale lime as the text
+ * selection in the hero), no gradient. It reads softly on the deep green.
  */
-const TEXT_GRADIENT =
-  'linear-gradient(100deg, #b6f500 0%, #c8f56e 50%, #d6f88c 100%)';
+const TEXT_COLOR = 'text-[#d8f6a2]';
 
 /**
  * Timing (ms). The whole intro is FIRST + (greetings - 1) * EACH, and the
@@ -80,19 +79,15 @@ export function Preloader() {
       {width > 0 ? (
         <>
           <MotionComponent
-            className='relative text-2xl font-medium md:text-4xl'
+            className={`relative text-lg font-medium md:text-2xl ${TEXT_COLOR}`}
             variants={fade}
             initial='initial'
             animate='enter'
           >
-            <Dot size={40} className='me-1 text-[#b6f500]' strokeWidth={4} />
+            <Dot size={28} className='me-1' strokeWidth={3.5} />
             <p
               lang={greeting.lang}
-              className='inline-block bg-clip-text py-1 leading-[1.6] text-transparent'
-              style={{
-                backgroundImage: TEXT_GRADIENT,
-                WebkitBackgroundClip: 'text',
-              }}
+              className='inline-block py-1 leading-[1.6]'
             >
               {greeting.text}
             </p>
