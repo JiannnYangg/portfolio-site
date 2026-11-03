@@ -107,7 +107,10 @@ export function Description() {
   });
 
   return (
-    <article className='container relative'>
+    /* lg:pb-10: extra room under the section. The circle is pinned a fixed
+       distance above the bottom edge, so this pushes it further down, clear
+       of the "Distribution." text, without moving it closer to the line. */
+    <article className='container relative lg:pb-10'>
       <Wrapper>
         <div className='basis-full lg:basis-[54%]'>
           <Frame>
