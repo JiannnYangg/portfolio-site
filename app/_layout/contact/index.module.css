@@ -1,21 +1,14 @@
 /*
  * Contact footer (see index.jsx).
  *
- * The glass field: every tile is an absolutely placed cell of an
- * `--ft-cols` x `--ft-rows` grid. All tiles draw the SAME big gradient
- * (`--ft-bloom`), each one shifted so it shows its own slice, which makes the
- * colour flow across tiles like light through a glass wall instead of every
- * tile having its own colour. A tile's face (gloss, rim light) is a
- * pseudo-element inset by `--ft-gap`, so the gaps between tiles show the raw
- * bloom, a little deeper than the faces.
- *
- * Tiles beyond the current column / row count sit outside the grid box and
- * are clipped by it, so one fixed set of markup serves every screen size.
+ * The background is one image (public/images/footer-bg.png) painted on the
+ * footer itself, anchored to the bottom so the green part always sits behind
+ * the details. `--ft-cols` / `--ft-rows` are only used to place the text and
+ * to keep the footer the same height it has always had at each breakpoint.
  */
 .root {
   --ft-cols: 8;
   --ft-rows: 13;
-  --ft-gap: 0;
   --ft-ink: #0b1f14;
   --ft-black: #1c1d21;
   --ft-grey: #8d8f96;
@@ -30,6 +23,10 @@
   overflow: hidden;
   color: var(--ft-ink);
   background-color: var(--paper);
+  background-image: url('/images/footer-bg.png');
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: cover;
   font-synthesis: none;
 }
 
@@ -65,26 +62,6 @@
   .root {
     --ft-cols: 22;
   }
-}
-
-/* Column lines: one hairline at the end of every tile column, so the type
-   and the tiles below share one grid. A dark groove with a white edge. */
-.root::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: linear-gradient(
-    to right,
-    transparent calc(100% - 2px),
-    rgb(15 15 25 / 6%) calc(100% - 2px),
-    rgb(15 15 25 / 6%) calc(100% - 1px),
-    rgb(255 255 255 / 90%) calc(100% - 1px),
-    rgb(255 255 255 / 90%) 100%
-  );
-  background-size: calc(100% / var(--ft-cols)) 100%;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 7rem);
 }
 
 .focusable:focus-visible {
@@ -209,133 +186,29 @@
   }
 }
 
-/* ---------- bottom half: the glass ---------- */
+/* ---------- bottom half: the details ---------- */
 .glass {
   position: relative;
   display: grid;
 }
 
-.grid {
-  --ft-bloom:
-    radial-gradient(
-      ellipse 26% 42% at 54% 82%,
-      #2f9f3a 0%,
-      rgb(47 159 58 / 0%) 100%
-    ),
-    radial-gradient(
-      ellipse 36% 52% at 44% 68%,
-      #8de000 0%,
-      rgb(141 224 0 / 0%) 100%
-    ),
-    radial-gradient(
-      ellipse 32% 48% at 84% 92%,
-      #62e0bd 0%,
-      rgb(98 224 189 / 0%) 100%
-    ),
-    radial-gradient(
-      ellipse 44% 66% at 10% 76%,
-      #b6f500 0%,
-      rgb(182 245 0 / 0%) 100%
-    ),
-    radial-gradient(
-      ellipse 40% 55% at 68% 16%,
-      #f1fba8 0%,
-      rgb(241 251 168 / 0%) 100%
-    ),
-    radial-gradient(
-      ellipse 28% 42% at 100% 100%,
-      rgb(243 243 245 / 90%) 0%,
-      rgb(243 243 245 / 0%) 100%
-    ),
-    linear-gradient(180deg, #f0fcc8 0%, #dcf99b 55%, #cff390 100%);
-
-  position: relative;
+/* Keeps this half exactly as tall as it was before, so the text sits where
+   it always did. The content below shares the same grid cell. */
+.glass::before {
+  content: '';
   grid-area: 1 / 1;
-  align-self: end;
-  width: 100%;
   height: calc(var(--ft-rows) * 100vw / var(--ft-cols));
-  overflow: hidden;
   pointer-events: none;
-  transition: --ft-spot 0.45s ease;
-  mask-image: linear-gradient(
-    to right,
-    rgb(0 0 0 / 30%) 0%,
-    #000 10%,
-    #000 68%,
-    rgb(0 0 0 / 18%) 100%
-  );
 }
 
-/* Where aspect-ratio exists the height follows the width exactly */
 @supports (aspect-ratio: 1) {
-  .grid {
+  .glass::before {
     height: auto;
     aspect-ratio: var(--ft-cols) / var(--ft-rows);
   }
 }
 
-.tile {
-  position: absolute;
-  top: calc(var(--ft-r) * 100% / var(--ft-rows));
-  left: calc(var(--ft-c) * 100% / var(--ft-cols));
-  width: calc(100% / var(--ft-cols));
-  height: calc(100% / var(--ft-rows));
-  background-image:
-    radial-gradient(
-      circle 14rem at var(--ft-mx, 50%) var(--ft-my, 50%),
-      rgb(255 255 255 / calc(var(--ft-spot, 0) * 55%)),
-      rgb(255 255 255 / 0%)
-    ),
-    var(--ft-bloom);
-  opacity: var(--ft-o, 1);
-  background-repeat: no-repeat;
-  background-position: calc(var(--ft-c) / (var(--ft-cols) - 1) * 100%)
-    calc(var(--ft-r) / (var(--ft-rows) - 1) * 100%);
-  background-size: calc(var(--ft-cols) * 100%) calc(var(--ft-rows) * 100%);
-}
-
-.tile::before {
-  content: '';
-  position: absolute;
-  inset: var(--ft-gap);
-  border-radius: 15%;
-  background-image:
-    radial-gradient(
-      130% 100% at 28% 8%,
-      rgb(255 255 255 / var(--ft-g, 20%)),
-      rgb(255 255 255 / 0%) 62%
-    ),
-    linear-gradient(
-      155deg,
-      rgb(255 255 255 / 22%),
-      rgb(255 255 255 / 0%) 42%,
-      rgb(10 70 20 / 10%) 100%
-    );
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 16%),
-    inset 0 1px 1px rgb(255 255 255 / 42%),
-    inset 0 -1px 2px rgb(0 70 10 / 8%),
-    inset 0 0 0.9rem rgb(255 255 255 / 14%);
-}
-
-/* The one orchestrated moment: tiles pop in as a wave from the bottom left.
-   `armed` parks them hidden; `in` releases them, each after a delay that
-   grows with its column and its height. */
-.root[data-phase='armed'] .tile {
-  opacity: 0;
-  transform: scale(0.8);
-}
-
-.root[data-phase='in'] .tile {
-  transition:
-    opacity 0.8s ease,
-    transform 1s var(--ft-ease);
-  transition-delay: calc(
-    var(--ft-c) * 32ms + (var(--ft-rows) - var(--ft-r)) * 30ms
-  );
-}
-
-/* ---------- the writing on the glass ---------- */
+/* ---------- the writing ---------- */
 .content {
   position: relative;
   z-index: 1;
@@ -532,7 +405,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tile,
   .star,
   .upIcon {
     transform: none;
@@ -541,8 +413,7 @@
 }
 
 @media print {
-  .root::before,
-  .grid {
-    display: none;
+  .root {
+    background-image: none;
   }
 }

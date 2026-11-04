@@ -75,15 +75,6 @@
   }
 }
 
-/* Footer glass lens (see layout/contact). Registered so the glow can fade in
-   and out as a number; browsers without @property just switch it on and off
-   (the footer always reads it with a fallback value). */
-@property --ft-spot {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-
 /* Pinned showcase (see layout/showcase). The section is one screen plus the
    scroll length (--showcase-travel, set from the carousel config); its stage
    is exactly one screen and sticks to the top while that scroll length is

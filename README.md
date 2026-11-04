@@ -18,7 +18,7 @@ Open http://localhost:3000.
 - Social links: `app/_data/social-medias.js`
 - Site title and SEO: `app/_config/metadata.config.js`
 - Footer email address: `app/_layout/contact/config.js`
-- Footer glass-tile skyline (steps) and grid size: `app/_layout/contact/config.js`, `index.module.css`
+- Footer background image: `public/images/footer-bg.png`
 
 Set `NEXT_PUBLIC_SITE_URL` to your live domain when you deploy.
 

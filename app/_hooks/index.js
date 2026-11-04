@@ -7,6 +7,5 @@ export * from './use-magnetic';
 export * from './use-offcanvas-toggle';
 export * from './use-parallax-slider';
 export * from './use-project-slider';
-export * from './use-reveal-phase';
 export * from './use-scroll-fade';
 export * from './use-time-out';
