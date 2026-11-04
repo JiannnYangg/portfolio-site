@@ -1,16 +1,12 @@
 /*
  * Contact footer (see index.jsx).
  *
- * The background is one image (public/images/footer-bg.png) painted on a
- * layer behind the footer (.root::before), anchored to the bottom so the
- * green part always sits behind the details. The layer is masked so its top
- * edge fades out: there the page's own background shows through, which is
- * what makes the footer and the section above it read as one surface instead
- * of two stacked boxes.
- *
- * The two dashed vertical guides are the same ones the rest of the site draws
- * (see _components/partition), repeated here because the footer's image would
- * otherwise cover them.
+ * The footer sits on solid paper, which is what ends the site's dashed
+ * vertical guides cleanly at its top edge. The background is one image
+ * (public/images/footer-bg.png) painted on a layer behind the content
+ * (.root::before), anchored to the bottom so the green part always sits
+ * behind the details. That layer is masked so its top edge fades into the
+ * paper, so the footer and the section above it read as one surface.
  *
  * `--ft-cols` / `--ft-rows` are only used to place the text and to keep the
  * footer the same height it has always had at each breakpoint.
@@ -27,19 +23,16 @@
   --ft-glass: rgb(255 255 255 / 22%);
   --ft-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* same as PARTITION_LINE and GUIDE_X in _components/partition */
-  --ft-dash: #2f3550;
-  --ft-guide-x: calc((100% - min(100%, 1400px)) / 2 + 2rem);
-
   position: relative;
   isolation: isolate;
   overflow: hidden;
   color: var(--ft-ink);
+  background-color: var(--paper);
   font-synthesis: none;
 }
 
-/* The image layer. Fully see-through at the very top, solid from --ft-fade
-   down. */
+/* The image layer. Fully see-through at the very top (paper shows), solid
+   from --ft-fade down. */
 .root::before {
   --ft-fade: clamp(6rem, 16vw, 14rem);
 
@@ -53,30 +46,6 @@
   background-position: center bottom;
   background-size: cover;
   mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft-fade));
-}
-
-/* Dashed guides: same look and same x as the ones on the rest of the page */
-.guide {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: -1;
-  display: block;
-  width: 2px;
-  pointer-events: none;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--ft-dash) 0 7px,
-    transparent 7px 13px
-  );
-}
-
-.guideLeft {
-  left: calc(var(--ft-guide-x) - 1px);
-}
-
-.guideRight {
-  right: calc(var(--ft-guide-x) - 1px);
 }
 
 @media (width >= 480px) {
@@ -462,8 +431,7 @@
 }
 
 @media print {
-  .root::before,
-  .guide {
+  .root::before {
     display: none;
   }
 }
