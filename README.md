@@ -17,6 +17,8 @@ Open http://localhost:3000.
 - Research papers: `app/_data/research-papers.js`
 - Social links: `app/_data/social-medias.js`
 - Site title and SEO: `app/_config/metadata.config.js`
+- Footer email address: `app/_layout/contact/config.js`
+- Footer glass-tile skyline (steps) and grid size: `app/_layout/contact/config.js`, `index.module.css`
 
 Set `NEXT_PUBLIC_SITE_URL` to your live domain when you deploy.
 
@@ -27,4 +29,3 @@ Set `NEXT_PUBLIC_SITE_URL` to your live domain when you deploy.
 3. Optional: add your custom domain under Settings, Domains, and set
    `NEXT_PUBLIC_SITE_URL` (for example `https://yourname.com`) under
    Settings, Environment Variables, then redeploy.
-

@@ -1,0 +1,548 @@
+/*
+ * Contact footer (see index.jsx).
+ *
+ * The glass field: every tile is an absolutely placed cell of an
+ * `--ft-cols` x `--ft-rows` grid. All tiles draw the SAME big gradient
+ * (`--ft-bloom`), each one shifted so it shows its own slice, which makes the
+ * colour flow across tiles like light through a glass wall instead of every
+ * tile having its own colour. A tile's face (gloss, rim light) is a
+ * pseudo-element inset by `--ft-gap`, so the gaps between tiles show the raw
+ * bloom, a little deeper than the faces.
+ *
+ * Tiles beyond the current column / row count sit outside the grid box and
+ * are clipped by it, so one fixed set of markup serves every screen size.
+ */
+.root {
+  --ft-cols: 8;
+  --ft-rows: 13;
+  --ft-gap: 0;
+  --ft-ink: #0b1f14;
+  --ft-black: #1c1d21;
+  --ft-grey: #8d8f96;
+  --ft-grey-soft: #b7b9bf;
+  --ft-green: #3a7d00;
+  --ft-line: rgb(11 31 20 / 38%);
+  --ft-glass: rgb(255 255 255 / 22%);
+  --ft-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--ft-ink);
+  background-color: var(--paper);
+  font-synthesis: none;
+}
+
+@media (width >= 480px) {
+  .root {
+    --ft-cols: 10;
+    --ft-rows: 9;
+  }
+}
+
+@media (width >= 768px) {
+  .root {
+    --ft-cols: 12;
+    --ft-rows: 8;
+  }
+}
+
+@media (width >= 1100px) {
+  .root {
+    --ft-cols: 14;
+    --ft-rows: 8;
+  }
+}
+
+@media (width >= 1500px) {
+  .root {
+    --ft-cols: 18;
+    --ft-rows: 8;
+  }
+}
+
+@media (width >= 1900px) {
+  .root {
+    --ft-cols: 22;
+  }
+}
+
+/* Column lines: one hairline at the end of every tile column, so the type
+   and the tiles below share one grid. A dark groove with a white edge. */
+.root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(
+    to right,
+    transparent calc(100% - 2px),
+    rgb(15 15 25 / 6%) calc(100% - 2px),
+    rgb(15 15 25 / 6%) calc(100% - 1px),
+    rgb(255 255 255 / 90%) calc(100% - 1px),
+    rgb(255 255 255 / 90%) 100%
+  );
+  background-size: calc(100% / var(--ft-cols)) 100%;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 7rem);
+}
+
+.focusable:focus-visible {
+  outline: 2px solid var(--ft-ink);
+  outline-offset: 4px;
+}
+
+/* ---------- top half: the call to action ---------- */
+.top {
+  position: relative;
+  padding-block: clamp(3.5rem, 9vw, 6.5rem) clamp(2.5rem, 6vw, 4.5rem);
+  padding-inline: calc(100% / var(--ft-cols));
+}
+
+.tag {
+  margin: 0 0 clamp(1.5rem, 3.5vw, 3rem);
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
+  font-size: clamp(0.8rem, 1.5vw, 1.2rem);
+  font-weight: 500;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--ft-grey);
+}
+
+.tag span {
+  display: block;
+}
+
+.tag span + span {
+  color: var(--ft-grey-soft);
+}
+
+.headline {
+  margin: 0;
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
+  font-size: clamp(2.6rem, 12.5vw, 7.75rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+/* Each line is as wide as its words (so the stars and the link can hug the
+   end of it). The bottom padding keeps the "g" from being cut off by the
+   gradient fill, which only paints inside the line box. */
+.line {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding-block-end: 0.12em;
+  margin-block-end: -0.12em;
+}
+
+.ink {
+  color: var(--ft-black);
+  background-image: linear-gradient(180deg, #0d0e11 20%, #55575e 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.lime {
+  color: var(--ft-green);
+  background-image: linear-gradient(180deg, #4f9d00 10%, #2c6600 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.star {
+  position: absolute;
+  color: #3d4152;
+  transition: transform 0.7s var(--ft-ease);
+}
+
+.starBig {
+  top: 0.02em;
+  left: calc(100% + 0.08em);
+  width: 0.34em;
+  height: 0.34em;
+}
+
+.starSmall {
+  top: -0.2em;
+  left: calc(100% + 0.4em);
+  width: 0.15em;
+  height: 0.15em;
+  color: #8a8fa3;
+}
+
+.touch {
+  display: block;
+  margin-block-start: 0.6rem;
+  font-size: clamp(1rem, 2.1vw, 1.9rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-decoration: underline transparent;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.22em;
+  color: var(--ft-green);
+  -webkit-text-fill-color: currentcolor;
+  transition: text-decoration-color 0.3s ease;
+}
+
+.touch span {
+  display: block;
+}
+
+.touch:hover,
+.touch:focus-visible {
+  text-decoration-color: currentcolor;
+}
+
+/* From here the link fits beside "together!" instead of under it */
+@media (width >= 800px) {
+  .touch {
+    position: absolute;
+    bottom: 0.32em;
+    left: calc(100% + 0.28em);
+    margin-block-start: 0;
+    white-space: nowrap;
+  }
+}
+
+/* ---------- bottom half: the glass ---------- */
+.glass {
+  position: relative;
+  display: grid;
+}
+
+.grid {
+  --ft-bloom:
+    radial-gradient(
+      ellipse 26% 42% at 54% 82%,
+      #2f9f3a 0%,
+      rgb(47 159 58 / 0%) 100%
+    ),
+    radial-gradient(
+      ellipse 36% 52% at 44% 68%,
+      #8de000 0%,
+      rgb(141 224 0 / 0%) 100%
+    ),
+    radial-gradient(
+      ellipse 32% 48% at 84% 92%,
+      #62e0bd 0%,
+      rgb(98 224 189 / 0%) 100%
+    ),
+    radial-gradient(
+      ellipse 44% 66% at 10% 76%,
+      #b6f500 0%,
+      rgb(182 245 0 / 0%) 100%
+    ),
+    radial-gradient(
+      ellipse 40% 55% at 68% 16%,
+      #f1fba8 0%,
+      rgb(241 251 168 / 0%) 100%
+    ),
+    radial-gradient(
+      ellipse 28% 42% at 100% 100%,
+      rgb(243 243 245 / 90%) 0%,
+      rgb(243 243 245 / 0%) 100%
+    ),
+    linear-gradient(180deg, #f0fcc8 0%, #dcf99b 55%, #cff390 100%);
+
+  position: relative;
+  grid-area: 1 / 1;
+  align-self: end;
+  width: 100%;
+  height: calc(var(--ft-rows) * 100vw / var(--ft-cols));
+  overflow: hidden;
+  pointer-events: none;
+  transition: --ft-spot 0.45s ease;
+  mask-image: linear-gradient(
+    to right,
+    rgb(0 0 0 / 30%) 0%,
+    #000 10%,
+    #000 68%,
+    rgb(0 0 0 / 18%) 100%
+  );
+}
+
+/* Where aspect-ratio exists the height follows the width exactly */
+@supports (aspect-ratio: 1) {
+  .grid {
+    height: auto;
+    aspect-ratio: var(--ft-cols) / var(--ft-rows);
+  }
+}
+
+.tile {
+  position: absolute;
+  top: calc(var(--ft-r) * 100% / var(--ft-rows));
+  left: calc(var(--ft-c) * 100% / var(--ft-cols));
+  width: calc(100% / var(--ft-cols));
+  height: calc(100% / var(--ft-rows));
+  background-image:
+    radial-gradient(
+      circle 14rem at var(--ft-mx, 50%) var(--ft-my, 50%),
+      rgb(255 255 255 / calc(var(--ft-spot, 0) * 55%)),
+      rgb(255 255 255 / 0%)
+    ),
+    var(--ft-bloom);
+  opacity: var(--ft-o, 1);
+  background-repeat: no-repeat;
+  background-position: calc(var(--ft-c) / (var(--ft-cols) - 1) * 100%)
+    calc(var(--ft-r) / (var(--ft-rows) - 1) * 100%);
+  background-size: calc(var(--ft-cols) * 100%) calc(var(--ft-rows) * 100%);
+}
+
+.tile::before {
+  content: '';
+  position: absolute;
+  inset: var(--ft-gap);
+  border-radius: 15%;
+  background-image:
+    radial-gradient(
+      130% 100% at 28% 8%,
+      rgb(255 255 255 / var(--ft-g, 20%)),
+      rgb(255 255 255 / 0%) 62%
+    ),
+    linear-gradient(
+      155deg,
+      rgb(255 255 255 / 22%),
+      rgb(255 255 255 / 0%) 42%,
+      rgb(10 70 20 / 10%) 100%
+    );
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 16%),
+    inset 0 1px 1px rgb(255 255 255 / 42%),
+    inset 0 -1px 2px rgb(0 70 10 / 8%),
+    inset 0 0 0.9rem rgb(255 255 255 / 14%);
+}
+
+/* The one orchestrated moment: tiles pop in as a wave from the bottom left.
+   `armed` parks them hidden; `in` releases them, each after a delay that
+   grows with its column and its height. */
+.root[data-phase='armed'] .tile {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.root[data-phase='in'] .tile {
+  transition:
+    opacity 0.8s ease,
+    transform 1s var(--ft-ease);
+  transition-delay: calc(
+    var(--ft-c) * 32ms + (var(--ft-rows) - var(--ft-r)) * 30ms
+  );
+}
+
+/* ---------- the writing on the glass ---------- */
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  grid-area: 1 / 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(2.5rem, 6vw, 5rem);
+  padding-block: calc(150% / var(--ft-cols)) clamp(1.75rem, 3.2vw, 3rem);
+  padding-inline: calc(100% / var(--ft-cols));
+}
+
+.statement {
+  margin: 0;
+  font-size: clamp(2.1rem, 4.6vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.statement span {
+  display: block;
+}
+
+.quiet {
+  color: rgb(11 31 20 / 55%);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block-start: clamp(1.25rem, 2.4vw, 2rem);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  min-height: 2.5rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--ft-line);
+  border-radius: 999px;
+  background-color: var(--ft-glass);
+  font: inherit;
+  font-size: 0.875rem;
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pill:hover {
+  background-color: rgb(255 255 255 / 55%);
+}
+
+.base {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 1.5rem;
+  row-gap: clamp(1.75rem, 3.5vw, 3rem);
+  align-items: start;
+}
+
+.links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
+  font-size: clamp(0.9rem, 1.45vw, 1.2rem);
+  font-weight: 500;
+  line-height: 1.12;
+  text-transform: uppercase;
+}
+
+.link,
+.muted {
+  display: block;
+  width: fit-content;
+  color: inherit;
+  text-decoration: underline transparent;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color 0.3s ease;
+}
+
+.link:hover {
+  text-decoration-color: currentcolor;
+}
+
+.muted {
+  color: rgb(11 31 20 / 55%);
+  cursor: default;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.25rem;
+  margin: 0;
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.meta dd {
+  margin: 0;
+}
+
+.meta dt {
+  color: rgb(11 31 20 / 58%);
+}
+
+.up {
+  display: flex;
+  grid-row: 1 / 3;
+  grid-column: 2;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
+  font-size: clamp(0.9rem, 1.45vw, 1.2rem);
+  font-weight: 500;
+  line-height: 1.12;
+  text-align: right;
+  text-transform: uppercase;
+  color: inherit;
+  cursor: pointer;
+}
+
+.upText span {
+  display: block;
+}
+
+.upIcon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--ft-line);
+  border-radius: 0.9rem;
+  background-color: var(--ft-glass);
+  transition:
+    background-color 0.3s ease,
+    transform 0.4s var(--ft-ease);
+}
+
+.up:hover .upIcon {
+  background-color: rgb(255 255 255 / 55%);
+  transform: translateY(-3px);
+}
+
+.line:hover .starBig {
+  transform: rotate(90deg);
+}
+
+/* Narrow phones: the button drops under the details instead of squeezing them */
+@media (width < 480px) {
+  .base {
+    grid-template-columns: 1fr;
+  }
+
+  .up {
+    grid-row: 3;
+    grid-column: 1;
+    flex-direction: row-reverse;
+    gap: 0.9rem;
+    align-items: center;
+    justify-content: flex-end;
+    text-align: left;
+  }
+}
+
+/* Windows high-contrast mode drops backgrounds, which would leave the
+   gradient-filled words transparent: give them a real colour back. */
+@media (forced-colors: active) {
+  .ink,
+  .lime {
+    background-image: none;
+    color: canvastext;
+    -webkit-text-fill-color: currentcolor;
+  }
+
+  .pill,
+  .upIcon {
+    border-color: buttontext;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .star,
+  .upIcon {
+    transform: none;
+    transition: none;
+  }
+}
+
+@media print {
+  .root::before,
+  .grid {
+    display: none;
+  }
+}
