@@ -17,20 +17,20 @@ const IOS_FONT =
 const CALLOUT_ITEMS = ['Copy', 'Look Up', 'Translate'];
 
 /**
- * Timeline (seconds). The header itself slides in at 2.9s (see variants.js,
- * right as the 2.5s preloader leaves), so everything inside it is sequenced
+ * Timeline (seconds). The header itself slides in at 2.4s (see variants.js,
+ * right as the 2.0s preloader leaves), so everything inside it is sequenced
  * from there:
  * words rise in -> CTA rises in -> selection highlight -> handles -> callout
  * -> light sweeps.
  */
-const HERO_START = 2.9;
+const HERO_START = 2.4;
 const WORD_DELAY = HERO_START + 0.15;
 const WORD_STAGGER = 0.07; // seconds between consecutive words
 const WORD_DURATION = 0.8;
-const HIGHLIGHT_DELAY = 3.8;
-const HANDLES_DELAY = 4.3;
-const CALLOUT_DELAY = 4.6;
-const MARKER_DELAY = 4.5; // marker bar behind "seen." sweeps in once the last word has settled
+const HIGHLIGHT_DELAY = 3.3;
+const HANDLES_DELAY = 3.8;
+const CALLOUT_DELAY = 4.1;
+const MARKER_DELAY = 4.0; // marker bar behind "seen." sweeps in once the last word has settled
 const SHINE_FIRST_DELAY = CALLOUT_DELAY + 0.5; // first pass 0.5s after the bubble appears
 const SHINE_DURATION = 2.2; // slow sweep
 const SHINE_REPEAT_DELAY = 0.5; // 0.5s pause between passes

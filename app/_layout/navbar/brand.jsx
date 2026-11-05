@@ -9,7 +9,7 @@ import { scrollToId } from '@/hooks';
  * Same light sweep as the iPhone edit menu in the hero: a slim diagonal
  * sheen that slowly passes over the logo, then a 0.5s pause, then again.
  */
-const SHINE_FIRST_DELAY = 2.8; // after the preloader has lifted
+const SHINE_FIRST_DELAY = 2.3; // after the preloader has lifted
 const SHINE_DURATION = 2.2; // slow sweep
 const SHINE_REPEAT_DELAY = 0.5; // 0.5s pause between passes
 
