@@ -18,14 +18,25 @@
  * has been reached. Needs `overflow: clip` (not hidden) on the page shell,
  * otherwise `position: sticky` has nothing to stick to — see globals.css.
  *
+ * The entry animation (cards rise, then grow) is NOT tied to loading or to a
+ * scroll threshold any more. It starts only when the stage is really on screen
+ * and, while it plays, the page is held in place (see ./scroll-lock). That is
+ * what stops a fast scroller from being several cards deep before the entry
+ * ends, which used to skip the first cards. The hold is easy to leave: scrolling
+ * up, a link click, or the fail-safe timer all release it.
+ *
  * Performance / robustness:
- * - Nothing heavy loads until the section is about to be seen: three.js and
- *   the engine are dynamically imported the first time it is 25% visible.
- * - The render loop is paused whenever the section is off screen.
+ * - three.js and the engine are fetched, and the shader compiled, while the
+ *   section is still about one screen away (so nothing hitches when it
+ *   arrives); the render loop runs only while the stage is on screen.
+ * - The scroll listener only exists while the section is within a screen of
+ *   the viewport, and reads the layout once per frame (heights are cached).
  * - Phones, tablets, small windows, reduced-motion, data-saver, low-memory /
  *   low-core devices, browsers without `overflow: clip` and browsers without
  *   WebGL get a plain CSS scroll strip (no WebGL, no three.js download, no
  *   scroll hijacking).
+ * - On devices that pass those checks but still struggle, the engine lowers
+ *   its resolution step by step (see QUALITY in ./engine).
  * - If WebGL fails or the GPU context is lost at any point, it switches to
  *   that same strip instead of leaving a blank block.
  * - A page restored from the back/forward cache replays the animation from
@@ -38,16 +49,34 @@ import { gsap } from 'gsap';
 import { createPortal } from 'react-dom';
 
 import { ENTRY, getScrollLength, PROJECTS, SCROLL, UI_ANIM } from './config';
+import { lockScroll, scrollToY } from './scroll-lock';
 import { ShowcaseStrip } from './strip';
 
 /** Same cut-off as the original carousel: a wide-screen experience */
 const MIN_VIEWPORT_WIDTH = 1025; // px
 /** The pinned stage is one screen tall (min 560px): shorter windows get the strip */
 const MIN_VIEWPORT_HEIGHT = 560; // px
-const BOOT_VISIBILITY = 0.25; // fraction of the section that boots the engine
+/** Start loading / compiling when the section is this close (viewport heights) */
+const NEAR_MARGIN = '100% 0px 100% 0px';
+/** The entry starts once this share of the stage is on screen */
+const ENTRY_VISIBILITY = 0.75;
+/** The page is only held if at least this share of the stage is on screen */
+const LOCK_VISIBILITY = 0.5;
 
 /** Page scroll length (px) of the pinned section; fixed by the config */
 const SCROLL_LENGTH = getScrollLength();
+
+/**
+ * How long the entry can possibly run (ms) plus a safety margin. It is only the
+ * fail-safe of the scroll hold: the hold normally ends with the entry itself.
+ */
+function getEntryLockMs() {
+  const n = PROJECTS.length;
+  const rise = ENTRY.stagger * Math.max(n - 1, 1) + ENTRY.riseDuration;
+  const grow = ENTRY.growDelay + ENTRY.growStagger * n + ENTRY.growDuration;
+  return Math.ceil((ENTRY.delay + rise + grow) * 1000) + 2500;
+}
+const ENTRY_LOCK_MS = getEntryLockMs();
 
 /** Used only when the section is not pinned (SCROLL.enabled = false) */
 const SECTION_HEIGHT =
@@ -134,8 +163,12 @@ export function Showcase() {
     let cancelled = false;
     let engine = null;
     let booting = false;
-    let bootObserver = null;
     let frame = 0;
+    let stageVisible = false; // is any part of the stage on screen
+    let listening = false; // scroll / resize listeners attached
+    let entryTriggered = false; // the entry is requested at most once
+    let releaseLock = null;
+    let stageHeight = stage.offsetHeight; // cached; kept fresh by resizeObserver
 
     const fail = () => {
       if (cancelled) return;
@@ -143,26 +176,75 @@ export function Showcase() {
       setMode('fallback');
     };
 
+    // Share (0..1) of the stage that is on screen right now.
+    const stageVisibleShare = () => {
+      const r = stage.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const height = Math.min(r.height, vh) || 1;
+      const seen = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+      return Math.max(0, seen) / height;
+    };
+
     // How far through the pinned scroll are we? 0 until the wrapper's top
-    // reaches the top of the screen, 1 once its last screen is showing.
+    // reaches the top of the screen, 1 once its last screen is showing. One
+    // layout read (the wrapper's rect); the stage height is cached.
     const measureProgress = () => {
       if (!SCROLL.enabled) return 0;
-      const length = wrapper.offsetHeight - stage.offsetHeight;
+      const rect = wrapper.getBoundingClientRect();
+      const length = rect.height - stageHeight;
       if (length < 1) return 0;
-      const top = wrapper.getBoundingClientRect().top;
-      return Math.min(1, Math.max(0, -top / length));
+      return Math.min(1, Math.max(0, -rect.top / length));
     };
+
+    // ---- entry: only when the stage is really there, never on a threshold ----
+    // The entry used to fire as soon as a quarter of the stage showed, while
+    // the visitor was still scrolling hard. By the time it ended the page was
+    // already several cards deep, so the first cards were skipped. Now it waits
+    // until most of the stage is on screen, glides the page onto the pin if it
+    // is not quite there, and the page is held while the entry plays.
+    const checkEntry = () => {
+      if (entryTriggered || !engine || cancelled || !ENTRY.enabled) return;
+      if (stageVisibleShare() < ENTRY_VISIBILITY) return;
+      entryTriggered = true;
+      const begin = () => {
+        if (!cancelled) engine?.beginEntry();
+      };
+      const top = wrapper.getBoundingClientRect().top;
+      if (top > 0.5) scrollToY(window.scrollY + top, begin);
+      else begin();
+    };
+
     const syncProgress = () => {
       frame = 0;
-      engine?.setProgress(measureProgress());
+      if (!engine) return;
+      engine.setProgress(measureProgress());
+      checkEntry();
     };
     const scheduleSync = () => {
       if (!frame) frame = requestAnimationFrame(syncProgress);
     };
-    if (SCROLL.enabled) {
-      window.addEventListener('scroll', scheduleSync, { passive: true });
-      window.addEventListener('resize', scheduleSync);
-    }
+
+    // The engine tells us when an entry starts / ends: hold the page for that
+    // long. If the stage is not mostly on screen (e.g. a page restored from the
+    // back/forward cache while scrolled elsewhere) nothing is held.
+    const onEntryStart = () => {
+      releaseLock?.();
+      releaseLock = null;
+      if (cancelled || stageVisibleShare() < LOCK_VISIBILITY) return;
+      releaseLock = lockScroll({
+        maxMs: ENTRY_LOCK_MS,
+        onRelease: () => {
+          releaseLock = null;
+        },
+      });
+    };
+    const onEntryDone = done => {
+      setEntryDone(done);
+      if (done) {
+        releaseLock?.();
+        releaseLock = null;
+      }
+    };
 
     const boot = async () => {
       if (booting || cancelled) return;
@@ -176,46 +258,86 @@ export function Showcase() {
         engine = createCarousel(THREE, mountRef.current, {
           cursorElement: cursorRef.current,
           scrollDriven: SCROLL.enabled,
+          deferEntry: SCROLL.enabled && ENTRY.enabled,
           onActiveChange: setActive,
           onFocusChange: setFocused,
-          onEntryDone: setEntryDone,
+          onEntryStart,
+          onEntryDone,
           onContextLost: fail,
         });
         engineRef.current = engine;
         // the page may already have scrolled while three.js was loading
         engine.setProgress(measureProgress());
+        // it was created (and its shader compiled) possibly well before the
+        // section is reached: don't keep rendering an off-screen canvas
+        if (!stageVisible) engine.pause();
+        checkEntry();
       } catch {
         fail();
       }
     };
 
-    // boot once the stage is meaningfully on screen
-    bootObserver = new IntersectionObserver(
+    // Scroll / resize listeners only exist while the section is within about
+    // a screen of the viewport; far away there is nothing to measure.
+    const listen = on => {
+      if (on === listening) return;
+      listening = on;
+      if (on) {
+        window.addEventListener('scroll', scheduleSync, { passive: true });
+        window.addEventListener('resize', scheduleSync);
+        scheduleSync();
+      } else {
+        window.removeEventListener('scroll', scheduleSync);
+        window.removeEventListener('resize', scheduleSync);
+      }
+    };
+
+    // about a screen away: start loading, and keep the scroll maths running
+    const nearObserver = new IntersectionObserver(
       entries => {
-        if (entries.some(e => e.intersectionRatio >= BOOT_VISIBILITY)) {
-          bootObserver.disconnect();
+        const near = entries.some(e => e.isIntersecting);
+        if (near) {
+          listen(true);
           boot();
+        } else {
+          listen(false);
+          // left far behind: park the row at the end it was left on
+          if (engine && SCROLL.enabled)
+            engine.setProgress(wrapper.getBoundingClientRect().top > 0 ? 0 : 1);
         }
       },
-      { threshold: BOOT_VISIBILITY },
+      { rootMargin: NEAR_MARGIN },
     );
-    bootObserver.observe(stage);
+    nearObserver.observe(wrapper);
 
     // render only while any part of the stage is on screen
     const visibilityObserver = new IntersectionObserver(entries => {
-      const visible = entries.some(e => e.isIntersecting);
-      if (visible) engine?.resume();
-      else engine?.pause();
+      stageVisible = entries.some(e => e.isIntersecting);
+      if (stageVisible) {
+        engine?.resume();
+        scheduleSync();
+      } else {
+        engine?.pause();
+      }
     });
     visibilityObserver.observe(stage);
 
+    // keep the cached stage height right when the window / fonts change it
+    const resizeObserver = new ResizeObserver(() => {
+      stageHeight = stage.offsetHeight;
+      if (listening) scheduleSync();
+    });
+    resizeObserver.observe(stage);
+
     return () => {
       cancelled = true;
-      bootObserver.disconnect();
+      nearObserver.disconnect();
       visibilityObserver.disconnect();
-      window.removeEventListener('scroll', scheduleSync);
-      window.removeEventListener('resize', scheduleSync);
+      resizeObserver.disconnect();
+      listen(false);
       if (frame) cancelAnimationFrame(frame);
+      releaseLock?.(); // never leave the page held
+      releaseLock = null;
       engine?.destroy();
       engineRef.current = null;
       revealPlayedRef.current = false;
