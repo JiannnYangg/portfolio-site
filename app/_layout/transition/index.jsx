@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
+import { PRELOADER_DURATION_MS } from '@/data';
 import { scrollToId, useLenis, useTimeOut } from '@/hooks';
 
 import { Preloader } from './preloader';
@@ -43,9 +44,9 @@ export function Transition({ children }) {
         setTimeout(() => scrollToId(hash.slice(1)), 100);
       }
     },
-    //? Must equal FIRST_MS + (greetings - 1) * EACH_MS in preloader/index.jsx
-    //? (600 + 5 * 300): the last greeting plays fully, then the screen leaves
-    duration: 2100,
+    //? Same constant the preloader reads (greetings * 0.5 s): the last greeting
+    //? plays fully, then the screen leaves
+    duration: PRELOADER_DURATION_MS,
     deps: [],
   });
 

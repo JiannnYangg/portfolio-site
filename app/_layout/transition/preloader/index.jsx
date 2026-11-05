@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Dot } from 'lucide-react';
 
 import { Center } from '@/components';
-import { preloaderGreetings } from '@/data';
+import { PRELOADER_GREETING_MS, preloaderGreetings } from '@/data';
 import { useDimensions, useTimeOut } from '@/hooks';
 
 import { fade, slideUp } from './variants';
@@ -28,13 +28,11 @@ const CURVE_FILL = 'fill-[#0b1f14]';
 const TEXT_COLOR = 'text-[#d8f6a2]';
 
 /**
- * Timing (ms). The whole intro is FIRST + (greetings - 1) * EACH, and the
- * Transition timer must match it so the last greeting gets its full time and
- * the screen slides away straight after it, with no extra pause.
+ * Timing: every greeting gets PRELOADER_GREETING_MS (0.5 s), including the
+ * first one. The total (greetings * 0.5 s) is PRELOADER_DURATION_MS, which the
+ * Transition timer reads too, so the last greeting always gets its full time
+ * and the screen slides away straight after it.
  */
-const FIRST_MS = 600;
-const EACH_MS = 300;
-
 export function Preloader() {
   const [index, setIndex] = useState(0);
   const { width, height } = useDimensions();
@@ -46,7 +44,7 @@ export function Preloader() {
     callback: () => {
       setIndex(prevIndex => Math.min(prevIndex + 1, lastIndex));
     },
-    duration: index === 0 ? FIRST_MS : EACH_MS,
+    duration: PRELOADER_GREETING_MS,
     deps: [index],
   });
 
