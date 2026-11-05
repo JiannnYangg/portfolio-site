@@ -14,11 +14,11 @@ import Image from 'next/image';
 
 /**
  * Timeline (seconds), continuing the headline sequence in index.jsx:
- * the header lands at 2.5s, words rise 2.65s -> ~4.1s, so the logos pop in
- * right behind the words (reading order) and have all settled by the time
- * the iOS callout appears at 4.2s.
+ * the header lands at 2.9s (after the 2.5s preloader), words rise 3.05s ->
+ * ~4.5s, so the logos pop in right behind the words (reading order) and have
+ * all settled by the time the iOS callout appears at 4.6s.
  */
-const LOGOS_START = 3.1;
+const LOGOS_START = 3.5;
 const LOGO_STAGGER = 0.13;
 
 /** Scroll: logos fade out and drift up at different speeds (depth) */
