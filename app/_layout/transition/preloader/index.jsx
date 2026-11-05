@@ -28,8 +28,8 @@ const CURVE_FILL = 'fill-[#0b1f14]';
 const TEXT_COLOR = 'text-[#d8f6a2]';
 
 /**
- * Timing: every greeting gets PRELOADER_GREETING_MS (0.5 s), including the
- * first one. The total (greetings * 0.5 s) is PRELOADER_DURATION_MS, which the
+ * Timing: every greeting gets PRELOADER_GREETING_MS (0.4 s), including the
+ * first one. The total (greetings * 0.4 s) is PRELOADER_DURATION_MS, which the
  * Transition timer reads too, so the last greeting always gets its full time
  * and the screen slides away straight after it.
  */

@@ -33,7 +33,7 @@ function HeroWord({ index, children }) {
         transition={{
           duration: 0.8,
           ease: [0.33, 1, 0.68, 1],
-          delay: 2.9 + index * 0.1,
+          delay: 2.4 + index * 0.1,
         }}
       >
         {children}

@@ -44,7 +44,7 @@ export function Transition({ children }) {
         setTimeout(() => scrollToId(hash.slice(1)), 100);
       }
     },
-    //? Same constant the preloader reads (greetings * 0.5 s): the last greeting
+    //? Same constant the preloader reads (greetings * 0.4 s): the last greeting
     //? plays fully, then the screen leaves
     duration: PRELOADER_DURATION_MS,
     deps: [],

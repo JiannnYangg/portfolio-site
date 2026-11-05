@@ -35,7 +35,7 @@ export function Navbar({ tone = 'light', partition }) {
           <Partition
             name={partition.name}
             index={partition.index}
-            delay={2.6}
+            delay={2.1}
           />
         </div>
       ) : null}
