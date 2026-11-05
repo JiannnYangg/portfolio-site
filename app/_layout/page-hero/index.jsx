@@ -8,6 +8,12 @@ import { useScrollFade } from '@/hooks';
 import { slideUp } from '../header/variants';
 
 /**
+ * Same inset the home intro box (Description) and Skills use, so text sits
+ * inside the dashed guides instead of touching them.
+ */
+export const PAGE_INSET = 'clamp(2.5em, 4vw, 8em)';
+
+/**
  * One title word: rises out of a mask on load (same as the home headline),
  * then fades and lifts with scroll, word by word. The scroll motion is on the
  * outer element so the mask travels with the word instead of clipping it.
@@ -40,9 +46,11 @@ function HeroWord({ index, children }) {
  * Hero shared by inner pages (About, Research Papers). It is transparent:
  * the paper / blooms / grid backdrop is the same site-wide layer the home
  * page uses, so every page reads as one surface.
- * @param {{ label: string, title: string }} props
+ * `inset` pulls the text in from the dashed guides (same inset as the rest of
+ * the site); it is opt-in so other pages keep their current look.
+ * @param {{ label: string, title: string, inset?: boolean }} props
  */
-export function PageHero({ label, title }) {
+export function PageHero({ label, title, inset = false }) {
   const words = title.split(' ');
 
   return (
@@ -53,23 +61,25 @@ export function PageHero({ label, title }) {
       animate='enter'
     >
       <div className='container relative pb-[clamp(3em,9vh,7em)] pt-40'>
-        <div className='mb-6 flex items-center gap-4 md:mb-10'>
-          <MoveDownRight size={28} strokeWidth={1.25} />
-          <span className='text-sm uppercase tracking-wide opacity-80'>
-            {label}
-          </span>
-        </div>
+        <div style={inset ? { paddingInline: PAGE_INSET } : undefined}>
+          <div className='mb-6 flex items-center gap-4 md:mb-10'>
+            <MoveDownRight size={28} strokeWidth={1.25} />
+            <span className='text-sm uppercase tracking-wide opacity-80'>
+              {label}
+            </span>
+          </div>
 
-        <h1
-          className='leading-[1.02]'
-          style={{ fontSize: 'clamp(3.25em, 10vw, 11em)' }}
-        >
-          {words.map((word, index) => (
-            <HeroWord key={`${word}-${index}`} index={index}>
-              {word}
-            </HeroWord>
-          ))}
-        </h1>
+          <h1
+            className='leading-[1.02]'
+            style={{ fontSize: 'clamp(3.25em, 10vw, 11em)' }}
+          >
+            {words.map((word, index) => (
+              <HeroWord key={`${word}-${index}`} index={index}>
+                {word}
+              </HeroWord>
+            ))}
+          </h1>
+        </div>
       </div>
     </motion.header>
   );
