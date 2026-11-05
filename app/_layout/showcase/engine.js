@@ -23,6 +23,23 @@
 //   - the pixel ratio is also limited so the buffer never exceeds the GPU's
 //     maximum texture size (ultra-wide / 4K windows)
 //
+// Performance + robustness changes (this is the "optimize heavily" pass):
+//   - deferEntry: the host decides WHEN the entry starts (beginEntry()), so it
+//     can wait until the section is really on screen instead of firing while
+//     the visitor is still scrolling toward it. onEntryStart() tells the host
+//     the entry is running (it holds the page still until it ends).
+//   - the lens shader takes ONE texture sample wherever there is no chromatic
+//     dispersion (the whole lens interior, and everywhere while the entry /
+//     focus fades dispersion out). Identical picture, up to 16x fewer samples.
+//   - no MSAA on the main canvas (it only draws one full-screen quad)
+//   - textures are uploaded to the GPU as soon as they load (initTexture), so
+//     the first frames of the entry don't hitch on a burst of uploads
+//   - adaptive quality: frame time is watched and, on a device that can't keep
+//     up, the pixel ratio and dispersion samples step down (never back up)
+//   - the row's travel speed is capped (a fraction of the screen per second),
+//     so a huge scroll jump sweeps through the cards in order instead of
+//     teleporting past them
+//
 // The carousel itself — three.js + GSAP, no React. An infinite flat row of
 // image panels rendered into an offscreen buffer, then drawn to screen
 // through the liquid-glass lens shader. The React component just mounts this
@@ -31,12 +48,14 @@
 //   const carousel = createCarousel(THREE, mountEl, {
 //     cursorElement,           // optional "View" label that trails the pointer
 //     scrollDriven,            // true = page scroll drives the row (setProgress)
+//     deferEntry,              // true = wait for beginEntry() before the entry
 //     onActiveChange(i) {},    // centered image changed
 //     onFocusChange(open) {},  // focus mode opened / closed
+//     onEntryStart() {},       // entry animation started
 //     onEntryDone(done) {},    // entry animation settled
 //     onContextLost() {},      // GPU context lost
 //   });
-//   carousel.setProgress(0..1); carousel.reset();
+//   carousel.setProgress(0..1); carousel.reset(); carousel.beginEntry();
 //   carousel.closeFocus(); carousel.replayEntry(); carousel.pause();
 //   carousel.resume(); carousel.destroy();
 
@@ -54,12 +73,34 @@ import {
   SCROLL,
 } from './config';
 
+/**
+ * Quality ladder for slow devices. Level 0 is the full look. A level is only
+ * entered when frames keep taking too long, and the carousel never climbs back
+ * up (that would flip-flop). `dpr` caps the pixel ratio, `samples` caps the
+ * dispersion samples (they only run on the lens rim now, so this is a rim cost).
+ */
+const QUALITY = [
+  { dpr: Infinity, samples: Infinity },
+  { dpr: 1.5, samples: 10 },
+  { dpr: 1.25, samples: 6 },
+  { dpr: 1, samples: 4 },
+];
+const SLOW_FRAME_MS = 26; // average above this = slower than ~38 fps
+const SLOW_WINDOW_FRAMES = 45; // frames averaged per check
+const SLOW_WINDOWS_TO_STEP = 2; // consecutive slow checks before stepping down
+const WARMUP_FRAMES = 24; // shader compile / first uploads are not "slow"
+
+/** Max row travel, in screen widths per second (see tick) */
+const ROW_MAX_SPEED = 3.2;
+
 export function createCarousel(THREE, mount, callbacks = {}) {
   const {
     cursorElement = null,
     scrollDriven = false,
+    deferEntry = false,
     onActiveChange = () => {},
     onFocusChange = () => {},
+    onEntryStart = () => {},
     onEntryDone = () => {},
     onModeChange = () => {},
     onContextLost = () => {},
@@ -83,17 +124,22 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   );
 
   // ---- renderer / scene / camera (orthographic, 1 unit = 1 px) ----
+  // antialias is off on purpose: the screen pass is a single full-screen quad
+  // (nothing to anti-alias) and MSAA on a full-screen canvas costs memory and
+  // fill-rate on every frame.
   const renderer = new THREE.WebGLRenderer({
-    antialias: true,
+    antialias: false,
     alpha: true,
     powerPreference: 'high-performance',
   });
   // Upstream's pixel-ratio cap, plus a guard so an ultra-wide / 4K window
-  // never asks for a buffer larger than the GPU's maximum texture size.
+  // never asks for a buffer larger than the GPU's maximum texture size. The
+  // cap (dprCap) is lowered by the adaptive quality below.
+  let dprCap = maxDpr;
   function fitPixelRatio() {
     return Math.min(
       window.devicePixelRatio || 1,
-      maxDpr,
+      dprCap,
       renderer.capabilities.maxTextureSize / Math.max(W, H),
     );
   }
@@ -119,16 +165,39 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   );
   camera.position.z = 10;
 
+  // ---- entry gate (see deferEntry) ----
+  // The entry starts when (a) every image has loaded or failed (or 4 s have
+  // passed, so one slow image can't hold the section back) and (b) the host
+  // has asked for it (immediately, unless deferEntry is set).
+  let texturesReady = false;
+  let entryRequested = !deferEntry;
+  let entryStarted = false;
+  let readyTimer = 0;
+  function tryStartEntry() {
+    if (
+      destroyed ||
+      !ENTRY.enabled ||
+      entryStarted ||
+      !entryRequested ||
+      !texturesReady
+    )
+      return;
+    clearTimeout(readyTimer);
+    playEntry();
+  }
+  function beginEntry() {
+    entryRequested = true;
+    tryStartEntry();
+  }
+
   // ---- load the source images (textures + measured aspect) ----
   const loader = new THREE.TextureLoader();
   let pendingTextures = PROJECTS.length;
-  let readyCb = null;
   const settleTexture = () => {
     pendingTextures = Math.max(0, pendingTextures - 1);
-    if (pendingTextures === 0 && readyCb) {
-      const cb = readyCb;
-      readyCb = null;
-      cb();
+    if (pendingTextures === 0) {
+      texturesReady = true;
+      tryStartEntry();
     }
   };
   const sources = PROJECTS.map(img => {
@@ -154,6 +223,11 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         if (!s.locked && tex.image)
           s.aspect = tex.image.width / tex.image.height;
         s.tex = tex;
+        // upload to the GPU now (one texture per load callback, spread out)
+        // instead of all at once on the first frame the panels are visible
+        try {
+          renderer.initTexture?.(tex);
+        } catch {}
         // aspect is now known -> rebuild slot offsets so spacing matches widths,
         // and re-center the row while the user hasn't scrolled yet
         recomputeTotal();
@@ -485,25 +559,32 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         // chromatic dispersion (weighted multi-sample, per-channel normalized)
         float rimMask = smoothstep(0.55, 1.0, nd);
         vec2  dispDir = offset * uDispersion * 0.004 * rimMask;
-        int N = uSamples;
-        if (N < 2) N = 2;
-        if (N > MAX_SAMPLES) N = MAX_SAMPLES;
         vec3 col = vec3(0.0);
-        vec3 caW = vec3(0.0);
-        for (int i = 0; i < MAX_SAMPLES; i++) {
-          if (i >= N) break;
-          float t = float(i) / float(N - 1);
-          vec2 sUV = baseUV + dispDir * (t - 0.5);
-          vec3 s = texture2D(uTex, sUV).rgb;
-          vec3 w = vec3(
-            exp(-pow((t - 0.00) / 0.38, 2.0)),
-            exp(-pow((t - 0.50) / 0.38, 2.0)),
-            exp(-pow((t - 1.00) / 0.38, 2.0))
-          );
-          col += s * w;
-          caW += w;
+        if (rimMask <= 0.0 || uDispersion <= 0.0001) {
+          // No dispersion here (lens interior, or the entry / focus has faded
+          // it out): every sample would read the same texel and the weighted
+          // average would equal it, so take that one sample. Same picture.
+          col = texture2D(uTex, baseUV).rgb;
+        } else {
+          int N = uSamples;
+          if (N < 2) N = 2;
+          if (N > MAX_SAMPLES) N = MAX_SAMPLES;
+          vec3 caW = vec3(0.0);
+          for (int i = 0; i < MAX_SAMPLES; i++) {
+            if (i >= N) break;
+            float t = float(i) / float(N - 1);
+            vec2 sUV = baseUV + dispDir * (t - 0.5);
+            vec3 s = texture2D(uTex, sUV).rgb;
+            vec3 w = vec3(
+              exp(-pow((t - 0.00) / 0.38, 2.0)),
+              exp(-pow((t - 0.50) / 0.38, 2.0)),
+              exp(-pow((t - 1.00) / 0.38, 2.0))
+            );
+            col += s * w;
+            caW += w;
+          }
+          col /= max(caW, vec3(0.001));
         }
-        col /= max(caW, vec3(0.001));
 
         // optional blur near the rim
         float blurFade = 1.0 - smoothstep(0.72, 0.98, nd);
@@ -1214,10 +1295,15 @@ export function createCarousel(THREE, mount, callbacks = {}) {
 
   // ---- entry animation: rise from below, hold small, grow to full ----
   function playEntry() {
+    if (destroyed) return;
+    entryStarted = true;
     if (entryAnim) entryAnim.kill();
     for (let k = 0; k < pEntry.length; k++) pEntry[k] = 0;
     entryActive = true;
     entrySettled = false;
+    // tell the host first: it holds the page still for as long as the entry
+    // runs, so no card can be scrolled past underneath it
+    onEntryStart();
     onEntryDone(false);
     for (let k = 0; k < growArr.length; k++) growArr[k] = 0;
     focusState.lensFx = 0; // no lens distortion during entry
@@ -1338,7 +1424,9 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     lastCenter = -1; // re-announce the centered card
     if (wasFocused) onFocusChange(false);
     if (ENTRY.enabled) {
-      playEntry();
+      // an entry that has not started yet (still waiting for images or for
+      // the host's beginEntry) simply keeps waiting
+      if (entryStarted) playEntry();
     } else {
       focusState.lensFx = 1;
       if (scrollDriven) scroll = target = scrollForProgress(progress);
@@ -1354,9 +1442,77 @@ export function createCarousel(THREE, mount, callbacks = {}) {
   el.addEventListener('pointerleave', onLeave);
   el.addEventListener('click', onClick);
 
+  // ---- buffers + adaptive quality ----
+  // Re-applies the pixel ratio and rebuilds the render target. Used by window
+  // resizes and by quality steps.
+  function resizeBuffers() {
+    renderer.setPixelRatio(fitPixelRatio());
+    dpr = renderer.getPixelRatio();
+    renderer.setSize(W, H);
+    camera.left = -W / 2;
+    camera.right = W / 2;
+    camera.top = H / 2;
+    camera.bottom = -H / 2;
+    camera.updateProjectionMatrix();
+    rt.setSize(px(W), px(H));
+    lensUniforms.uRes.value.set(px(W), px(H));
+  }
+
+  let qualityLevel = 0;
+  function applyQuality() {
+    if (destroyed) return;
+    const q = QUALITY[qualityLevel];
+    dprCap = Math.min(maxDpr, q.dpr);
+    lensUniforms.uSamples.value = Math.min(LENS.samples, q.samples);
+    resizeBuffers();
+  }
+
+  // Watches the real frame time. A device that keeps missing ~38 fps steps
+  // down one quality level (twice in a row = deliberate, not a one-off hitch).
+  // Gaps (tab switch, pause, resume) are ignored.
+  let lastFrameT = 0;
+  let frameCount = 0;
+  let frameAcc = 0;
+  let slowWindows = 0;
+  let warmup = WARMUP_FRAMES;
+  function monitorFrame(now) {
+    const prev = lastFrameT;
+    lastFrameT = now;
+    if (warmup > 0) {
+      warmup--;
+      return;
+    }
+    if (!prev) return;
+    const dt = now - prev;
+    if (dt >= 250) return; // a gap, not a slow frame
+    frameAcc += dt;
+    frameCount++;
+    if (frameCount < SLOW_WINDOW_FRAMES) return;
+    const avg = frameAcc / frameCount;
+    frameAcc = 0;
+    frameCount = 0;
+    slowWindows = avg > SLOW_FRAME_MS ? slowWindows + 1 : 0;
+    if (
+      slowWindows >= SLOW_WINDOWS_TO_STEP &&
+      qualityLevel < QUALITY.length - 1
+    ) {
+      slowWindows = 0;
+      qualityLevel++;
+      applyQuality();
+    }
+  }
+
   // ---- animation loop ----
   let raf;
+  let lastTick = 0;
   function tick() {
+    const now = performance.now();
+    // seconds since the previous frame, capped so a long gap can't make the
+    // row lurch
+    const frameDt = lastTick ? Math.min(0.05, (now - lastTick) / 1000) : 1 / 60;
+    lastTick = now;
+    monitorFrame(now);
+
     if (!dragging) {
       // flick momentum from a drag release, decaying to nothing
       target += velocity;
@@ -1372,7 +1528,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         !scrollDriven &&
         !snapped &&
         !focusState.active &&
-        performance.now() - lastInput > CONFIG.SNAP_IDLE_MS
+        now - lastInput > CONFIG.SNAP_IDLE_MS
       ) {
         target = centerForIndex(nearestIndex(scroll));
         snapped = true;
@@ -1396,7 +1552,17 @@ export function createCarousel(THREE, mount, callbacks = {}) {
             : snapped
               ? CONFIG.SNAP_EASE
               : CONFIG.EASE;
-    scroll += (target - scroll) * follow;
+    let step = (target - scroll) * follow;
+    if (scrollDriven) {
+      // Speed cap: however far the page scroll jumped (End key, a link, a very
+      // hard flick), the row travels at most ROW_MAX_SPEED screens per second,
+      // so it sweeps through the cards in order instead of teleporting past
+      // them. Normal scrolling never reaches the cap.
+      const maxStep = W * ROW_MAX_SPEED * frameDt;
+      if (step > maxStep) step = maxStep;
+      else if (step < -maxStep) step = -maxStep;
+    }
+    scroll += step;
 
     // tell the host which image is centered (overlay text)
     const ci = centerIndex(scroll);
@@ -1432,10 +1598,10 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     // lens uniforms + focus/entry fade of the distortion props
     lensUniforms.uCenter.value.set(LENS.posX, LENS.posY);
     lensUniforms.uAspect.value = W / H;
-    lensUniforms.uTime.value = performance.now() * 0.001;
+    lensUniforms.uTime.value = now * 0.001;
     const rad = a => (a * Math.PI) / 180;
     lensUniforms.uRotation.value =
-      rad(LENS.rotation) + rad(LENS.spin) * (performance.now() * 0.001);
+      rad(LENS.rotation) + rad(LENS.spin) * (now * 0.001);
     const fx = focusState.lensFx;
     LENS_FX_KEYS.forEach(key => {
       lensUniforms[key].value = lensFxFull[key] * fx;
@@ -1465,23 +1631,27 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     if (scrollDriven && !inputLocked() && !pendingFocus) scroll = target;
     prevScroll = scroll; // no fake "speed" spike from the paused gap
     lastInput = performance.now();
+    // the paused gap is not a slow frame, and the first frames after a resume
+    // (texture residency, driver wake-up) shouldn't count against quality
+    lastTick = 0;
+    lastFrameT = 0;
+    frameAcc = 0;
+    frameCount = 0;
+    warmup = 6;
     raf = requestAnimationFrame(tick);
   }
 
-  // Start the entry once every image has loaded (or failed), with a timeout
-  // so one slow image can't hold the whole section back.
-  let readyTimer = 0;
+  // Start the entry once every image has loaded (or failed) AND the host has
+  // asked for it. A timeout stops one slow image from holding the whole
+  // section back.
   if (ENTRY.enabled) {
-    const start = () => {
-      clearTimeout(readyTimer);
-      if (!destroyed) playEntry();
-    };
-    if (pendingTextures === 0) start();
-    else {
-      readyCb = start;
+    if (pendingTextures === 0) {
+      texturesReady = true;
+      tryStartEntry();
+    } else {
       readyTimer = setTimeout(() => {
-        readyCb = null;
-        start();
+        texturesReady = true;
+        tryStartEntry();
       }, 4000);
     }
   }
@@ -1493,16 +1663,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     if (!nw || !nh || (nw === W && nh === H)) return; // hidden / unchanged
     W = nw;
     H = nh;
-    renderer.setPixelRatio(fitPixelRatio());
-    dpr = renderer.getPixelRatio();
-    renderer.setSize(W, H);
-    camera.left = -W / 2;
-    camera.right = W / 2;
-    camera.top = H / 2;
-    camera.bottom = -H / 2;
-    camera.updateProjectionMatrix();
-    rt.setSize(px(W), px(H));
-    lensUniforms.uRes.value.set(px(W), px(H));
+    resizeBuffers();
   }
   const resizeObserver = new ResizeObserver(onResize);
   resizeObserver.observe(mount);
@@ -1543,6 +1704,7 @@ export function createCarousel(THREE, mount, callbacks = {}) {
 
   return {
     closeFocus,
+    beginEntry, // deferEntry: start the entry now (once images are ready)
     replayEntry: playEntry,
     reset, // start over (focus dropped, entry replayed)
     setProgress, // scroll-driven: page scroll progress 0..1
