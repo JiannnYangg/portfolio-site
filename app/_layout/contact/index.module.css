@@ -39,6 +39,17 @@
   --ft-cta-dark: #1f2024;
   --ft-cta-ring: #f4f4f5;
 
+  /* The big word's own blue: top to bottom (like light falling on glossy
+     letters) instead of the CTA's diagonal sweep, which read as flat and
+     left-to-right on the green tiles. Bright top, rich middle, deep base. */
+  --ft-word-gradient: linear-gradient(
+    180deg,
+    #8a9bff 0%,
+    #5a72f5 30%,
+    #3b50e0 62%,
+    #232fa8 100%
+  );
+
   position: relative;
   isolation: isolate;
   display: flex;
@@ -147,10 +158,10 @@
   color: #000;
 }
 
-/* Extra-bold italic like the hero's emphasis words, filled with the CTA's
-   blue gradient. The padding keeps the italic "!" and the "g" from being cut
-   off by the gradient fill, which only paints inside the box; the negative
-   margins give the space back so nothing moves. */
+/* Extra-bold italic like the hero's emphasis words, filled with the glossy
+   blue (--ft-word-gradient). The padding keeps the italic "!" and the "g"
+   from being cut off by the gradient fill, which only paints inside the box;
+   the negative margins give the space back so nothing moves. */
 .together {
   display: inline-block;
   padding: 0.04em 0.14em 0.14em 0;
@@ -158,9 +169,12 @@
   font-weight: 800;
   font-style: italic;
   color: var(--ft-cta-solid);
-  background-image: var(--ft-cta-gradient);
+  background-image: var(--ft-word-gradient);
   background-clip: text;
   -webkit-text-fill-color: transparent;
+
+  /* a soft indigo glow lifts the word off the tiles */
+  filter: drop-shadow(0 0.06em 0.14em rgb(35 47 168 / 28%));
 }
 
 .star {
