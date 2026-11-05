@@ -1,16 +1,151 @@
 'use client';
 
-import { ParallaxFade, ParallaxReveal } from '@/components';
+import { motion } from 'framer-motion';
+
+import { ParallaxFade } from '@/components';
 
 import { PAGE_INSET, PageHero } from '../page-hero';
 
 const heroLine = 'We help brands thrive.';
 
-const intro =
-  'We started our content creation journey in 2021 through Cliver Visions. With 5+ years of experience in content production, and our expertise in data analytics, marketing, and disruptive AI technologies, this unique combination focuses not only on delivering better results, but on optimizing them through iterative analytics.';
+/**
+ * Overview paragraph, split so a few key phrases can carry the marker
+ * highlight. `mark` = highlighted phrase, `tail` = punctuation that follows it
+ * (kept outside the swatch so the marker only covers the words).
+ */
+const intro = [
+  {
+    text: 'We started our content creation journey in 2021 through Cliver Visions. With',
+  },
+  { text: '5+ years of experience', mark: true, tail: ',' },
+  { text: 'and our expertise in data analytics, marketing, and' },
+  { text: 'disruptive AI technologies', mark: true, tail: ',' },
+  { text: 'this unique combination focuses not only on delivering' },
+  { text: 'better results', mark: true, tail: ',' },
+  { text: 'but on optimizing them through' },
+  { text: 'iterative analytics', mark: true, tail: '.' },
+];
 
 /** Text sits inside the dashed guides, same inset as the rest of the site */
 const inset = { paddingInline: PAGE_INSET };
+
+/** Same word reveal used across the site */
+const reveal = {
+  initial: { y: '100%' },
+  open: i => ({
+    y: '0%',
+    transition: { duration: 0.5, delay: 0.01 * i },
+  }),
+};
+
+/**
+ * Marker swatches: the same hand-placed highlighter shapes as the four D's on
+ * the home intro (each one a hair off-level, with uneven edges), in the site's
+ * theme blue (the Tailwind `primary`) instead of lime.
+ */
+const MARKER_BLUE = 'hsl(var(--primary) / 0.3)';
+
+const SWATCHES = [
+  {
+    left: '-0.08em',
+    right: '-0.04em',
+    top: '50%',
+    bottom: '8%',
+    transform: 'rotate(-0.8deg)',
+    clipPath: 'polygon(0 14%, 100% 0, 97% 100%, 2% 86%)',
+  },
+  {
+    left: '-0.05em',
+    right: '-0.1em',
+    top: '46%',
+    bottom: '10%',
+    transform: 'rotate(0.6deg)',
+    clipPath: 'polygon(3% 0, 98% 16%, 100% 92%, 0 100%)',
+  },
+  {
+    left: '-0.1em',
+    right: '-0.05em',
+    top: '54%',
+    bottom: '6%',
+    transform: 'rotate(-0.5deg)',
+    clipPath: 'polygon(0 0, 99% 12%, 100% 100%, 4% 82%)',
+  },
+  {
+    left: '-0.04em',
+    right: '-0.09em',
+    top: '48%',
+    bottom: '9%',
+    transform: 'rotate(0.8deg)',
+    clipPath: 'polygon(1% 16%, 100% 0, 95% 90%, 0 100%)',
+  },
+];
+
+/** One word in its own mask, sliding up like the rest of the site's text */
+function Word({ word, custom, gap }) {
+  return (
+    <span className={`inline-flex overflow-hidden ${gap ? 'me-2' : ''}`}>
+      <motion.span
+        custom={custom}
+        variants={reveal}
+        initial='initial'
+        whileInView='open'
+      >
+        {word}
+      </motion.span>
+    </span>
+  );
+}
+
+/** Word-by-word reveal with marker highlights behind the marked phrases */
+function MarkedReveal({ segments }) {
+  let cursor = 0;
+  let markCount = 0;
+
+  return segments.map(({ text, mark, tail }) => {
+    const words = text.split(' ');
+    const start = cursor;
+    cursor += words.length + (tail ? 1 : 0);
+
+    if (!mark) {
+      return words.map((word, n) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <Word key={`${start}-${n}`} word={word} custom={start + n} gap />
+      ));
+    }
+
+    const swatch = SWATCHES[markCount % SWATCHES.length];
+    markCount += 1;
+
+    return (
+      <span key={start} className='inline'>
+        {/* nowrap keeps the swatch in one piece on a single line */}
+        <span
+          className={`relative isolate inline-block whitespace-nowrap align-top ${
+            tail ? '' : 'me-2'
+          }`}
+        >
+          <span
+            aria-hidden='true'
+            className='pointer-events-none absolute -z-10'
+            style={{ ...swatch, backgroundColor: MARKER_BLUE }}
+          />
+          {words.map((word, n) => (
+            <Word
+              // eslint-disable-next-line react/no-array-index-key
+              key={`${start}-${n}`}
+              word={word}
+              custom={start + n}
+              gap={n < words.length - 1}
+            />
+          ))}
+        </span>
+        {tail && (
+          <Word word={tail} custom={start + words.length} gap />
+        )}
+      </span>
+    );
+  });
+}
 
 /** Key phrase: brand-blue text on a soft tint. Wraps cleanly across lines. */
 function Highlight({ children }) {
@@ -46,7 +181,7 @@ export function AboutBody() {
             className='lg:col-span-9'
             style={{ fontSize: 'clamp(1.5em, 2.2vw, 3em)', lineHeight: 1.45 }}
           >
-            <ParallaxReveal paragraph={intro} />
+            <MarkedReveal segments={intro} />
           </h2>
         </div>
       </section>
