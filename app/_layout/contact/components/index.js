@@ -1,5 +1,7 @@
 export * from './back-to-top';
+export * from './brand-icons';
 export * from './copy-email';
+export * from './get-in-touch';
 export * from './glass-content';
 export * from './headline';
 export * from './local-time';

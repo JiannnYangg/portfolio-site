@@ -2,77 +2,106 @@
  * Contact footer (see index.jsx).
  *
  * The footer sits on solid paper, which is what ends the site's dashed
- * vertical guides cleanly at its top edge. The background is one image
- * (public/images/footer-bg.png) painted on a layer behind the content
- * (.root::before), anchored to the bottom so the green part always sits
- * behind the details. That layer is masked so its top edge fades into the
- * paper, so the footer and the section above it read as one surface.
+ * vertical guides cleanly at its top edge. The background is one picture
+ * (public/images/footer-bg.png, 2400x1556) painted on a layer behind the
+ * content (.bg), anchored to the bottom so the green part always sits behind
+ * the details. That layer is masked so its top edge fades into the paper, so
+ * the footer and the section above it read as one surface.
  *
- * `--ft-cols` / `--ft-rows` are only used to place the text and to keep the
- * footer the same height it has always had at each breakpoint.
+ * The footer used to be as tall as the whole picture plus a block of text.
+ * Now the top four tile rows of the picture are left out: from 768px up the
+ * footer is only as tall as the lower 998px of the picture (see min-height
+ * below), and the picture is bottom-anchored, so exactly those four rows are
+ * cropped. On phones the height simply follows the content.
+ *
+ * `--ft-cols` only sets the side gutters, so the text lines up with the rest
+ * of the page at every breakpoint.
  */
 .root {
   --ft-cols: 8;
-  --ft-rows: 13;
   --ft-ink: #0b1f14;
-  --ft-black: #1c1d21;
-  --ft-grey: #8d8f96;
-  --ft-grey-soft: #b7b9bf;
-  --ft-green: #3a7d00;
+  --ft-muted: rgb(11 31 20 / 72%);
   --ft-line: rgb(11 31 20 / 38%);
-  --ft-glass: rgb(255 255 255 / 22%);
+  --ft-hair: rgb(11 31 20 / 22%);
+  --ft-glass: rgb(255 255 255 / 40%);
+  --ft-glass-hover: rgb(255 255 255 / 72%);
   --ft-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Same colours as the hero CTA (header/index.jsx: CTA_SOLID, CTA_GRADIENT,
+     CTA_DARK), so the footer and the landing page match exactly. */
+  --ft-cta-solid: #445ae9;
+  --ft-cta-gradient: linear-gradient(
+    135deg,
+    #5068f0 0%,
+    #445ae9 48%,
+    #2b3bb8 100%
+  );
+  --ft-cta-dark: #1f2024;
+  --ft-cta-ring: #f4f4f5;
 
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(2.5rem, 6vw, 5rem);
+  padding-block: clamp(3.5rem, 8vw, 7rem) clamp(1.25rem, 2.4vw, 2rem);
+  padding-inline: calc(100% / var(--ft-cols));
   color: var(--ft-ink);
   background-color: var(--paper);
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
   font-synthesis: none;
 }
 
-/* The image layer. Fully see-through at the very top (paper shows), solid
+/* The picture layer. Fully see-through at the very top (paper shows), solid
    from --ft-fade down. */
-.root::before {
-  --ft-fade: clamp(6rem, 16vw, 14rem);
+.bg {
+  --ft-fade: clamp(4rem, 12vw, 10rem);
 
-  content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
+  overflow: hidden;
   pointer-events: none;
-  background-image: url('/images/footer-bg.png');
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: cover;
   mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft-fade));
+}
+
+.bgImage {
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+/* Phones: line up with the site's dashed guides (32px from each edge) */
+@media (width < 480px) {
+  .root {
+    padding-inline: 2rem;
+  }
 }
 
 @media (width >= 480px) {
   .root {
     --ft-cols: 10;
-    --ft-rows: 9;
   }
 }
 
 @media (width >= 768px) {
   .root {
     --ft-cols: 12;
-    --ft-rows: 8;
+
+    /* the picture is 2400 wide and its lower 998px are kept (1556 - 4 rows) */
+    min-height: calc(100vw * 998 / 2400);
   }
 }
 
 @media (width >= 1100px) {
   .root {
     --ft-cols: 14;
-    --ft-rows: 8;
   }
 }
 
 @media (width >= 1500px) {
   .root {
     --ft-cols: 18;
-    --ft-rows: 8;
   }
 }
 
@@ -83,355 +112,445 @@
 }
 
 .focusable:focus-visible {
-  outline: 2px solid var(--ft-ink);
+  outline: 2px solid var(--ft-cta-dark);
   outline-offset: 4px;
 }
 
-/* ---------- top half: the call to action ---------- */
-.top {
-  position: relative;
-  padding-block: clamp(3.5rem, 9vw, 6.5rem) clamp(2.5rem, 6vw, 4.5rem);
-  padding-inline: calc(100% / var(--ft-cols));
-}
+/* ---------- top: the call to action ---------- */
 
-.tag {
-  margin: 0 0 clamp(1.5rem, 3.5vw, 3rem);
-  font-family: var(--font-inter-tight), system-ui, sans-serif;
-  font-size: clamp(0.8rem, 1.5vw, 1.2rem);
-  font-weight: 500;
-  line-height: 1.1;
-  text-transform: uppercase;
-  color: var(--ft-grey);
-}
-
-.tag span {
-  display: block;
-}
-
-.tag span + span {
-  color: var(--ft-grey-soft);
-}
-
+/* Same type as the hero headline: Inter Tight, semibold, 1.08 leading,
+   -0.03em tracking, clamp(2.5rem, 6.4vw, 5.5rem). */
 .headline {
   margin: 0;
-  font-family: var(--font-inter-tight), system-ui, sans-serif;
-  font-size: clamp(2.6rem, 12.5vw, 7.75rem);
-  font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.5rem, 6.4vw, 5.5rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 
-/* Each line is as wide as its words (so the stars and the link can hug the
-   end of it). The bottom padding keeps the "g" from being cut off by the
-   gradient fill, which only paints inside the line box. */
+/* Each line is as wide as its words, so the stars can hug the end of it. */
 .line {
   position: relative;
   display: block;
   width: fit-content;
   max-width: 100%;
-  padding-block-end: 0.12em;
-  margin-block-end: -0.12em;
+}
+
+/* Staggered like the hero's lines (from tablet up) */
+@media (width >= 768px) {
+  .lineIndent {
+    padding-inline-start: 1em;
+  }
 }
 
 .ink {
-  color: var(--ft-black);
-  background-image: linear-gradient(180deg, #0d0e11 20%, #55575e 100%);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #000;
 }
 
-.lime {
-  color: var(--ft-green);
-  background-image: linear-gradient(180deg, #4f9d00 10%, #2c6600 100%);
+/* Extra-bold italic like the hero's emphasis words, filled with the CTA's
+   blue gradient. The padding keeps the italic "!" and the "g" from being cut
+   off by the gradient fill, which only paints inside the box; the negative
+   margins give the space back so nothing moves. */
+.together {
+  display: inline-block;
+  padding: 0.04em 0.14em 0.14em 0;
+  margin: -0.04em -0.14em -0.14em 0;
+  font-weight: 800;
+  font-style: italic;
+  color: var(--ft-cta-solid);
+  background-image: var(--ft-cta-gradient);
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .star {
   position: absolute;
-  color: #3d4152;
+  color: var(--ft-cta-solid);
   transition: transform 0.7s var(--ft-ease);
 }
 
 .starBig {
-  top: 0.02em;
+  top: 0.04em;
   left: calc(100% + 0.08em);
   width: 0.34em;
   height: 0.34em;
 }
 
 .starSmall {
-  top: -0.2em;
-  left: calc(100% + 0.4em);
+  top: -0.14em;
+  left: calc(100% + 0.42em);
   width: 0.15em;
   height: 0.15em;
-  color: #8a8fa3;
-}
-
-.touch {
-  display: block;
-  margin-block-start: 0.6rem;
-  font-size: clamp(1rem, 2.1vw, 1.9rem);
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: 0;
-  text-transform: uppercase;
-  text-decoration: underline transparent;
-  text-decoration-thickness: 0.08em;
-  text-underline-offset: 0.22em;
-  color: var(--ft-green);
-  -webkit-text-fill-color: currentcolor;
-  transition: text-decoration-color 0.3s ease;
-}
-
-.touch span {
-  display: block;
-}
-
-.touch:hover,
-.touch:focus-visible {
-  text-decoration-color: currentcolor;
-}
-
-/* From here the link fits beside "together!" instead of under it */
-@media (width >= 800px) {
-  .touch {
-    position: absolute;
-    bottom: 0.32em;
-    left: calc(100% + 0.28em);
-    margin-block-start: 0;
-    white-space: nowrap;
-  }
-}
-
-/* ---------- bottom half: the details ---------- */
-.glass {
-  position: relative;
-  display: grid;
-}
-
-/* Keeps this half exactly as tall as it was before, so the text sits where
-   it always did. The content below shares the same grid cell. */
-.glass::before {
-  content: '';
-  grid-area: 1 / 1;
-  height: calc(var(--ft-rows) * 100vw / var(--ft-cols));
-  pointer-events: none;
-}
-
-@supports (aspect-ratio: 1) {
-  .glass::before {
-    height: auto;
-    aspect-ratio: var(--ft-cols) / var(--ft-rows);
-  }
-}
-
-/* ---------- the writing ---------- */
-.content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  grid-area: 1 / 1;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: clamp(2.5rem, 6vw, 5rem);
-  padding-block: calc(150% / var(--ft-cols)) clamp(1.75rem, 3.2vw, 3rem);
-  padding-inline: calc(100% / var(--ft-cols));
-}
-
-.statement {
-  margin: 0;
-  font-size: clamp(2.1rem, 4.6vw, 4rem);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-}
-
-.statement span {
-  display: block;
-}
-
-.quiet {
-  color: rgb(11 31 20 / 55%);
-}
-
-.pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-block-start: clamp(1.25rem, 2.4vw, 2rem);
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  max-width: 100%;
-  min-height: 2.5rem;
-  padding-inline: 1rem;
-  border: 1px solid var(--ft-line);
-  border-radius: 999px;
-  background-color: var(--ft-glass);
-  font: inherit;
-  font-size: 0.875rem;
-  color: inherit;
-  text-decoration: none;
-  overflow-wrap: anywhere;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.pill:hover {
-  background-color: rgb(255 255 255 / 55%);
-}
-
-.base {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  column-gap: 1.5rem;
-  row-gap: clamp(1.75rem, 3.5vw, 3rem);
-  align-items: start;
-}
-
-.links {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-family: var(--font-inter-tight), system-ui, sans-serif;
-  font-size: clamp(0.9rem, 1.45vw, 1.2rem);
-  font-weight: 500;
-  line-height: 1.12;
-  text-transform: uppercase;
-}
-
-.link,
-.muted {
-  display: block;
-  width: fit-content;
-  color: inherit;
-  text-decoration: underline transparent;
-  text-decoration-thickness: 0.08em;
-  text-underline-offset: 0.22em;
-  transition: text-decoration-color 0.3s ease;
-}
-
-.link:hover {
-  text-decoration-color: currentcolor;
-}
-
-.muted {
-  color: rgb(11 31 20 / 55%);
-  cursor: default;
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 2.25rem;
-  margin: 0;
-  font-family: var(--font-inter-tight), system-ui, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.2;
-  text-transform: uppercase;
-}
-
-.meta dd {
-  margin: 0;
-}
-
-.meta dt {
-  color: rgb(11 31 20 / 58%);
-}
-
-.up {
-  display: flex;
-  grid-row: 1 / 3;
-  grid-column: 2;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-family: var(--font-inter-tight), system-ui, sans-serif;
-  font-size: clamp(0.9rem, 1.45vw, 1.2rem);
-  font-weight: 500;
-  line-height: 1.12;
-  text-align: right;
-  text-transform: uppercase;
-  color: inherit;
-  cursor: pointer;
-}
-
-.upText span {
-  display: block;
-}
-
-.upIcon {
-  display: grid;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1px solid var(--ft-line);
-  border-radius: 0.9rem;
-  background-color: var(--ft-glass);
-  transition:
-    background-color 0.3s ease,
-    transform 0.4s var(--ft-ease);
-}
-
-.up:hover .upIcon {
-  background-color: rgb(255 255 255 / 55%);
-  transform: translateY(-3px);
+  color: #8a96f0;
 }
 
 .line:hover .starBig {
   transform: rotate(90deg);
 }
 
-/* Narrow phones: the button drops under the details instead of squeezing them */
-@media (width < 480px) {
-  .base {
-    grid-template-columns: 1fr;
+/* The CTA and the email, on one row. Wraps cleanly on narrow screens. */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+  align-items: center;
+  margin-block-start: clamp(1.75rem, 3.6vw, 3rem);
+}
+
+/* ---------- the CTA: same as the hero's "Let's talk" ---------- */
+.cta {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border-radius: 999px;
+  background-color: var(--ft-cta-ring);
+  box-shadow: 0 0 0 1px rgb(11 31 20 / 8%);
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.3s var(--ft-ease);
+}
+
+.cta:hover,
+.cta:focus-visible {
+  transform: scale(1.03);
+}
+
+.ctaLabel,
+.ctaArrow {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.ctaLabel {
+  min-width: 156px;
+  padding-inline: 1.5rem;
+  background-color: var(--ft-cta-solid);
+  background-image: var(--ft-cta-gradient);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.ctaArrow {
+  width: 50px;
+  background-color: var(--ft-cta-dark);
+}
+
+/* A gradient can't be transitioned, so each half keeps its resting fill and
+   the other fill fades in on top of it (behind the text and the arrow). */
+.ctaLabel::before,
+.ctaArrow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ctaLabel::before {
+  background-color: var(--ft-cta-dark);
+}
+
+.ctaArrow::before {
+  background-color: var(--ft-cta-solid);
+  background-image: var(--ft-cta-gradient);
+}
+
+.cta:hover .ctaLabel::before,
+.cta:hover .ctaArrow::before,
+.cta:focus-visible .ctaLabel::before,
+.cta:focus-visible .ctaArrow::before {
+  opacity: 1;
+}
+
+.ctaArrow svg {
+  transition: transform 0.3s var(--ft-ease);
+}
+
+.cta:hover .ctaArrow svg,
+.cta:focus-visible .ctaArrow svg {
+  transform: translate(2px, -2px);
+}
+
+/* ---------- the email: one capsule, address + copy ---------- */
+.email {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  min-height: 3rem;
+  border: 1px solid var(--ft-line);
+  border-radius: 999px;
+  background-color: var(--ft-glass);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.emailLink,
+.emailCopy {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.emailLink {
+  padding-inline: 1.1rem 1rem;
+  border-radius: 999px 0 0 999px;
+  overflow-wrap: anywhere;
+}
+
+.emailLink svg,
+.emailCopy svg {
+  flex: none;
+}
+
+.emailCopy {
+  padding: 0 1.1rem 0 1rem;
+  border: 0;
+  border-inline-start: 1px solid var(--ft-line);
+  border-radius: 0 999px 999px 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.emailLink:hover,
+.emailCopy:hover {
+  background-color: var(--ft-glass-hover);
+}
+
+/* the capsule's own edge is the clip, so keep the focus ring inside it */
+.emailLink:focus-visible,
+.emailCopy:focus-visible {
+  outline-offset: -4px;
+}
+
+.emailCopyLabel {
+  min-width: 4.4em; /* "Copy" / "Copied" / "Copy failed" without jumping */
+}
+
+.emailCopy[data-state='failed'] {
+  color: #9b1c1c;
+}
+
+/* Very narrow phones: the copy half keeps just its icon. The button's name
+   and the "copied" announcement do not depend on the visible label. */
+@media (width < 400px) {
+  .emailCopyLabel {
+    display: none;
+  }
+}
+
+/* ---------- bottom: socials + back to top, then the details ---------- */
+.base {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.4vw, 2rem);
+}
+
+.baseRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip,
+.up {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  border: 1px solid var(--ft-line);
+  border-radius: 999px;
+  background-color: var(--ft-glass);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  transition:
+    background-color 0.3s ease,
+    transform 0.4s var(--ft-ease);
+}
+
+.chip {
+  gap: 0.55rem;
+  padding-inline: 1rem 1.15rem;
+}
+
+.chip:hover,
+.up:hover {
+  background-color: var(--ft-glass-hover);
+}
+
+.chip:hover {
+  transform: translateY(-2px);
+}
+
+/* Back to top: label, then a dark circle with the arrow (the CTA's shape,
+   smaller). Same height as the chips, so the row is one clean line. */
+.up {
+  gap: 0.75rem;
+  padding: 4px 4px 4px 1.15rem;
+  cursor: pointer;
+}
+
+.upIcon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--ft-cta-dark);
+  color: #fff;
+}
+
+.upIcon svg {
+  transition: transform 0.4s var(--ft-ease);
+}
+
+.up:hover .upIcon svg {
+  transform: translateY(-2px);
+}
+
+/* ---------- version + local time ---------- */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding-block-start: clamp(0.9rem, 1.6vw, 1.25rem);
+  border-top: 1px solid var(--ft-hair);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.metaItem {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+
+.metaItem dt {
+  color: var(--ft-muted);
+}
+
+.metaItem dd {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A small "live" dot beside the clock */
+.live {
+  position: relative;
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #2f8f00;
+}
+
+.live::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: inherit;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .live::after {
+    animation: ft-live 2.4s ease-out infinite;
+  }
+}
+
+@keyframes ft-live {
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
   }
 
-  .up {
-    grid-row: 3;
-    grid-column: 1;
-    flex-direction: row-reverse;
-    gap: 0.9rem;
-    align-items: center;
-    justify-content: flex-end;
-    text-align: left;
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(2.8);
   }
 }
 
 /* Windows high-contrast mode drops backgrounds, which would leave the
-   gradient-filled words transparent: give them a real colour back. */
+   gradient-filled word transparent: give it a real colour back. */
 @media (forced-colors: active) {
-  .ink,
-  .lime {
+  .together {
     background-image: none;
     color: canvastext;
     -webkit-text-fill-color: currentcolor;
   }
 
-  .pill,
-  .upIcon {
+  .email,
+  .emailCopy,
+  .chip,
+  .up,
+  .cta {
     border-color: buttontext;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .star,
-  .upIcon {
+  .line:hover .starBig,
+  .cta,
+  .cta:hover,
+  .cta:focus-visible,
+  .chip,
+  .chip:hover,
+  .up:hover .upIcon svg,
+  .upIcon svg,
+  .ctaArrow svg,
+  .cta:hover .ctaArrow svg,
+  .cta:focus-visible .ctaArrow svg {
     transform: none;
     transition: none;
   }
 }
 
 @media print {
-  .root::before {
+  .bg {
     display: none;
   }
 }

@@ -4,7 +4,12 @@ import { ArrowUp } from 'lucide-react';
 
 import styles from '../index.module.css';
 
-/** One button, laid out over two rows of the footer (text, then the arrow). */
+/**
+ * One compact pill on a single line: the label, then a dark circle with the
+ * arrow (the same shape language as the "Get in touch" CTA, just smaller).
+ * It sits on the same row as the social chips, right-aligned, and is as tall
+ * as they are so the row reads as one line.
+ */
 export function BackToTop() {
   const handleClick = event => {
     const calm = window.matchMedia?.(
@@ -20,12 +25,9 @@ export function BackToTop() {
       onClick={handleClick}
       className={`${styles.up} ${styles.focusable}`}
     >
-      <span className={styles.upText}>
-        <span>Back</span>
-        <span>to top</span>
-      </span>
+      <span className={styles.upText}>Back to top</span>
       <span className={styles.upIcon}>
-        <ArrowUp size={20} strokeWidth={1.5} aria-hidden='true' />
+        <ArrowUp size={18} strokeWidth={2} aria-hidden='true' />
       </span>
     </button>
   );
