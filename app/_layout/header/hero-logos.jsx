@@ -82,7 +82,7 @@ const shadowFor = depth =>
 const LOGOS = [
   {
     id: 'claude',
-    src: '/hero-logos/hero-claude-4827.png',
+    src: '/hero-logos/hero-claude-4827.webp',
     width: 300,
     height: 261,
     size: 'clamp(62px, 8.4vw, 152px)', // was clamp(76px, 10.5vw, 190px)
@@ -93,7 +93,7 @@ const LOGOS = [
   },
   {
     id: 'comfy',
-    src: '/hero-logos/hero-comfy-9153.png',
+    src: '/hero-logos/hero-comfy-9153.webp',
     width: 420,
     height: 172,
     size: 'clamp(84px, 12vw, 224px)', // was clamp(104px, 15vw, 280px)
@@ -104,7 +104,7 @@ const LOGOS = [
   },
   {
     id: 'squiggle',
-    src: '/hero-logos/hero-squiggle-1084.png',
+    src: '/hero-logos/hero-squiggle-1084.webp',
     width: 224,
     height: 196,
     size: 'clamp(54px, 8vw, 148px)', // was clamp(68px, 10vw, 185px)
@@ -116,7 +116,7 @@ const LOGOS = [
   },
   {
     id: 'n8n',
-    src: '/hero-logos/hero-n8n-2606.png',
+    src: '/hero-logos/hero-n8n-2606.webp',
     width: 320,
     height: 200,
     size: 'clamp(48px, 6vw, 100px)',
@@ -131,7 +131,7 @@ const LOGOS = [
     // moved a bit left (left 20% -> 17%); mobile only lowered (19% -> 16%).
     // Same size, tilt and float as before.
     id: 'github',
-    src: '/hero-logos/hero-gitcat-4719.png',
+    src: '/hero-logos/hero-gitcat-4719.webp',
     width: 190,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
@@ -142,7 +142,7 @@ const LOGOS = [
   },
   {
     id: 'elevenlabs',
-    src: '/hero-logos/hero-elevenlabs-7342.png',
+    src: '/hero-logos/hero-elevenlabs-7342.webp',
     width: 240,
     height: 234,
     size: 'clamp(38px, 4.8vw, 78px)',
@@ -156,7 +156,7 @@ const LOGOS = [
     // Moved inwards on desktop (right 24% -> 27%) and a bit upwards (offset
     // 84px -> 112px above the middle); mobile is unchanged.
     id: 'codex',
-    src: '/hero-logos/hero-mylogo-6382.png',
+    src: '/hero-logos/hero-mylogo-6382.webp',
     width: 193,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
@@ -171,7 +171,7 @@ const LOGOS = [
     // 74px -> 58px), higher (bottom 41%) and a bit to the right (left 21% ->
     // 24%). Mobile is unchanged.
     id: 'runway',
-    src: '/hero-logos/hero-letter-r-8156.png',
+    src: '/hero-logos/hero-letter-r-8156.webp',
     width: 200,
     height: 200,
     size: 'clamp(30px, 3.6vw, 58px)',
