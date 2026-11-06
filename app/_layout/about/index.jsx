@@ -166,7 +166,7 @@ function Label({ children }) {
 }
 
 export function AboutHero() {
-  return <PageHero label='About us' title={heroLine} inset />;
+  return <PageHero label='About us' title={heroLine} inset balance />;
 }
 
 export function AboutBody() {
