@@ -3,16 +3,19 @@
  *
  * The footer sits on solid paper, which is what ends the site's dashed
  * vertical guides cleanly at its top edge. The background is one picture
- * (public/images/footer-bg.png, 2400x1556) painted on a layer behind the
- * content (.bg), anchored to the bottom so the green part always sits behind
- * the details. That layer is masked so its top edge fades into the paper, so
- * the footer and the section above it read as one surface.
+ * (public/images/footer-bg.webp, 1632x912) painted on a layer behind the
+ * content (.bg), anchored to the bottom so the deep blue part always sits
+ * behind the details. That layer is masked so its top edge fades into the
+ * paper, so the footer and the section above it read as one surface.
  *
- * The footer used to be as tall as the whole picture plus a block of text.
- * Now the top four tile rows of the picture are left out: from 768px up the
- * footer is only as tall as the lower 998px of the picture (see min-height
- * below), and the picture is bottom-anchored, so exactly those four rows are
- * cropped. On phones the height simply follows the content.
+ * The picture's top ~150px are plain white, so from 768px up the footer is
+ * only as tall as the lower 762px of the picture (see min-height below); the
+ * picture is bottom-anchored, so exactly that white strip is cropped. On
+ * phones the height simply follows the content.
+ *
+ * Two colour zones: the top (headline, CTA, email) sits on the light part of
+ * the picture and uses dark ink; the bottom (.base) sits on deep blue and
+ * switches to white text on translucent glass.
  *
  * `--ft-cols` only sets the side gutters, so the text lines up with the rest
  * of the page at every breakpoint.
@@ -23,9 +26,12 @@
   --ft-muted: rgb(11 31 20 / 72%);
   --ft-line: rgb(11 31 20 / 38%);
   --ft-hair: rgb(11 31 20 / 22%);
-  --ft-glass: rgb(255 255 255 / 40%);
-  --ft-glass-hover: rgb(255 255 255 / 72%);
+  --ft-glass: rgb(255 255 255 / 62%);
+  --ft-glass-hover: rgb(255 255 255 / 88%);
   --ft-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ft-icon-bg: #1f2024;
+  --ft-icon-fg: #fff;
+  --ft-live: #2f8f00;
 
   /* Same colours as the hero CTA (header/index.jsx: CTA_SOLID, CTA_GRADIENT,
      CTA_DARK), so the footer and the landing page match exactly. */
@@ -56,7 +62,7 @@
 /* The picture layer. Fully see-through at the very top (paper shows), solid
    from --ft-fade down. */
 .bg {
-  --ft-fade: clamp(4rem, 12vw, 10rem);
+  --ft-fade: clamp(2rem, 6vw, 5rem);
 
   position: absolute;
   inset: 0;
@@ -88,8 +94,8 @@
   .root {
     --ft-cols: 12;
 
-    /* the picture is 2400 wide and its lower 998px are kept (1556 - 4 rows) */
-    min-height: calc(100vw * 998 / 2400);
+    /* the picture is 1632 wide and its lower 762px are kept (912 - 150) */
+    min-height: calc(100vw * 762 / 1632);
   }
 }
 
@@ -147,12 +153,13 @@
   color: #000;
 }
 
-/* The key word: a glossy blue sticker pill. It reuses the CTA's language (the
-   light ring, the blue gradient, the inner top highlight) so the headline and
-   the button read as one system, and white text on this blue is 5.9:1+.
-   Slightly tilted like a sticker; it straightens and catches a shine on hover.
-   The padding is generous on the right so the italic "!" never touches the
-   edge, and nowrap keeps the pill whole on the narrowest phones. */
+/* The key word: a dark "ink" sticker pill. The picture is blue now, so a blue
+   pill would melt into it; a deep navy-black pill with a light ring and a
+   blue glow stays crisp on the white top and on any blue that a short phone
+   layout can bring up behind it, and white on it is well above 12:1.
+   Slightly tilted like a sticker; it straightens and catches a shine on
+   hover. The right padding keeps the italic "!" off the edge, and nowrap
+   keeps the pill whole on the narrowest phones. */
 .together {
   position: relative;
   isolation: isolate;
@@ -161,13 +168,18 @@
   padding: 0.02em 0.34em 0.1em 0.24em;
   overflow: hidden;
   border-radius: 999px;
-  background-color: var(--ft-cta-solid);
-  background-image: var(--ft-cta-gradient);
+  background-color: #12153a;
+  background-image: linear-gradient(
+    135deg,
+    #2a3170 0%,
+    #151947 55%,
+    #0b0d26 100%
+  );
   box-shadow:
-    inset 0 0.03em 0 rgb(255 255 255 / 32%),
-    inset 0 -0.05em 0.1em rgb(0 0 0 / 22%),
+    inset 0 0.03em 0 rgb(255 255 255 / 26%),
+    inset 0 -0.05em 0.1em rgb(0 0 0 / 35%),
     0 0 0 0.055em var(--ft-cta-ring),
-    0 0.14em 0.45em rgb(43 59 184 / 38%);
+    0 0.14em 0.45em rgb(43 59 184 / 45%);
   color: #fff;
   font-weight: 800;
   font-style: italic;
@@ -187,7 +199,7 @@
   background-image: linear-gradient(
     105deg,
     transparent 0%,
-    rgb(255 255 255 / 45%) 50%,
+    rgb(255 255 255 / 30%) 50%,
     transparent 100%
   );
   transform: translateX(-130%) skewX(-12deg);
@@ -245,7 +257,7 @@
   left: calc(100% + 0.42em);
   width: 0.15em;
   height: 0.15em;
-  color: #8a96f0;
+  color: #6f82f0;
 }
 
 .line:hover .starBig {
@@ -357,6 +369,7 @@
   border: 1px solid var(--ft-line);
   border-radius: 999px;
   background-color: var(--ft-glass);
+  backdrop-filter: blur(8px);
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -421,11 +434,28 @@
   }
 }
 
-/* ---------- bottom: socials + back to top, then the details ---------- */
+/* ---------- bottom: socials + back to top, then the details ----------
+   This part sits on the deep blue of the picture, so it flips to white text
+   on translucent glass. Everything below reads its colours from these
+   variables, so the rules further down need no changes. */
 .base {
+  --ft-line: rgb(255 255 255 / 45%);
+  --ft-hair: rgb(255 255 255 / 28%);
+  --ft-muted: rgb(255 255 255 / 80%);
+  --ft-glass: rgb(255 255 255 / 14%);
+  --ft-glass-hover: rgb(255 255 255 / 30%);
+  --ft-icon-bg: #fff;
+  --ft-icon-fg: #1f2024;
+  --ft-live: #5eea8a;
+
   display: flex;
   flex-direction: column;
   gap: clamp(1.25rem, 2.4vw, 2rem);
+  color: #fff;
+}
+
+.base :focus-visible {
+  outline-color: #fff;
 }
 
 .baseRow {
@@ -453,6 +483,7 @@
   border: 1px solid var(--ft-line);
   border-radius: 999px;
   background-color: var(--ft-glass);
+  backdrop-filter: blur(8px);
   color: inherit;
   font-family: inherit;
   font-size: 0.95rem;
@@ -478,7 +509,7 @@
   transform: translateY(-2px);
 }
 
-/* Back to top: label, then a dark circle with the arrow (the CTA's shape,
+/* Back to top: label, then a circle with the arrow (the CTA's shape,
    smaller). Same height as the chips, so the row is one clean line. */
 .up {
   gap: 0.75rem;
@@ -492,8 +523,8 @@
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background-color: var(--ft-cta-dark);
-  color: #fff;
+  background-color: var(--ft-icon-bg);
+  color: var(--ft-icon-fg);
 }
 
 .upIcon svg {
@@ -546,7 +577,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #2f8f00;
+  background-color: var(--ft-live);
 }
 
 .live::after {
@@ -591,6 +622,10 @@
     display: none;
   }
 
+  .base {
+    color: canvastext;
+  }
+
   .email,
   .emailCopy,
   .chip,
@@ -628,7 +663,8 @@
   }
 }
 
-/* Print: backgrounds usually aren't printed, so the white word would vanish */
+/* Print: the picture is hidden, so the white-on-blue bottom would vanish.
+   Back to black on paper. */
 @media print {
   .bg {
     display: none;
@@ -639,5 +675,15 @@
     box-shadow: none;
     color: #000;
     transform: none;
+  }
+
+  .base {
+    --ft-line: rgb(11 31 20 / 38%);
+    --ft-hair: rgb(11 31 20 / 22%);
+    --ft-muted: rgb(11 31 20 / 72%);
+    --ft-icon-bg: #1f2024;
+    --ft-icon-fg: #fff;
+
+    color: #000;
   }
 }
