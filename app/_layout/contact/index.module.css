@@ -55,6 +55,10 @@
     #232f9c 100%
   );
 
+  /* The headline's ink: a near-black navy, the same family as the pill's dark
+     end, so the two halves of the phrase belong together. */
+  --ft-headline-ink: #0b0f2e;
+
   position: relative;
   isolation: isolate;
   display: flex;
@@ -144,23 +148,24 @@
   letter-spacing: -0.03em;
 }
 
-/* Each line is as wide as its words, so the stars can hug the end of it. */
-.line {
-  position: relative;
-  display: block;
-  width: fit-content;
-  max-width: 100%;
-}
-
-/* Staggered like the hero's lines (from tablet up) */
-@media (width >= 768px) {
-  .lineIndent {
-    padding-inline-start: 1em;
-  }
+/* One phrase on one baseline: "Let's work" then the pill. When there is not
+   room for both, the pill wraps to the next line, left-aligned. */
+.phrase {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.12em 0.3em;
+  align-items: baseline;
 }
 
 .ink {
-  color: #000;
+  color: var(--ft-headline-ink);
+}
+
+/* Wraps the pill and its sparkles, so the sparkles hug the pill's corner. */
+.pillWrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
 }
 
 /* The key word: a glossy blue sticker pill, the CTA's gradient one notch
@@ -211,11 +216,11 @@
 }
 
 @media (hover: hover) {
-  .line:hover .together {
+  .headline:hover .together {
     transform: rotate(0deg) scale(1.03);
   }
 
-  .line:hover .together::after {
+  .headline:hover .together::after {
     transform: translateX(300%) skewX(-12deg);
     transition: transform 0.9s var(--ft-ease);
   }
@@ -243,6 +248,7 @@
   }
 }
 
+/* The sparkles sit on the pill's top-right corner. */
 .star {
   position: absolute;
   color: var(--ft-cta-solid);
@@ -250,21 +256,21 @@
 }
 
 .starBig {
-  top: 0.04em;
-  left: calc(100% + 0.08em);
+  top: -0.1em;
+  left: calc(100% + 0.04em);
   width: 0.34em;
   height: 0.34em;
 }
 
 .starSmall {
-  top: -0.14em;
-  left: calc(100% + 0.42em);
+  top: -0.3em;
+  left: calc(100% + 0.36em);
   width: 0.15em;
   height: 0.15em;
   color: #6f82f0;
 }
 
-.line:hover .starBig {
+.headline:hover .starBig {
   transform: rotate(90deg);
 }
 
@@ -615,6 +621,10 @@
 /* Windows high-contrast mode drops backgrounds, which would leave the white
    word invisible: give the pill a real border and the word a system colour. */
 @media (forced-colors: active) {
+  .ink {
+    color: canvastext;
+  }
+
   .together {
     border: 2px solid canvastext;
     background-image: none;
@@ -641,9 +651,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .star,
-  .line:hover .starBig,
+  .headline:hover .starBig,
   .together,
-  .line:hover .together,
+  .headline:hover .together,
   .cta,
   .cta:hover,
   .cta:focus-visible,
