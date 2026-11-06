@@ -147,63 +147,83 @@
   color: #000;
 }
 
-/* The key word: extra-bold italic like the hero's emphasis words, in solid ink
-   so it stays crisp on every tile colour (a blue gradient fill clashed with
-   the green). The brand blue lives in the marker underline behind it. The
-   padding gives the italic "!" room; the negative margins give the space back
-   so nothing moves. isolation keeps the underline's z-index inside the word. */
+/* The key word: a glossy blue sticker pill. It reuses the CTA's language (the
+   light ring, the blue gradient, the inner top highlight) so the headline and
+   the button read as one system, and white text on this blue is 5.9:1+.
+   Slightly tilted like a sticker; it straightens and catches a shine on hover.
+   The padding is generous on the right so the italic "!" never touches the
+   edge, and nowrap keeps the pill whole on the narrowest phones. */
 .together {
   position: relative;
   isolation: isolate;
   display: inline-block;
-  padding: 0.04em 0.14em 0.14em 0;
-  margin: -0.04em -0.14em -0.14em 0;
-  color: #000;
+  margin-block: 0.06em 0.02em;
+  padding: 0.02em 0.34em 0.1em 0.24em;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: var(--ft-cta-solid);
+  background-image: var(--ft-cta-gradient);
+  box-shadow:
+    inset 0 0.03em 0 rgb(255 255 255 / 32%),
+    inset 0 -0.05em 0.1em rgb(0 0 0 / 22%),
+    0 0 0 0.055em var(--ft-cta-ring),
+    0 0.14em 0.45em rgb(43 59 184 / 38%);
+  color: #fff;
   font-weight: 800;
   font-style: italic;
   white-space: nowrap;
+  transform: rotate(-2.5deg);
+  transform-origin: 20% 80%;
+  transition: transform 0.5s var(--ft-ease);
 }
 
-/* Hand-drawn marker stroke, sitting behind the letters so it can pass through
-   the "g" descender like a real highlighter. Purely decorative. */
-.underline {
+/* the shine: a soft diagonal band that sweeps across on hover / focus */
+.together::after {
+  content: '';
   position: absolute;
-  inset-inline: 0.02em 0.16em;
-  bottom: 0.1em;
+  inset: 0 auto 0 0;
   z-index: -1;
-  width: auto;
-  height: 0.24em;
-  overflow: visible;
+  width: 45%;
+  background-image: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgb(255 255 255 / 45%) 50%,
+    transparent 100%
+  );
+  transform: translateX(-130%) skewX(-12deg);
   pointer-events: none;
-  filter: drop-shadow(0 0.04em 0.06em rgb(35 47 168 / 25%));
 }
 
-.underlinePath {
-  stroke-width: 3.6;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0; /* fully drawn by default: no JS, old browsers, print */
+@media (hover: hover) {
+  .line:hover .together {
+    transform: rotate(0deg) scale(1.03);
+  }
+
+  .line:hover .together::after {
+    transform: translateX(300%) skewX(-12deg);
+    transition: transform 0.9s var(--ft-ease);
+  }
 }
 
-/* Where the browser supports scroll-driven animation, the stroke draws itself
-   as the footer scrolls into view. Elsewhere it is simply there. */
+/* Where the browser supports scroll-driven animation, the pill wipes in from
+   the left as the footer scrolls into view. Elsewhere it is simply there. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .underlinePath {
-      stroke-dashoffset: 1;
-      animation: ft-draw linear both;
+    .together {
+      animation: ft-wipe linear both;
       animation-timeline: view();
-      animation-range: entry 25% cover 40%;
+      animation-range: entry 20% cover 38%;
     }
   }
 }
 
-@keyframes ft-draw {
+@keyframes ft-wipe {
   from {
-    stroke-dashoffset: 1;
+    clip-path: inset(-40% 100% -40% 0 round 999px);
   }
 
   to {
-    stroke-dashoffset: 0;
+    clip-path: inset(-40% -10% -40% -10% round 999px);
   }
 }
 
@@ -557,19 +577,18 @@
   }
 }
 
-/* Windows high-contrast mode: the word is already real text, so only the
-   decorative stroke needs a system colour. */
+/* Windows high-contrast mode drops backgrounds, which would leave the white
+   word invisible: give the pill a real border and the word a system colour. */
 @media (forced-colors: active) {
   .together {
+    border: 2px solid canvastext;
+    background-image: none;
+    box-shadow: none;
     color: canvastext;
   }
 
-  .underlinePath {
-    stroke: linktext;
-  }
-
-  .underline {
-    filter: none;
+  .together::after {
+    display: none;
   }
 
   .email,
@@ -584,6 +603,8 @@
 @media (prefers-reduced-motion: reduce) {
   .star,
   .line:hover .starBig,
+  .together,
+  .line:hover .together,
   .cta,
   .cta:hover,
   .cta:focus-visible,
@@ -598,14 +619,25 @@
     transition: none;
   }
 
-  .underlinePath {
+  .together {
     animation: none;
-    stroke-dashoffset: 0;
+  }
+
+  .together::after {
+    display: none;
   }
 }
 
+/* Print: backgrounds usually aren't printed, so the white word would vanish */
 @media print {
   .bg {
     display: none;
+  }
+
+  .together {
+    background: none;
+    box-shadow: none;
+    color: #000;
+    transform: none;
   }
 }
