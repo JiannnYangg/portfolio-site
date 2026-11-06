@@ -39,17 +39,6 @@
   --ft-cta-dark: #1f2024;
   --ft-cta-ring: #f4f4f5;
 
-  /* The big word's own blue: top to bottom (like light falling on glossy
-     letters) instead of the CTA's diagonal sweep, which read as flat and
-     left-to-right on the green tiles. Bright top, rich middle, deep base. */
-  --ft-word-gradient: linear-gradient(
-    180deg,
-    #8a9bff 0%,
-    #5a72f5 30%,
-    #3b50e0 62%,
-    #232fa8 100%
-  );
-
   position: relative;
   isolation: isolate;
   display: flex;
@@ -158,23 +147,64 @@
   color: #000;
 }
 
-/* Extra-bold italic like the hero's emphasis words, filled with the glossy
-   blue (--ft-word-gradient). The padding keeps the italic "!" and the "g"
-   from being cut off by the gradient fill, which only paints inside the box;
-   the negative margins give the space back so nothing moves. */
+/* The key word: extra-bold italic like the hero's emphasis words, in solid ink
+   so it stays crisp on every tile colour (a blue gradient fill clashed with
+   the green). The brand blue lives in the marker underline behind it. The
+   padding gives the italic "!" room; the negative margins give the space back
+   so nothing moves. isolation keeps the underline's z-index inside the word. */
 .together {
+  position: relative;
+  isolation: isolate;
   display: inline-block;
   padding: 0.04em 0.14em 0.14em 0;
   margin: -0.04em -0.14em -0.14em 0;
+  color: #000;
   font-weight: 800;
   font-style: italic;
-  color: var(--ft-cta-solid);
-  background-image: var(--ft-word-gradient);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
 
-  /* a soft indigo glow lifts the word off the tiles */
-  filter: drop-shadow(0 0.06em 0.14em rgb(35 47 168 / 28%));
+/* Hand-drawn marker stroke, sitting behind the letters so it can pass through
+   the "g" descender like a real highlighter. Purely decorative. */
+.underline {
+  position: absolute;
+  inset-inline: 0.02em 0.16em;
+  bottom: 0.1em;
+  z-index: -1;
+  width: auto;
+  height: 0.24em;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 0.04em 0.06em rgb(35 47 168 / 25%));
+}
+
+.underlinePath {
+  stroke-width: 3.6;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0; /* fully drawn by default: no JS, old browsers, print */
+}
+
+/* Where the browser supports scroll-driven animation, the stroke draws itself
+   as the footer scrolls into view. Elsewhere it is simply there. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .underlinePath {
+      stroke-dashoffset: 1;
+      animation: ft-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 25% cover 40%;
+    }
+  }
+}
+
+@keyframes ft-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .star {
@@ -527,13 +557,19 @@
   }
 }
 
-/* Windows high-contrast mode drops backgrounds, which would leave the
-   gradient-filled word transparent: give it a real colour back. */
+/* Windows high-contrast mode: the word is already real text, so only the
+   decorative stroke needs a system colour. */
 @media (forced-colors: active) {
   .together {
-    background-image: none;
     color: canvastext;
-    -webkit-text-fill-color: currentcolor;
+  }
+
+  .underlinePath {
+    stroke: linktext;
+  }
+
+  .underline {
+    filter: none;
   }
 
   .email,
@@ -560,6 +596,11 @@
   .cta:focus-visible .ctaArrow svg {
     transform: none;
     transition: none;
+  }
+
+  .underlinePath {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }
 
