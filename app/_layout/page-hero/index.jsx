@@ -48,9 +48,10 @@ function HeroWord({ index, children }) {
  * page uses, so every page reads as one surface.
  * `inset` pulls the text in from the dashed guides (same inset as the rest of
  * the site); it is opt-in so other pages keep their current look.
- * @param {{ label: string, title: string, inset?: boolean }} props
+ * `balance` evens out the line lengths so a short last word is not left alone.
+ * @param {{ label: string, title: string, inset?: boolean, balance?: boolean }} props
  */
-export function PageHero({ label, title, inset = false }) {
+export function PageHero({ label, title, inset = false, balance = false }) {
   const words = title.split(' ');
 
   return (
@@ -70,7 +71,7 @@ export function PageHero({ label, title, inset = false }) {
           </div>
 
           <h1
-            className='leading-[1.02]'
+            className={`leading-[1.02] ${balance ? 'text-balance' : ''}`}
             style={{ fontSize: 'clamp(3.25em, 10vw, 11em)' }}
           >
             {words.map((word, index) => (
