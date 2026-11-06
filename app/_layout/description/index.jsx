@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Balancer from 'react-wrap-balancer';
 
 import { MagneticButton, ParallaxFade } from '@/components';
 
@@ -37,10 +36,13 @@ const segments = [
 
 /**
  * ONE font size for the whole side note (the intro line and the four D's), so
- * both lines always match. It is as large as 1.3rem, and only steps down when
- * the column is too narrow for the four D's to stay on a single line.
+ * both lines always match. It grows with the screen (1.25rem to 2rem), which
+ * is clearly bigger than before, and the lines simply wrap if a column is ever
+ * too narrow: each D keeps its own marker swatch in one piece (nowrap), and
+ * text-wrap: balance keeps the break from leaving a lone word.
  */
-const NOTE_TEXT = 'leading-loose [font-size:min(1.3rem,4.4cqw)]';
+const NOTE_TEXT =
+  'leading-relaxed [text-wrap:balance] [font-size:clamp(1.25rem,1.7vw,2rem)]';
 
 /**
  * Hover colour of the circle: the theme lime (same as the CTA's hover) with
@@ -107,57 +109,50 @@ export function Description() {
   });
 
   return (
-    /* lg:pb-10: extra room under the section. The circle is pinned a fixed
-       distance above the bottom edge, so this pushes it further down, clear
-       of the "Distribution." text, without moving it closer to the line. */
-    <article className='container relative lg:pb-10'>
-      <Wrapper>
-        <div className='basis-full lg:basis-[54%]'>
+    <article className='container relative'>
+      {/* Two columns from lg up (stacked below it). The wrapping is set here with
+          Tailwind's own lg breakpoint rather than a theme lookup, so the side
+          note can never fall under the paragraph on a wide screen. */}
+      <Wrapper className='flex-wrap lg:flex-nowrap'>
+        <div className='basis-full lg:basis-[52%]'>
           <Frame>
             <Title>{content}</Title>
           </Frame>
         </div>
 
-        {/* side note: top-aligned with the paragraph. It is a size container so
-            the text can scale to keep the four D's on ONE line. */}
-        <div
-          className='basis-full sm:basis-7/12 lg:basis-[38%] lg:self-start lg:pt-2'
-          style={{ containerType: 'inline-size' }}
-        >
+        {/* Right column, top-aligned with the paragraph: the side note, and the
+            "About us" circle directly under it. The circle is in the normal flow
+            (not pinned), so it can never overlap the text; the gap keeps clear
+            air between the last line and the circle. */}
+        <div className='flex basis-full flex-col gap-10 sm:basis-7/12 lg:basis-[40%] lg:gap-14 lg:self-start lg:pt-2'>
           <ParallaxFade>
-            <Balancer as='p' className={NOTE_TEXT}>
-              We bring together the four D&rsquo;s:
-            </Balancer>
-            {/* one line, never wraps, same size as the line above */}
-            <p className={`whitespace-nowrap ${NOTE_TEXT}`}>
+            <p className={NOTE_TEXT}>We bring together the four D&rsquo;s:</p>
+            <p className={`mt-1 ${NOTE_TEXT}`}>
               <Highlight $variant='data'>Data</Highlight>,{' '}
               <Highlight $variant='design'>Design</Highlight>,{' '}
               <Highlight $variant='development'>Development</Highlight>,{' '}
               <Highlight $variant='distribution'>Distribution</Highlight>.
             </p>
           </ParallaxFade>
-        </div>
 
-        {/* "About us" circle: sits INSIDE the section, bottom-right, a little
-            above the dashed line and inside the right guide. On small screens
-            it simply follows the text, right-aligned. */}
-        <motion.div
-          className='flex basis-full justify-end lg:absolute lg:bottom-12 lg:right-14 lg:basis-auto'
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <Link href='/about' passHref>
-            <MagneticButton
-              variant='ghost'
-              size='xl'
-              className={`${CIRCLE_SHAPE} ${CIRCLE_HOVER}`}
-            >
-              About us
-            </MagneticButton>
-          </Link>
-        </motion.div>
+          <motion.div
+            className='flex justify-start'
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <Link href='/about' passHref>
+              <MagneticButton
+                variant='ghost'
+                size='xl'
+                className={`${CIRCLE_SHAPE} ${CIRCLE_HOVER}`}
+              >
+                About us
+              </MagneticButton>
+            </Link>
+          </motion.div>
+        </div>
       </Wrapper>
     </article>
   );

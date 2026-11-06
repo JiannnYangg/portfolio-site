@@ -12,21 +12,21 @@ const LIME = '#b6f500';
 /* Same lime, lightened: used for the marker swatches behind the four D's */
 const LIME_LIGHT = 'rgba(182, 245, 0, 0.36)';
 
+/* Row / column behaviour (wrap on small screens, two columns from lg up) is set
+   in index.jsx with Tailwind's flex-wrap / lg:flex-nowrap, so it follows the
+   site's real lg breakpoint. */
 export const Wrapper = styled.div`
   display: flex;
-  flex-wrap: wrap;
   align-items: stretch;
   justify-content: space-between;
   gap: clamp(3.5rem, 6vw, 7rem);
-  /* top padding lifted again (was clamp(3em, 6vw, 7em)): the paragraph, the
-     side note and the "About me" circle (pinned to the bottom) all sit higher,
-     closer to the dashed line above */
-  padding-block: clamp(2em, 3.6vw, 4.25em) clamp(5em, 14vh, 16em);
-  padding-inline: clamp(2.5em, 4vw, 8em);
 
-  @media screen and (min-width: ${({ theme }) => theme?.breakpoints?.lg}) {
-    flex-wrap: revert;
-  }
+  /* top padding lifted (was clamp(3em, 6vw, 7em)): the paragraph and the side
+     note sit close to the dashed line above. The bottom padding is lighter
+     than it used to be, because the "About us" circle is now part of the right
+     column instead of being pinned into the bottom padding. */
+  padding-block: clamp(2em, 3.6vw, 4.25em) clamp(4em, 10vh, 10em);
+  padding-inline: clamp(2.5em, 4vw, 8em);
 `;
 
 export const Title = styled.h4`
