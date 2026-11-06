@@ -1,6 +1,7 @@
 'use client';
 
 import { GUIDE_X, Partition } from '@/components';
+import { introDelay } from '@/data';
 
 import { NavbarBrand } from './brand';
 import { NavbarList } from './list';
@@ -35,7 +36,7 @@ export function Navbar({ tone = 'light', partition }) {
           <Partition
             name={partition.name}
             index={partition.index}
-            delay={2.1}
+            delay={introDelay(2.1)}
           />
         </div>
       ) : null}

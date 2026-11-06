@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import {
   motion,
+  useInView,
   useMotionValue,
   useReducedMotion,
   useScroll,
@@ -11,6 +12,9 @@ import {
   useTransform,
 } from 'framer-motion';
 import Image from 'next/image';
+
+import { introDelay } from '@/data';
+import { useLoopDelay } from '@/hooks';
 
 /**
  * Timeline (seconds), continuing the headline sequence in index.jsx:
@@ -78,7 +82,7 @@ const shadowFor = depth =>
 const LOGOS = [
   {
     id: 'claude',
-    src: '/hero-logos/hero-claude-4827.webp',
+    src: '/hero-logos/hero-claude-4827.png',
     width: 300,
     height: 261,
     size: 'clamp(62px, 8.4vw, 152px)', // was clamp(76px, 10.5vw, 190px)
@@ -89,7 +93,7 @@ const LOGOS = [
   },
   {
     id: 'comfy',
-    src: '/hero-logos/hero-comfy-9153.webp',
+    src: '/hero-logos/hero-comfy-9153.png',
     width: 420,
     height: 172,
     size: 'clamp(84px, 12vw, 224px)', // was clamp(104px, 15vw, 280px)
@@ -100,7 +104,7 @@ const LOGOS = [
   },
   {
     id: 'squiggle',
-    src: '/hero-logos/hero-squiggle-1084.webp',
+    src: '/hero-logos/hero-squiggle-1084.png',
     width: 224,
     height: 196,
     size: 'clamp(54px, 8vw, 148px)', // was clamp(68px, 10vw, 185px)
@@ -112,7 +116,7 @@ const LOGOS = [
   },
   {
     id: 'n8n',
-    src: '/hero-logos/hero-n8n-2606.webp',
+    src: '/hero-logos/hero-n8n-2606.png',
     width: 320,
     height: 200,
     size: 'clamp(48px, 6vw, 100px)',
@@ -127,7 +131,7 @@ const LOGOS = [
     // moved a bit left (left 20% -> 17%); mobile only lowered (19% -> 16%).
     // Same size, tilt and float as before.
     id: 'github',
-    src: '/hero-logos/hero-gitcat-4719.webp',
+    src: '/hero-logos/hero-gitcat-4719.png',
     width: 190,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
@@ -138,7 +142,7 @@ const LOGOS = [
   },
   {
     id: 'elevenlabs',
-    src: '/hero-logos/hero-elevenlabs-7342.webp',
+    src: '/hero-logos/hero-elevenlabs-7342.png',
     width: 240,
     height: 234,
     size: 'clamp(38px, 4.8vw, 78px)',
@@ -152,7 +156,7 @@ const LOGOS = [
     // Moved inwards on desktop (right 24% -> 27%) and a bit upwards (offset
     // 84px -> 112px above the middle); mobile is unchanged.
     id: 'codex',
-    src: '/hero-logos/hero-mylogo-6382.webp',
+    src: '/hero-logos/hero-mylogo-6382.png',
     width: 193,
     height: 200,
     size: 'clamp(34px, 4.2vw, 68px)',
@@ -167,7 +171,7 @@ const LOGOS = [
     // 74px -> 58px), higher (bottom 41%) and a bit to the right (left 21% ->
     // 24%). Mobile is unchanged.
     id: 'runway',
-    src: '/hero-logos/hero-letter-r-8156.webp',
+    src: '/hero-logos/hero-letter-r-8156.png',
     width: 200,
     height: 200,
     size: 'clamp(30px, 3.6vw, 58px)',
@@ -178,13 +182,17 @@ const LOGOS = [
   },
 ];
 
-function Logo({ logo, index, mouseX, mouseY }) {
+function Logo({ logo, index, mouseX, mouseY, active }) {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
 
   const { depth, rotate, float } = logo;
   const [amplitude, duration, tilt, phase] = float;
-  const enterDelay = LOGOS_START + index * LOGO_STAGGER;
+  const enterDelay = introDelay(LOGOS_START) + index * LOGO_STAGGER;
+  //? the idle float repeats forever: it only runs while the hero is near the
+  //? screen (`active`), and only waits its intro delay the very first time
+  const floating = !reduceMotion && active;
+  const floatDelay = useLoopDelay(floating, enterDelay + 1 + phase);
 
   // scroll-linked: fade out in reading order, drift up faster when closer
   const fadeStart = SCROLL_FADE_START + index * 18;
@@ -239,14 +247,20 @@ function Logo({ logo, index, mouseX, mouseY }) {
           animate={
             reduceMotion
               ? undefined
-              : { y: [0, -amplitude, 0], rotate: [0, tilt, 0] }
+              : floating
+                ? { y: [0, -amplitude, 0], rotate: [0, tilt, 0] }
+                : { y: 0, rotate: 0 }
           }
-          transition={{
-            duration,
-            ease: 'easeInOut',
-            repeat: Infinity,
-            delay: enterDelay + 1 + phase,
-          }}
+          transition={
+            floating
+              ? {
+                  duration,
+                  ease: 'easeInOut',
+                  repeat: Infinity,
+                  delay: floatDelay,
+                }
+              : { duration: 0 }
+          }
         >
           {/* resting tilt: spins in while it pops */}
           <motion.div
@@ -265,7 +279,8 @@ function Logo({ logo, index, mouseX, mouseY }) {
               width={logo.width}
               height={logo.height}
               sizes={logo.size}
-              priority={index < 4}
+              loading='eager'
+              fetchPriority='low'
               draggable={false}
               className='h-auto w-full select-none'
             />
@@ -279,6 +294,8 @@ function Logo({ logo, index, mouseX, mouseY }) {
 /** Floating 3D logos scattered around the headline */
 export function HeroLogos() {
   const reduceMotion = useReducedMotion();
+  const containerRef = useRef(null);
+  const onScreen = useInView(containerRef, { margin: '200px 0px 200px 0px' });
 
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
@@ -299,7 +316,11 @@ export function HeroLogos() {
   }, [reduceMotion, rawX, rawY]);
 
   return (
-    <div aria-hidden='true' className='pointer-events-none absolute inset-0'>
+    <div
+      ref={containerRef}
+      aria-hidden='true'
+      className='pointer-events-none absolute inset-0'
+    >
       {LOGOS.map((logo, index) => (
         <Logo
           key={logo.id}
@@ -307,6 +328,7 @@ export function HeroLogos() {
           index={index}
           mouseX={mouseX}
           mouseY={mouseY}
+          active={onScreen}
         />
       ))}
     </div>

@@ -3,6 +3,7 @@ export * from './use-dimensions';
 export * from './use-follow-pointer';
 export * from './use-hash-nav';
 export * from './use-lenis';
+export * from './use-loop-delay';
 export * from './use-magnetic';
 export * from './use-offcanvas-toggle';
 export * from './use-parallax-slider';

@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { MoveDownRight } from 'lucide-react';
 
+import { introDelay } from '@/data';
 import { useScrollFade } from '@/hooks';
 
 import { slideUp } from '../header/variants';
@@ -33,7 +34,7 @@ function HeroWord({ index, children }) {
         transition={{
           duration: 0.8,
           ease: [0.33, 1, 0.68, 1],
-          delay: 2.4 + index * 0.1,
+          delay: introDelay(2.4) + index * 0.1,
         }}
       >
         {children}
@@ -48,10 +49,9 @@ function HeroWord({ index, children }) {
  * page uses, so every page reads as one surface.
  * `inset` pulls the text in from the dashed guides (same inset as the rest of
  * the site); it is opt-in so other pages keep their current look.
- * `balance` evens out the line lengths so a short last word is not left alone.
- * @param {{ label: string, title: string, inset?: boolean, balance?: boolean }} props
+ * @param {{ label: string, title: string, inset?: boolean }} props
  */
-export function PageHero({ label, title, inset = false, balance = false }) {
+export function PageHero({ label, title, inset = false }) {
   const words = title.split(' ');
 
   return (
@@ -71,7 +71,7 @@ export function PageHero({ label, title, inset = false, balance = false }) {
           </div>
 
           <h1
-            className={`leading-[1.02] ${balance ? 'text-balance' : ''}`}
+            className='leading-[1.02]'
             style={{ fontSize: 'clamp(3.25em, 10vw, 11em)' }}
           >
             {words.map((word, index) => (

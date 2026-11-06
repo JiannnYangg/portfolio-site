@@ -1,5 +1,6 @@
 import { SiteBackdrop, SiteGuides, SmoothCursor } from '@/components';
 import { rootMetadata } from '@/config';
+import { INTRO_SKIP_SCRIPT } from '@/data';
 import { inter_tight, neue_montreal } from '@/fonts';
 import { Offcanvas } from '@/layout';
 import { Providers } from '@/providers';
@@ -14,11 +15,17 @@ export const viewport = { themeColor: '#1f2024' };
 /** @param {import('react').PropsWithChildren<unknown>} */
 export default function RootLayout({ children }) {
   return (
+    //? suppressHydrationWarning: the inline script in <head> may add
+    //? data-intro to <html> before React hydrates (see INTRO_SKIP_SCRIPT)
     <html
       lang='en'
       dir='ltr'
+      suppressHydrationWarning
       className={`${neue_montreal.variable} ${inter_tight.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SKIP_SCRIPT }} />
+      </head>
       <body className={neue_montreal.className}>
         <Providers>
           <SiteBackdrop />

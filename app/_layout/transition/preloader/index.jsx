@@ -69,6 +69,7 @@ export function Preloader() {
 
   return (
     <MotionComponent
+      data-preloader=''
       className={`fixed z-50 h-screen w-screen cursor-wait ${BG}`}
       variants={slideUp}
       initial='initial'

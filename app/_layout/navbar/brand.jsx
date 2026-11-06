@@ -1,9 +1,12 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { useRef } from 'react';
+
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 
-import { scrollToId } from '@/hooks';
+import { introDelay } from '@/data';
+import { scrollToId, useLoopDelay } from '@/hooks';
 
 /**
  * Same light sweep as the iPhone edit menu in the hero: a slim diagonal
@@ -22,6 +25,11 @@ const SHINE_REPEAT_DELAY = 0.5; // 0.5s pause between passes
  */
 export function NavbarBrand({ tone = 'light' }) {
   const reduceMotion = useReducedMotion();
+  //? the sweep repeats forever: it only runs while the logo is near the
+  //? screen, so it costs nothing once the visitor has scrolled away
+  const shineRef = useRef(null);
+  const onScreen = useInView(shineRef, { margin: '200px 0px 200px 0px' });
+  const shineDelay = useLoopDelay(onScreen, introDelay(SHINE_FIRST_DELAY));
   const scrollToFooter = () => scrollToId('contact-footer');
   const isDark = tone === 'dark';
   // logo-social.svg = the dark logo with the dot recolored to charcoal
@@ -50,6 +58,7 @@ export function NavbarBrand({ tone = 'light' }) {
             on the letters and the "C" only, never on the empty box around */}
         {!reduceMotion && (
           <span
+            ref={shineRef}
             aria-hidden='true'
             className='pointer-events-none absolute inset-0 overflow-hidden'
             style={{
@@ -69,14 +78,18 @@ export function NavbarBrand({ tone = 'light' }) {
                 transform: 'skewX(-18deg)',
               }}
               initial={{ x: '-160%' }}
-              animate={{ x: '480%' }}
-              transition={{
-                delay: SHINE_FIRST_DELAY,
-                duration: SHINE_DURATION,
-                ease: 'easeInOut',
-                repeat: Infinity,
-                repeatDelay: SHINE_REPEAT_DELAY,
-              }}
+              animate={{ x: onScreen ? '480%' : '-160%' }}
+              transition={
+                onScreen
+                  ? {
+                      delay: shineDelay,
+                      duration: SHINE_DURATION,
+                      ease: 'easeInOut',
+                      repeat: Infinity,
+                      repeatDelay: SHINE_REPEAT_DELAY,
+                    }
+                  : { duration: 0 }
+              }
             />
           </span>
         )}

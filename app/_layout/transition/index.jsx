@@ -1,17 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 import { AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
-import { PRELOADER_DURATION_MS } from '@/data';
+import { markIntroSeen, PRELOADER_DURATION_MS, resolveIntro } from '@/data';
 import { scrollToId, useLenis, useTimeOut } from '@/hooks';
 
 import { Preloader } from './preloader';
 
+//? useLayoutEffect warns when a component renders on the server, and this one
+//? is pre-rendered. Same behaviour on the client, no warning on the server.
+const useIsomorphicLayoutEffect =
+  typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
 /** @param {import('react').PropsWithChildren<unknown>} */
 export function Transition({ children }) {
+  //? Decided once per mount, BEFORE any child renders (children read it
+  //? through `introDelay` to time the hero). True when the visitor already saw
+  //? the intro in this tab, or asked for reduced motion: the preloader is then
+  //? skipped and the hero starts straight away. See app/_data/intro.js.
+  const [skipIntro] = useState(resolveIntro);
+  //? Starts true on the server AND on the first client render whatever
+  //? `skipIntro` says, so the markup always matches the server HTML. A skipped
+  //? intro is removed in the layout effect below, before the browser paints.
   const [isLoading, setLoading] = useState(true);
   const pathname = usePathname();
 
@@ -33,10 +46,15 @@ export function Transition({ children }) {
     };
   }, []);
 
+  useIsomorphicLayoutEffect(() => {
+    if (skipIntro) setLoading(false);
+  }, [skipIntro]);
+
   useLenis();
   useTimeOut({
     callback: () => {
       setLoading(false);
+      markIntroSeen();
       window.scrollTo(0, 0);
       const { hash } = window.location;
       if (hash) {
@@ -45,8 +63,9 @@ export function Transition({ children }) {
       }
     },
     //? Same constant the preloader reads (greetings * 0.4 s): the last greeting
-    //? plays fully, then the screen leaves
-    duration: PRELOADER_DURATION_MS,
+    //? plays fully, then the screen leaves. A skipped intro has nothing to wait
+    //? for: the page is reset to the top (and a #hash followed) right away.
+    duration: skipIntro ? 0 : PRELOADER_DURATION_MS,
     deps: [],
   });
 
@@ -54,9 +73,17 @@ export function Transition({ children }) {
   //? becoming a scroll container, so the pinned (sticky) showcase works
   return (
     <div key={pathname} className='page-shell'>
-      <AnimatePresence mode='wait'>
-        {isLoading ? <Preloader /> : null}
-      </AnimatePresence>
+      {skipIntro ? (
+        //? no exit animation: the overlay is just removed (it is also hidden
+        //? by CSS from the first paint, see INTRO_SKIP_SCRIPT)
+        isLoading ? (
+          <Preloader />
+        ) : null
+      ) : (
+        <AnimatePresence mode='wait'>
+          {isLoading ? <Preloader /> : null}
+        </AnimatePresence>
+      )}
       {children}
     </div>
   );

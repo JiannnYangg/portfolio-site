@@ -1,12 +1,19 @@
 'use client';
 
-import { createContext, useCallback, useContext, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from 'react';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 
 import { PAPER_RGB } from '@/components';
-import { scrollToId, useScrollFade } from '@/hooks';
+import { introDelay } from '@/data';
+import { scrollToId, useLoopDelay, useScrollFade } from '@/hooks';
 
 import { HeroLogos } from './hero-logos';
 import { slideUp } from './variants';
@@ -161,7 +168,7 @@ function Word({ index, last = false, children }) {
         animate={{ y: '0%', opacity: 1 }}
         transition={{
           duration: WORD_DURATION,
-          delay: WORD_DELAY + index * WORD_STAGGER,
+          delay: introDelay(WORD_DELAY + index * WORD_STAGGER),
           ease: EASE_OUT_EXPO,
         }}
         onAnimationComplete={last ? settleLine : undefined}
@@ -194,7 +201,7 @@ function CtaReveal({ children }) {
           animate={{ y: '0%', opacity: 1 }}
           transition={{
             duration: WORD_DURATION,
-            delay: CTA_DELAY,
+            delay: introDelay(CTA_DELAY),
             ease: EASE_OUT_EXPO,
           }}
           onAnimationComplete={() => setSettled(true)}
@@ -236,7 +243,7 @@ function Marker({ children }) {
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{
-          delay: MARKER_DELAY,
+          delay: introDelay(MARKER_DELAY),
           duration: 0.7,
           ease: EASE_OUT_EXPO,
         }}
@@ -254,6 +261,11 @@ function Marker({ children }) {
  */
 function IosCallout() {
   const reduceMotion = useReducedMotion();
+  //? the sheen repeats forever: it only runs while the bubble is near the
+  //? screen, so it costs nothing once the visitor has scrolled past the hero
+  const sheenRef = useRef(null);
+  const onScreen = useInView(sheenRef, { margin: '200px 0px 200px 0px' });
+  const sheenDelay = useLoopDelay(onScreen, introDelay(SHINE_FIRST_DELAY));
 
   return (
     <span
@@ -272,7 +284,7 @@ function IosCallout() {
         initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 4 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{
-          delay: CALLOUT_DELAY,
+          delay: introDelay(CALLOUT_DELAY),
           duration: 0.22,
           ease: EASE_OUT_EXPO,
         }}
@@ -291,7 +303,10 @@ function IosCallout() {
 
         {/* light sweep: a slim diagonal sheen that slowly passes over the bubble */}
         {!reduceMotion && (
-          <span className='pointer-events-none absolute inset-0 overflow-hidden rounded-[9px]'>
+          <span
+            ref={sheenRef}
+            className='pointer-events-none absolute inset-0 overflow-hidden rounded-[9px]'
+          >
             <motion.span
               className='absolute inset-y-0 left-0 w-[24%]'
               style={{
@@ -300,14 +315,18 @@ function IosCallout() {
                 transform: 'skewX(-18deg)',
               }}
               initial={{ x: '-160%' }}
-              animate={{ x: '480%' }}
-              transition={{
-                delay: SHINE_FIRST_DELAY,
-                duration: SHINE_DURATION,
-                ease: 'easeInOut',
-                repeat: Infinity,
-                repeatDelay: SHINE_REPEAT_DELAY,
-              }}
+              animate={{ x: onScreen ? '480%' : '-160%' }}
+              transition={
+                onScreen
+                  ? {
+                      delay: sheenDelay,
+                      duration: SHINE_DURATION,
+                      ease: 'easeInOut',
+                      repeat: Infinity,
+                      repeatDelay: SHINE_REPEAT_DELAY,
+                    }
+                  : { duration: 0 }
+              }
             />
           </span>
         )}
@@ -345,7 +364,7 @@ function Selection({ children }) {
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{
-          delay: HIGHLIGHT_DELAY,
+          delay: introDelay(HIGHLIGHT_DELAY),
           duration: 0.7,
           ease: EASE_OUT_EXPO,
         }}
@@ -358,7 +377,7 @@ function Selection({ children }) {
         initial={reduceMotion ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
-          delay: HANDLES_DELAY,
+          delay: introDelay(HANDLES_DELAY),
           duration: 0.4,
           ease: EASE_OUT_EXPO,
         }}

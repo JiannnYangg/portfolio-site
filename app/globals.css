@@ -1,4 +1,3 @@
-@import 'next-cloudinary/dist/cld-video-player.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -72,6 +71,15 @@
     .page-shell {
       overflow: clip;
     }
+  }
+}
+
+/* Skipped intro (see app/_data/intro.js): a tiny script in <head> marks <html>
+   with data-intro="skip" before the first paint, so the preloader overlay that
+   is part of the server HTML never flashes while the page's JavaScript loads. */
+@layer components {
+  html[data-intro='skip'] [data-preloader] {
+    display: none;
   }
 }
 
