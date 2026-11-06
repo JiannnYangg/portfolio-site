@@ -236,7 +236,7 @@ export const FOCUS = {
 // hold, then grow to full size while the lens blooms back in.
 export const ENTRY = {
   enabled: true,
-  delay: 0.5, // seconds before the entry begins
+  delay: 0, // seconds before the entry begins (the page glides onto the pin meanwhile)
   startH: 80, // px height each panel starts at
   riseDuration: 1.0, // seconds for a panel to rise into place
   stagger: 0.07, // seconds between panels rising

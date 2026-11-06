@@ -19,16 +19,19 @@
  * otherwise `position: sticky` has nothing to stick to — see globals.css.
  *
  * The entry animation (cards rise, then grow) is NOT tied to loading or to a
- * scroll threshold any more. It starts only when the stage is really on screen
- * and, while it plays, the page is held in place (see ./scroll-lock). That is
- * what stops a fast scroller from being several cards deep before the entry
+ * scroll threshold any more. It starts the moment the stage begins to come
+ * into view, so the cards are already rising while the page settles onto the
+ * pin: there is no empty stage and no waiting. As soon as the page is on the
+ * pin it is held in place for the rest of the entry (see ./scroll-lock). That
+ * is what stops a fast scroller from being several cards deep before the entry
  * ends, which used to skip the first cards. The hold is easy to leave: scrolling
  * up, a link click, or the fail-safe timer all release it.
  *
  * Performance / robustness:
- * - three.js and the engine are fetched, and the shader compiled, while the
- *   section is still about one screen away (so nothing hitches when it
- *   arrives); the render loop runs only while the stage is on screen.
+ * - three.js and the engine are fetched, and the shader compiled, in an idle
+ *   moment shortly after the page loads (and at the latest when the section is
+ *   about one screen away), so the cards are ready the instant it arrives and
+ *   nothing hitches; the render loop runs only while the stage is on screen.
  * - The scroll listener only exists while the section is within a screen of
  *   the viewport, and reads the layout once per frame (heights are cached).
  * - Phones, tablets, small windows, reduced-motion, data-saver, low-memory /
@@ -58,8 +61,22 @@ const MIN_VIEWPORT_WIDTH = 1025; // px
 const MIN_VIEWPORT_HEIGHT = 560; // px
 /** Start loading / compiling when the section is this close (viewport heights) */
 const NEAR_MARGIN = '100% 0px 100% 0px';
-/** The entry starts once this share of the stage is on screen */
-const ENTRY_VISIBILITY = 0.75;
+/**
+ * The entry starts once this share of the stage is on screen. Small on purpose:
+ * the cards should already be rising as the stage slides into view, not wait
+ * for it to be almost fully there. (The page is still guided onto the pin and
+ * held for the entry, so a fast scroller cannot skip the first cards.)
+ */
+const ENTRY_VISIBILITY = 0.15;
+/**
+ * Load three.js, the engine and the textures, and compile the shader, this
+ * long after the page mounts, in an idle moment (so the hero intro is not
+ * disturbed). The near-observer below still boots immediately if the visitor
+ * gets close to the section before that.
+ */
+const BOOT_DELAY_MS = 1500;
+/** An idle moment is waited for at most this long before booting anyway */
+const BOOT_IDLE_TIMEOUT_MS = 3000;
 /** The page is only held if at least this share of the stage is on screen */
 const LOCK_VISIBILITY = 0.5;
 
@@ -168,6 +185,10 @@ export function Showcase() {
     let listening = false; // scroll / resize listeners attached
     let entryTriggered = false; // the entry is requested at most once
     let releaseLock = null;
+    let gliding = false; // the page is being guided onto the pin
+    let entryRunning = false; // the engine's entry animation is playing
+    let bootTimer = 0; // delayed, idle-time boot
+    let idleHandle = 0;
     let stageHeight = stage.offsetHeight; // cached; kept fresh by resizeObserver
 
     const fail = () => {
@@ -196,22 +217,29 @@ export function Showcase() {
       return Math.min(1, Math.max(0, -rect.top / length));
     };
 
-    // ---- entry: only when the stage is really there, never on a threshold ----
-    // The entry used to fire as soon as a quarter of the stage showed, while
-    // the visitor was still scrolling hard. By the time it ended the page was
-    // already several cards deep, so the first cards were skipped. Now it waits
-    // until most of the stage is on screen, glides the page onto the pin if it
-    // is not quite there, and the page is held while the entry plays.
+    // ---- entry: starts as the stage comes into view, never waits ----
+    // The entry has to be over before the visitor can scroll on, otherwise a
+    // fast scroller ends up several cards deep and the first cards are skipped
+    // (that is what the page hold is for). It used to wait until most of the
+    // stage was on screen AND the page had finished gliding onto the pin, and
+    // only then began, so the stage sat empty for a moment. Now the entry
+    // starts right away, the page glides onto the pin at the same time, and the
+    // hold takes over the moment the page is on the pin.
     const checkEntry = () => {
       if (entryTriggered || !engine || cancelled || !ENTRY.enabled) return;
       if (stageVisibleShare() < ENTRY_VISIBILITY) return;
       entryTriggered = true;
-      const begin = () => {
-        if (!cancelled) engine?.beginEntry();
-      };
       const top = wrapper.getBoundingClientRect().top;
-      if (top > 0.5) scrollToY(window.scrollY + top, begin);
-      else begin();
+      if (top > 0.5) {
+        // not on the pin yet: guide the page there while the cards rise. The
+        // hold waits until the glide is over (holding would stop the glide).
+        gliding = true;
+        scrollToY(window.scrollY + top, () => {
+          gliding = false;
+          if (!cancelled && entryRunning) engageLock();
+        });
+      }
+      engine.beginEntry();
     };
 
     const syncProgress = () => {
@@ -224,10 +252,10 @@ export function Showcase() {
       if (!frame) frame = requestAnimationFrame(syncProgress);
     };
 
-    // The engine tells us when an entry starts / ends: hold the page for that
-    // long. If the stage is not mostly on screen (e.g. a page restored from the
-    // back/forward cache while scrolled elsewhere) nothing is held.
-    const onEntryStart = () => {
+    // Hold the page still for the rest of the entry. If the stage is not mostly
+    // on screen (e.g. a page restored from the back/forward cache while
+    // scrolled elsewhere) nothing is held.
+    const engageLock = () => {
       releaseLock?.();
       releaseLock = null;
       if (cancelled || stageVisibleShare() < LOCK_VISIBILITY) return;
@@ -238,9 +266,18 @@ export function Showcase() {
         },
       });
     };
+    // The engine tells us when an entry starts / ends. While the page is still
+    // gliding onto the pin the hold is postponed (see checkEntry): it would
+    // stop the glide half way.
+    const onEntryStart = () => {
+      entryRunning = true;
+      if (gliding) return;
+      engageLock();
+    };
     const onEntryDone = done => {
       setEntryDone(done);
       if (done) {
+        entryRunning = false;
         releaseLock?.();
         releaseLock = null;
       }
@@ -310,6 +347,22 @@ export function Showcase() {
     );
     nearObserver.observe(wrapper);
 
+    // Boot early, in an idle moment, instead of waiting until the visitor is a
+    // screen away: three.js (CDN), the engine, the textures and the shader
+    // compile are the slow part, and a visitor who scrolls straight down used to
+    // reach the section before they were ready. The idle callback keeps it from
+    // competing with the hero intro.
+    bootTimer = window.setTimeout(() => {
+      if (cancelled) return;
+      if ('requestIdleCallback' in window) {
+        idleHandle = window.requestIdleCallback(boot, {
+          timeout: BOOT_IDLE_TIMEOUT_MS,
+        });
+      } else {
+        boot();
+      }
+    }, BOOT_DELAY_MS);
+
     // render only while any part of the stage is on screen
     const visibilityObserver = new IntersectionObserver(entries => {
       stageVisible = entries.some(e => e.isIntersecting);
@@ -336,6 +389,9 @@ export function Showcase() {
       resizeObserver.disconnect();
       listen(false);
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(bootTimer);
+      if (idleHandle && 'cancelIdleCallback' in window)
+        window.cancelIdleCallback(idleHandle);
       releaseLock?.(); // never leave the page held
       releaseLock = null;
       engine?.destroy();
