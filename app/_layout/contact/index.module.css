@@ -45,6 +45,16 @@
   --ft-cta-dark: #1f2024;
   --ft-cta-ring: #f4f4f5;
 
+  /* The "together!" pill: the CTA gradient, one notch darker so it holds its
+     own against the blue picture. */
+  --ft-pill-solid: #3a4ed6;
+  --ft-pill-gradient: linear-gradient(
+    135deg,
+    #4559e0 0%,
+    #3a4ed6 48%,
+    #232f9c 100%
+  );
+
   position: relative;
   isolation: isolate;
   display: flex;
@@ -153,10 +163,9 @@
   color: #000;
 }
 
-/* The key word: a dark "ink" sticker pill. The picture is blue now, so a blue
-   pill would melt into it; a deep navy-black pill with a light ring and a
-   blue glow stays crisp on the white top and on any blue that a short phone
-   layout can bring up behind it, and white on it is well above 12:1.
+/* The key word: a glossy blue sticker pill, the CTA's gradient one notch
+   darker (--ft-pill-*). The light ring and the inner top highlight are what
+   keep it crisp against the blue picture, and white on this blue is 7:1.
    Slightly tilted like a sticker; it straightens and catches a shine on
    hover. The right padding keeps the italic "!" off the edge, and nowrap
    keeps the pill whole on the narrowest phones. */
@@ -168,18 +177,13 @@
   padding: 0.02em 0.34em 0.1em 0.24em;
   overflow: hidden;
   border-radius: 999px;
-  background-color: #12153a;
-  background-image: linear-gradient(
-    135deg,
-    #2a3170 0%,
-    #151947 55%,
-    #0b0d26 100%
-  );
+  background-color: var(--ft-pill-solid);
+  background-image: var(--ft-pill-gradient);
   box-shadow:
-    inset 0 0.03em 0 rgb(255 255 255 / 26%),
-    inset 0 -0.05em 0.1em rgb(0 0 0 / 35%),
+    inset 0 0.03em 0 rgb(255 255 255 / 30%),
+    inset 0 -0.05em 0.1em rgb(0 0 0 / 26%),
     0 0 0 0.055em var(--ft-cta-ring),
-    0 0.14em 0.45em rgb(43 59 184 / 45%);
+    0 0.14em 0.45em rgb(35 47 156 / 42%);
   color: #fff;
   font-weight: 800;
   font-style: italic;
@@ -199,7 +203,7 @@
   background-image: linear-gradient(
     105deg,
     transparent 0%,
-    rgb(255 255 255 / 30%) 50%,
+    rgb(255 255 255 / 40%) 50%,
     transparent 100%
   );
   transform: translateX(-130%) skewX(-12deg);
