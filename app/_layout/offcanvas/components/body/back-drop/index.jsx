@@ -35,8 +35,13 @@ export function OffcanvasBackdrop() {
     },
   };
 
+  /* The curve sits just left of the panel (same width: min(600px, 100vw)) and
+     takes the panel's colour (--oc-bg, set on the menu root). */
   return (
-    <motion.svg className='absolute right-[600px] top-0 h-full w-24 fill-foreground stroke-none'>
+    <motion.svg
+      className='absolute top-0 h-full w-24 stroke-none'
+      style={{ right: 'min(600px, 100vw)', fill: 'var(--oc-bg)' }}
+    >
       <motion.path
         variants={curve}
         initial='initial'

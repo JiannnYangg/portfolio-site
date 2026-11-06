@@ -1,0 +1,89 @@
+/*
+ * Menu links (see index.jsx). Colours come from the menu root
+ * (body/index.module.css): --oc-accent (theme blue) and --oc-hover (violet).
+ */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 1.8vh, 1rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  transition: opacity 0.35s ease;
+}
+
+/* The reserved slot for the dot */
+.dot {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--oc-accent);
+}
+
+.link {
+  padding-block: 0.04em;
+  border-radius: 0.5rem;
+  color: var(--oc-accent);
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
+  font-size: clamp(2.25rem, 9vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  text-transform: capitalize;
+  transition:
+    color 0.3s ease,
+    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--oc-hover);
+  transform: translateX(0.4rem);
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--oc-hover);
+  outline-offset: 6px;
+}
+
+/* The links you are not on step back a little */
+@media (hover: hover) {
+  .list:hover .item:not(:hover) {
+    opacity: 0.45;
+  }
+}
+
+.list:focus-within .item:not(:focus-within) {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .link,
+  .link:hover,
+  .link:focus-visible {
+    transition: none;
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .link,
+  .dot {
+    color: linktext;
+  }
+
+  .link:hover,
+  .link:focus-visible {
+    color: highlight;
+  }
+}
