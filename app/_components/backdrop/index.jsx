@@ -12,7 +12,7 @@ import { memo, useEffect, useRef, useState } from 'react';
  *   - the big bloom swaps sides from band to band (left, right, left ...)
  *   - the smaller counter-bloom sits on the opposite side, tilted the other way
  *   - an elongated accent drifts near the middle on two bands out of three
- *   - a strong lime glow bleeds off one edge, alternating top-right / lower-left
+ *   - a strong brand glow bleeds off one edge, alternating blue top-right / pink lower-left
  *   - faint grey folds and white highlights keep the "paper" feel
  *   - every band has its own intensity, so the page breathes: loud, quiet,
  *     medium, quiet, ...
@@ -42,11 +42,11 @@ export const PAPER_RGB = '243,243,245';
 const INITIAL_BANDS = 8;
 
 /**
- * Graph-paper grid, drawn on TOP of the blooms in a deeper lime so the lines
- * stay readable on both the off-white and the lime areas.
+ * Graph-paper grid, drawn on TOP of the blooms in a deeper indigo so the lines
+ * stay readable on both the off-white and the coloured areas.
  * Alpha lowered ~40% (0.133 -> 0.08) so the grid sits quietly behind the text.
  */
-const GRID_COLOR = '140,190,0';
+const GRID_COLOR = '110,100,230';
 const GRID_ALPHA = 0.08;
 const GRID_CELL = '62px 57px';
 const GRID = [
@@ -54,13 +54,20 @@ const GRID = [
   `linear-gradient(to bottom, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
 ].join(', ');
 
+/**
+ * Palette taken from the logo's "C": blue, violet and pink. The big glows use
+ * the vivid steps (glowBlue top-right, glowPink lower-left); the blooms use
+ * soft pastel versions of the same three hues, so the page reads as one
+ * blue-to-pink wash instead of a single loud colour.
+ */
 const COLOR = {
-  lime: '182,245,0',
-  paleLime: '214,248,140',
-  yellow: '236,250,160',
-  chartreuse: '200,245,110',
-  mint: '176,238,200',
-  aqua: '170,236,214',
+  glowBlue: '122,108,255',
+  glowPink: '240,104,196',
+  softBlue: '200,210,255',
+  softViolet: '226,208,255',
+  softPink: '255,208,238',
+  periwinkle: '186,200,255',
+  lilac: '218,198,255',
   white: '255,255,255',
   fold: '80,80,90',
 };
@@ -86,7 +93,7 @@ const pick = (rand, list) => list[Math.floor(rand() * list.length)];
 
 /**
  * The landing screen (band 0) is the ORIGINAL hero look, ported 1:1: same
- * folds, blooms, lime glows and intensity. Every shape is an unclipped
+ * folds, blooms, glows and intensity. Every shape is an unclipped
  * element (radii in % of the page width / screens), so a glow that touches
  * the bottom edge of the first screen keeps fading out into the next one
  * instead of being cut off by a hero edge. The layer opacities the old hero
@@ -101,15 +108,15 @@ const LANDING_BLOBS = [
   { cx: 22, cy: 0.84, rx: 40, ry: 0.22, rgb: COLOR.fold, a: 0.08 * LANDING_PAPER },
   { cx: 85, cy: 0.12, rx: 60, ry: 0.4, rgb: COLOR.white, a: 0.9 * LANDING_PAPER },
   // soft blooms
-  { cx: 14, cy: 0.18, rx: 34, ry: 0.3, rgb: '214,248,140', a: 0.55 * LANDING_BLOOM },
-  { cx: 52, cy: 0.08, rx: 30, ry: 0.28, rgb: '232,250,160', a: 0.5 * LANDING_BLOOM },
-  { cx: 84, cy: 0.4, rx: 32, ry: 0.3, rgb: '176,238,200', a: 0.5 * LANDING_BLOOM },
-  { cx: 40, cy: 0.62, rx: 30, ry: 0.28, rgb: '200,245,110', a: 0.45 * LANDING_BLOOM },
-  { cx: 70, cy: 0.9, rx: 34, ry: 0.3, rgb: '170,236,214', a: 0.5 * LANDING_BLOOM },
-  { cx: 6, cy: 0.66, rx: 28, ry: 0.26, rgb: '247,250,170', a: 0.5 * LANDING_BLOOM },
-  // lime corner glows (fade out at 70% of the radius)
-  { cx: 100, cy: 0, rx: 55, ry: 0.42, rgb: COLOR.lime, a: 0.8, fade: 70 },
-  { cx: 0, cy: 1, rx: 50, ry: 0.38, rgb: COLOR.lime, a: 0.75, fade: 70 },
+  { cx: 14, cy: 0.18, rx: 34, ry: 0.3, rgb: COLOR.softBlue, a: 0.55 * LANDING_BLOOM },
+  { cx: 52, cy: 0.08, rx: 30, ry: 0.28, rgb: COLOR.softViolet, a: 0.5 * LANDING_BLOOM },
+  { cx: 84, cy: 0.4, rx: 32, ry: 0.3, rgb: COLOR.periwinkle, a: 0.5 * LANDING_BLOOM },
+  { cx: 40, cy: 0.62, rx: 30, ry: 0.28, rgb: COLOR.softPink, a: 0.45 * LANDING_BLOOM },
+  { cx: 70, cy: 0.9, rx: 34, ry: 0.3, rgb: COLOR.lilac, a: 0.5 * LANDING_BLOOM },
+  { cx: 6, cy: 0.66, rx: 28, ry: 0.26, rgb: '255,226,246', a: 0.5 * LANDING_BLOOM },
+  // brand corner glows (fade out at 70% of the radius)
+  { cx: 100, cy: 0, rx: 55, ry: 0.42, rgb: COLOR.glowBlue, a: 0.7, fade: 70 },
+  { cx: 0, cy: 1, rx: 50, ry: 0.38, rgb: COLOR.glowPink, a: 0.65, fade: 70 },
 ];
 
 /** Diagonal paper folds of the old hero: one screen-sized layer, fully
@@ -198,7 +205,7 @@ function bandBlobs(band) {
       w: between(rand, 55, 80),
       h: between(rand, 0.55, 0.8),
       rot: dir * between(rand, 10, 35),
-      rgb: pick(rand, [COLOR.paleLime, COLOR.yellow, COLOR.chartreuse]),
+      rgb: pick(rand, [COLOR.softBlue, COLOR.softViolet, COLOR.softPink]),
       a: between(rand, 0.45, 0.6) * power,
     },
     {
@@ -207,7 +214,7 @@ function bandBlobs(band) {
       w: between(rand, 40, 60),
       h: between(rand, 0.4, 0.6),
       rot: -dir * between(rand, 8, 28),
-      rgb: pick(rand, [COLOR.mint, COLOR.aqua]),
+      rgb: pick(rand, [COLOR.periwinkle, COLOR.lilac]),
       a: between(rand, 0.4, 0.55) * power,
     },
   ];
@@ -220,12 +227,12 @@ function bandBlobs(band) {
       w: between(rand, 28, 42),
       h: between(rand, 0.22, 0.34),
       rot: between(rand, -20, 20),
-      rgb: pick(rand, [COLOR.chartreuse, COLOR.paleLime]),
+      rgb: pick(rand, [COLOR.softPink, COLOR.softBlue]),
       a: between(rand, 0.3, 0.42) * power,
     });
   }
 
-  // lime glow bleeding off an edge: top-right on even bands, lower-left on odd
+  // brand glow bleeding off an edge: blue top-right on even bands, pink lower-left on odd
   const glows =
     band % 2 === 0
       ? [
@@ -235,7 +242,7 @@ function bandBlobs(band) {
             w: between(rand, 48, 62),
             h: between(rand, 0.5, 0.7),
             rot: between(rand, -12, 12),
-            rgb: COLOR.lime,
+            rgb: COLOR.glowBlue,
             a: between(rand, 0.5, 0.65) * power,
           },
         ]
@@ -246,7 +253,7 @@ function bandBlobs(band) {
             w: between(rand, 44, 58),
             h: between(rand, 0.45, 0.65),
             rot: between(rand, -14, 14),
-            rgb: COLOR.lime,
+            rgb: COLOR.glowPink,
             a: between(rand, 0.45, 0.6) * power,
           },
         ];

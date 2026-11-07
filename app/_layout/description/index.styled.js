@@ -4,13 +4,20 @@ import { motion } from 'framer-motion';
 import { styled } from 'styled-components';
 
 /*
- * Intro paragraph: one extra mark, a solid lime strike on "AI slop."
- * The four D's in the side note get light, hand-placed marker swatches in the
- * same lime, one per word.
+ * Intro paragraph: one extra mark, a brand-gradient strike on "AI slop."
+ * The four D's in the side note get light, hand-placed marker swatches, one
+ * per word, each in its own step of the logo's blue-violet-pink gradient.
  */
-const LIME = '#b6f500';
-/* Same lime, lightened: used for the marker swatches behind the four D's */
-const LIME_LIGHT = 'rgba(182, 245, 0, 0.36)';
+const STRIKE_GRADIENT =
+  'linear-gradient(90deg, #5a6cff 0%, #a064e8 55%, #f060bc 100%)';
+/* Marker swatches behind the four D's: one step of the gradient per word,
+   lightened so the dark text stays crisp on top */
+const SWATCH_COLOR = {
+  data: 'rgba(90, 108, 255, 0.26)',
+  design: 'rgba(130, 100, 240, 0.26)',
+  development: 'rgba(176, 98, 224, 0.26)',
+  distribution: 'rgba(240, 96, 188, 0.26)',
+};
 
 /* Row / column behaviour (wrap on small screens, two columns from lg up) is set
    in index.jsx with Tailwind's flex-wrap / lg:flex-nowrap, so it follows the
@@ -59,7 +66,7 @@ export const Strike = styled(motion.span)`
   right: -3%;
   top: 56%;
   height: 3px;
-  background-color: ${LIME};
+  background-image: ${STRIKE_GRADIENT};
   border-radius: 2px;
   pointer-events: none;
 `;
@@ -102,7 +109,7 @@ export const Highlight = styled.span`
     content: '';
     position: absolute;
     z-index: -1;
-    background-color: ${LIME_LIGHT};
+    background-color: ${({ $variant }) => SWATCH_COLOR[$variant]};
     pointer-events: none;
     ${({ $variant }) => swatches[$variant]}
   }

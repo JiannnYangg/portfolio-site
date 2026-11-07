@@ -45,11 +45,11 @@ const NOTE_TEXT =
   'leading-relaxed [text-wrap:balance] [font-size:clamp(1.25rem,1.7vw,2rem)]';
 
 /**
- * Hover colour of the circle: the theme lime (same as the CTA's hover) with
- * dark text on top, instead of the default blue fill.
+ * Hover colour of the circle: the brand pink (the end of the logo's gradient)
+ * with dark text on top (about 6:1), instead of the default blue fill.
  */
 const CIRCLE_HOVER =
-  'before:bg-[#b6f500] after:bg-[#b6f500] hover:text-[#1f2024]';
+  'before:bg-[#f060bc] after:bg-[#f060bc] hover:text-[#1f2024]';
 
 /**
  * Shape of the circle. The default "xl" button size is padding-driven, which
