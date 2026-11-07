@@ -279,8 +279,9 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
               width={logo.width}
               height={logo.height}
               sizes={logo.size}
-              loading='eager'
-              fetchPriority='low'
+              {...(index < 4
+                ? { priority: true }
+                : { loading: 'eager', fetchPriority: 'low' })}
               draggable={false}
               className='h-auto w-full select-none'
             />

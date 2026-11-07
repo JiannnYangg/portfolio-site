@@ -1,55 +1,39 @@
-/** Seconds in one day, for the cache lifetimes below */
-const DAY = 60 * 60 * 24;
+/** @type {import('next').NextConfig} */
 
-/**
- * Files in /public are served by Next with `max-age=0`, so every repeat visit
- * re-checks every logo and picture. Their names are not content-hashed, so
- * they are not marked `immutable`: they are cached for a day and may be
- * served stale for a week while the browser quietly fetches the new copy.
- * Replacing a file therefore shows up within a day (a new file name shows up
- * at once).
- */
-const PUBLIC_ASSET_CACHE = [
+// Static files in /public are otherwise sent with `max-age=0`, so browsers
+// re-check every one of them on every visit. These are safe to keep for 30
+// days. If you ever replace one of these files, give the new file a new name
+// (for example footer-bg-v2.webp) so visitors do not see the old copy.
+const STATIC_CACHE = [
   {
     key: 'Cache-Control',
-    value: `public, max-age=${DAY}, stale-while-revalidate=${DAY * 7}`,
+    value: 'public, max-age=2592000, stale-while-revalidate=86400',
   },
 ];
 
-const PUBLIC_ASSET_SOURCES = [
-  '/showcase/:path*',
-  '/images/:path*',
-  '/hero-logos/:path*',
-  '/logo.png',
-  '/logo-light.png',
-  '/logo-social.svg',
-];
-
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
-
-  images: {
-    // AVIF first, WebP for browsers without it (and the original format as the
-    // last resort). Same picture, noticeably fewer bytes.
-    formats: ['image/avif', 'image/webp'],
-    // The default is 60 s, so optimised images were re-checked all the time.
-    // A week keeps repeat visits instant. Rename a file when you replace it.
-    minimumCacheTTL: DAY * 7,
-  },
 
   experimental: {
     // Import only the icons / motion pieces that are used, not the whole barrel
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
 
-  async headers() {
-    return PUBLIC_ASSET_SOURCES.map(source => ({
-      source,
-      headers: PUBLIC_ASSET_CACHE,
-    }));
+  images: {
+    // AVIF first (smaller than WebP at the same quality), WebP as fallback
+    formats: ['image/avif', 'image/webp'],
+    // Next's default is 60 seconds, which re-optimizes images far too often
+    minimumCacheTTL: 2592000,
   },
-
+  async headers() {
+    return [
+      { source: '/images/:path*', headers: STATIC_CACHE },
+      { source: '/hero-logos/:path*', headers: STATIC_CACHE },
+      { source: '/showcase/:path*', headers: STATIC_CACHE },
+      { source: '/logo-light.png', headers: STATIC_CACHE },
+      { source: '/logo-social.svg', headers: STATIC_CACHE },
+    ];
+  },
   async redirects() {
     return [
       { source: '/work', destination: '/research-papers', permanent: true },
