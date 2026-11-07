@@ -14,16 +14,16 @@ import { fade, slideUp } from './variants';
 const MotionComponent = motion(Center);
 
 /**
- * Deep midnight indigo: the dark partner of the site's blue-violet theme.
+ * Deep midnight violet: the dark partner of the site's violet-pink theme.
  * Keep the container background and the curve fill on the SAME value, the
  * curved bottom edge is drawn in the fill colour.
  */
-const BG = 'bg-[#0b0f2e]';
-const CURVE_FILL = 'fill-[#0b0f2e]';
+const BG = 'bg-[#160a33]';
+const CURVE_FILL = 'fill-[#160a33]';
 
 /**
  * Greeting colour: ONE flat, light lilac (the same as the text selection in
- * the hero), no gradient. It reads softly on the deep indigo.
+ * the hero), no gradient. It reads softly on the deep violet.
  */
 const TEXT_COLOR = 'text-[#e4defc]';
 

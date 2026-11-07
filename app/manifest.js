@@ -6,8 +6,8 @@ export default function manifest() {
     description: 'I help brands thrive.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#14152b',
-    theme_color: '#14152b',
+    background_color: '#160a33',
+    theme_color: '#160a33',
     icons: [
       { src: '/icon.png', sizes: '512x512', type: 'image/png' },
       { src: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
