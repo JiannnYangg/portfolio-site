@@ -25,6 +25,9 @@ import { useLoopDelay } from '@/hooks';
 const LOGOS_START = 3.0;
 const LOGO_STAGGER = 0.13;
 
+/** The soft colour blobs melt in just after the first logos pop */
+const BLOBS_START = 3.2;
+
 /** Scroll: logos fade out and drift up at different speeds (depth) */
 const SCROLL_FADE_START = 30;
 const SCROLL_FADE_DISTANCE = 300;
@@ -51,7 +54,11 @@ const shadowFor = depth =>
  * as a faint periwinkle, so blue stays a hint. They are indexed like LOGOS
  * (same order), and cycle if a logo is ever added.
  * Each entry is [centre colour, edge colour] as "r,g,b", plus a strength.
+ *
+ * HALO_STRENGTH scales every halo at once: 1 was the first version, 0.5 is
+ * half as strong (the halos are now a gentle tint, not a glow).
  */
+const HALO_STRENGTH = 0.5;
 const HALOS = [
   { from: '160,100,232', to: '240,96,188', alpha: 0.42 }, // claude: violet -> pink
   { from: '240,96,188', to: '160,100,232', alpha: 0.4 }, // comfy: pink -> violet
@@ -63,8 +70,85 @@ const HALOS = [
   { from: '240,96,188', to: '125,108,255', alpha: 0.34 }, // runway: pink -> periwinkle
 ];
 
-const haloBackground = ({ from, to, alpha }) =>
-  `radial-gradient(closest-side, rgba(${from},${alpha}) 0%, rgba(${to},${(alpha * 0.55).toFixed(2)}) 55%, rgba(${to},0) 100%)`;
+const haloBackground = ({ from, to, alpha }) => {
+  const strength = alpha * HALO_STRENGTH;
+  return `radial-gradient(closest-side, rgba(${from},${strength.toFixed(3)}) 0%, rgba(${to},${(strength * 0.55).toFixed(3)}) 55%, rgba(${to},0) 100%)`;
+};
+
+/**
+ * Colour blobs: big, very soft, mesh-gradient style washes that sit behind the
+ * logos in a few places only (top-left, right edge, lower-left, plus one tiny
+ * one top-right). They are deliberately NOT symmetrical: different sizes,
+ * different distances from the edges, different colour pairs, and the two
+ * biggest ones bleed off the edge of the screen so they read as light spilling
+ * in, not as circles.
+ *
+ * Each blob is two overlapping radial gradients ("a" and "b", offset from each
+ * other) so the colour shifts inside it like a mesh gradient. The stops fall
+ * off in three steps (no hard edge, no banding), and the strongest alpha is
+ * 0.2, so the headline text on top stays fully readable.
+ *
+ * Cost: no blur filter (the gradient itself is soft), no extra images. The slow
+ * drift is transform-only, runs only while the hero is on screen, and is off
+ * with reduced motion. They fade out with the scroll, like the logos.
+ *
+ * position: Tailwind classes (mobile first, md: for desktop)
+ * width   : clamp(phone, fluid vw, large screen); height follows from `aspect`
+ * drift   : [x px, y px, duration s, phase s]
+ */
+const BLOBS = [
+  {
+    // top-left: the largest, violet leaning to periwinkle, behind "claude"
+    id: 'top-left',
+    position: '-left-[14%] -top-[9%] md:-left-[7%] md:top-[0%]',
+    width: 'clamp(250px, 42vw, 760px)',
+    aspect: 1.25,
+    a: '160,100,232',
+    b: '125,108,255',
+    alpha: 0.2,
+    drift: [16, 12, 24, 0],
+  },
+  {
+    // right edge, a little below the middle: pink into violet, behind the
+    // big "comfy" / "squiggle" pair
+    id: 'right',
+    position: '-right-[16%] top-[36%] md:-right-[8%] md:top-[33%]',
+    width: 'clamp(220px, 34vw, 620px)',
+    aspect: 0.95,
+    a: '240,96,188',
+    b: '160,100,232',
+    alpha: 0.17,
+    drift: [-14, 14, 29, 2.5],
+  },
+  {
+    // lower left: orchid into periwinkle, smaller and lighter, near "github"
+    id: 'bottom-left',
+    position: '-bottom-[2%] -left-[8%] md:bottom-[3%] md:left-[6%]',
+    width: 'clamp(200px, 26vw, 460px)',
+    aspect: 1.5,
+    a: '200,98,214',
+    b: '125,108,255',
+    alpha: 0.14,
+    drift: [12, -10, 33, 5],
+  },
+  {
+    // a small pink accent, top-right of the headline, desktop only
+    id: 'top-right',
+    position: 'hidden md:block md:right-[21%] md:top-[3%]',
+    width: 'clamp(140px, 15vw, 280px)',
+    aspect: 1.1,
+    a: '240,96,188',
+    b: '200,98,214',
+    alpha: 0.1,
+    drift: [-8, 9, 26, 7],
+  },
+];
+
+const blobBackground = ({ a, b, alpha }) =>
+  [
+    `radial-gradient(closest-side at 38% 40%, rgba(${a},${alpha}) 0%, rgba(${a},${(alpha * 0.45).toFixed(3)}) 50%, rgba(${a},0) 100%)`,
+    `radial-gradient(closest-side at 66% 62%, rgba(${b},${(alpha * 0.8).toFixed(3)}) 0%, rgba(${b},${(alpha * 0.3).toFixed(3)}) 55%, rgba(${b},0) 100%)`,
+  ].join(', ');
 
 /**
  * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
@@ -203,6 +287,67 @@ const LOGOS = [
   },
 ];
 
+/**
+ * One soft colour blob (see BLOBS). The outer box carries the position and
+ * the scroll fade, the inner one the intro fade-in and the slow drift, so the
+ * two never fight over the same property.
+ */
+function Blob({ blob, active }) {
+  const reduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  const scrollOpacity = useTransform(scrollY, [0, 420], [1, 0]);
+
+  const [driftX, driftY, duration, phase] = blob.drift;
+  //? the drift repeats forever: it only runs while the hero is near the
+  //? screen, and only waits its intro delay the very first time
+  const drifting = !reduceMotion && active;
+  const introAt = introDelay(BLOBS_START);
+  const driftDelay = useLoopDelay(drifting, introAt + 1.6 + phase);
+
+  const loop = {
+    duration,
+    ease: 'easeInOut',
+    repeat: Infinity,
+    delay: driftDelay,
+  };
+
+  return (
+    <motion.div
+      className={`pointer-events-none absolute z-0 ${blob.position}`}
+      style={{
+        width: blob.width,
+        aspectRatio: blob.aspect,
+        ...(reduceMotion ? {} : { opacity: scrollOpacity }),
+      }}
+    >
+      <motion.span
+        aria-hidden='true'
+        className='block h-full w-full rounded-full'
+        style={{ backgroundImage: blobBackground(blob) }}
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
+        animate={
+          reduceMotion
+            ? { opacity: 1, scale: 1 }
+            : drifting
+              ? {
+                  opacity: 1,
+                  scale: 1,
+                  x: [0, driftX, 0],
+                  y: [0, driftY, 0],
+                }
+              : { opacity: 1, scale: 1, x: 0, y: 0 }
+        }
+        transition={{
+          opacity: { duration: 1.8, ease: 'easeOut', delay: introAt },
+          scale: { duration: 2.2, ease: 'easeOut', delay: introAt },
+          x: drifting ? loop : { duration: 0 },
+          y: drifting ? loop : { duration: 0 },
+        }}
+      />
+    </motion.div>
+  );
+}
+
 function Logo({ logo, index, mouseX, mouseY, active }) {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
@@ -334,7 +479,7 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
   );
 }
 
-/** Floating 3D logos scattered around the headline */
+/** Floating 3D logos scattered around the headline, over a few soft colour blobs */
 export function HeroLogos() {
   const reduceMotion = useReducedMotion();
   const containerRef = useRef(null);
@@ -364,6 +509,11 @@ export function HeroLogos() {
       aria-hidden='true'
       className='pointer-events-none absolute inset-0'
     >
+      {/* blobs first, so every logo is painted on top of them */}
+      {BLOBS.map(blob => (
+        <Blob key={blob.id} blob={blob} active={onScreen} />
+      ))}
+
       {LOGOS.map((logo, index) => (
         <Logo
           key={logo.id}
