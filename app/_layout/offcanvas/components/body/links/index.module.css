@@ -1,6 +1,8 @@
 /*
  * Menu links (see index.jsx). Colours come from the menu root
- * (body/index.module.css): --oc-accent (theme blue) and --oc-hover (violet).
+ * (body/index.module.css), which takes them from the .social logo:
+ * --oc-accent (theme blue), --oc-hover (violet) and --oc-gradient (blue to
+ * violet to pink, shown on the hovered / focused link).
  */
 .list {
   display: flex;
@@ -25,11 +27,15 @@
   place-items: center;
   width: 2rem;
   height: 2rem;
-  color: var(--oc-accent);
+  color: var(--oc-hover);
 }
 
+/* The block is a little taller than the text (padding) and pulled back by the
+   same amount (margin), so the gradient on hover has room for the tails of
+   letters like "p" and "g" while the spacing between links stays the same. */
 .link {
-  padding-block: 0.04em;
+  padding-block: 0.08em;
+  margin-block: -0.04em;
   border-radius: 0.5rem;
   color: var(--oc-accent);
   font-family: var(--font-inter-tight), system-ui, sans-serif;
@@ -48,6 +54,17 @@
 .link:focus-visible {
   color: var(--oc-hover);
   transform: translateX(0.4rem);
+}
+
+/* Browsers that can clip a background to the text get the logo gradient on
+   the hovered link; the others keep the solid violet above. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .link:hover,
+  .link:focus-visible {
+    background-image: var(--oc-gradient);
+    background-clip: text;
+    color: transparent;
+  }
 }
 
 .link:focus-visible {
@@ -84,6 +101,7 @@
 
   .link:hover,
   .link:focus-visible {
+    background-image: none;
     color: highlight;
   }
 }
