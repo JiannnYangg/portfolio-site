@@ -68,6 +68,19 @@ const HANDLE_BOTTOM = '#d6409f';
 const SELECTION_INK = '#2b1466';
 
 /**
+ * Headline accent: the word "build" is filled with a violet-to-pink
+ * gradient (the same two colours that lead the logo and the CTA), deep enough
+ * to stay clearly readable on the light paper (every stop is well above the
+ * 3:1 needed for large text).
+ *
+ * BUILD_SOLID is the fallback: it is the text colour, so a browser that can't
+ * clip a gradient to text still shows the word in solid violet.
+ */
+const BUILD_SOLID = '#8a4fe6';
+const BUILD_GRADIENT =
+  'linear-gradient(95deg, #8a4fe6 0%, #b04ad8 55%, #d6409f 100%)';
+
+/**
  * CTA colours: a diagonal violet-to-magenta gradient, the logo's gradient
  * deepened just enough for white text. Every stop clears 4.5:1 with white
  * (4.8:1 at the lightest stop, 4.7:1 in the middle, 4.9:1 at the deep end),
@@ -226,9 +239,30 @@ function CtaReveal({ children }) {
   );
 }
 
-/** Key word inside the headline: ExtraBold Italic, same weight as the reference */
+/**
+ * Key word inside the headline: ExtraBold Italic, same weight as the
+ * reference, filled with the violet-to-pink gradient (text-clip, solid
+ * violet fallback). The italic glyphs lean past their box on the right, so a
+ * small padding (cancelled by an equal negative margin, so the layout does
+ * not move) keeps the last letter from being clipped by the gradient box.
+ */
 function Emphasis({ children }) {
-  return <em className='font-extrabold italic'>{children}</em>;
+  return (
+    <em
+      className='font-extrabold italic'
+      style={{
+        color: BUILD_SOLID,
+        backgroundImage: BUILD_GRADIENT,
+        WebkitBackgroundClip: 'text',
+        backgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        paddingRight: '0.12em',
+        marginRight: '-0.12em',
+      }}
+    >
+      {children}
+    </em>
+  );
 }
 
 /**
