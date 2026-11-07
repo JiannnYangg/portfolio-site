@@ -157,31 +157,39 @@ const blobBackground = ({ a, b, alpha }) =>
   ].join(', ');
 
 /**
- * Coloured lights: the blobs sit BEHIND the logos, these fall ON them. They
- * are drawn above the logos (and below the headline, so the text stays crisp),
- * which is what makes a logo catch a wash of violet or pink on one side only,
- * like stage light landing on a shelf of objects.
+ * Coloured lights, in the logo's own violet / pink / periwinkle (the same
+ * colours as the CTA, the marker and the halos). Two kinds, both drawn above
+ * the logos and below the headline:
  *
- * The lights are uneven on purpose:
- *  - key: a long, slanted violet-to-pink streak entering from the top-left,
- *    the same direction the key light and the shadows already use, so it
- *    reads as the source of the lighting. It crosses "claude".
+ * 1. Scene lights (this list): big soft washes that fall across the hero and
+ *    over some of the logos, like stage light. Uneven on purpose:
+ *  - key: a long, slanted violet-to-pink streak from the top-left, the same
+ *    direction as the key light and the shadows, aimed so its centre line
+ *    runs through "claude".
  *  - pink-pool: a wide pool of pink in the lower right, over "squiggle" and
  *    "elevenlabs", bleeding off the edge.
- *  - periwinkle: a small cool spot at the middle left, over "n8n" and "runway".
+ *  - periwinkle: a small cool spot at the middle left, over "n8n".
  *  - orchid: a thin tilted sliver near the top right, over "comfy" (desktop).
- * Nothing mirrors, and most logos stay untouched.
  *
- * Each light is two stacked radial gradients (a main colour and a warmer
- * core pushed to one side), so the colour shifts inside it. Alpha tops out
- * at 0.15: a tint you notice, not a filter you see. No blur filter and no
- * blend mode (both are costly on low-spec devices); the soft gradient does the
- * work.
+ * 2. Logo lights (`lit` on a logo, see LOGOS): a light that lands on the logo
+ *    itself. The gradient is masked with the logo's own artwork, so it paints
+ *    only the logo's pixels, never the paper around it, which is what makes a
+ *    logo look lit from one side. Only some logos have one.
  *
- * Motion: a slow breathing scale and drift, and they slide against the mouse
- * (opposite to the logos), so the light seems to move over the objects instead
- * of being painted on them. All transform-only, running only while the hero
- * is on screen, and all off with reduced motion. They fade out on scroll.
+ * Each scene light is two stacked radial gradients (a main colour and a
+ * warmer core pushed to one side), so the colour shifts inside it. No blur
+ * filter and no blend mode (both are costly on low-spec devices).
+ *
+ * The hero background is already a pale violet-pink, so a pale light of the
+ * same hue simply disappears into it. The alphas are therefore strong enough to
+ * register (0.2 to 0.26), while the soft falloff keeps them from looking like
+ * a flat overlay.
+ *
+ * Motion: a slow breathing scale and drift, and the scene lights slide against
+ * the mouse (opposite to the logos), so the light seems to move over the
+ * objects instead of being painted on them. All transform-only, running only
+ * while the hero is on screen, and all off with reduced motion. They fade out
+ * on scroll.
  *
  * rotate: degrees; shift: how far it follows the mouse (x LIGHT_SHIFT px)
  * drift : [x px, y px, duration s, phase s]
@@ -189,13 +197,13 @@ const blobBackground = ({ a, b, alpha }) =>
 const LIGHTS = [
   {
     id: 'key',
-    position: '-left-[12%] top-[4%] md:-left-[8%] md:top-[8%]',
+    position: '-left-[10%] top-[17%] md:-left-[8%] md:top-[19%]',
     width: 'clamp(300px, 60vw, 1040px)',
     aspect: 4,
     rotate: 26,
     a: '160,100,232',
     b: '240,96,188',
-    alpha: 0.15,
+    alpha: 0.26,
     shift: 1,
     drift: [22, 10, 28, 0],
   },
@@ -207,7 +215,7 @@ const LIGHTS = [
     rotate: 0,
     a: '240,96,188',
     b: '200,98,214',
-    alpha: 0.14,
+    alpha: 0.24,
     shift: 0.7,
     drift: [-16, -12, 31, 2],
   },
@@ -219,7 +227,7 @@ const LIGHTS = [
     rotate: -18,
     a: '125,108,255',
     b: '160,100,232',
-    alpha: 0.12,
+    alpha: 0.2,
     shift: 1.3,
     drift: [10, 14, 25, 4],
   },
@@ -231,7 +239,7 @@ const LIGHTS = [
     rotate: -20,
     a: '200,98,214',
     b: '240,96,188',
-    alpha: 0.12,
+    alpha: 0.2,
     shift: 0.9,
     drift: [-10, 8, 27, 6],
   },
@@ -242,6 +250,16 @@ const lightBackground = ({ a, b, alpha }) =>
     `radial-gradient(closest-side at 28% 50%, rgba(${b},${(alpha * 0.9).toFixed(3)}) 0%, rgba(${b},0) 100%)`,
     `radial-gradient(closest-side, rgba(${a},${alpha}) 0%, rgba(${a},${(alpha * 0.5).toFixed(3)}) 45%, rgba(${a},0) 100%)`,
   ].join(', ');
+
+/**
+ * A light that lands on one logo: a linear gradient from one side (`angle` is
+ * the CSS gradient angle, so 135 = from the top-left, 225 = from the top-right
+ * is 225 = from the bottom-left of the logo, and so on) fading out across the
+ * logo. It is masked with the logo's own artwork in Logo, so only the logo
+ * is tinted.
+ */
+const litBackground = ({ angle, from, to, alpha }) =>
+  `linear-gradient(${angle}deg, rgba(${from},${alpha}) 0%, rgba(${to},${(alpha * 0.55).toFixed(3)}) 45%, rgba(${to},0) 80%)`;
 
 /**
  * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
@@ -276,6 +294,9 @@ const lightBackground = ({ a, b, alpha }) =>
  * depth  : parallax strength + shadow length (big/close logos move more)
  * rotate : resting tilt in degrees
  * float  : [amplitude px, duration s, tilt deg, phase s]
+ * lit    : optional light on the logo itself, see litBackground. Only four
+ *          logos have one, each from a different side and in a different
+ *          colour pair, so the lighting is uneven.
  */
 const LOGOS = [
   {
@@ -288,6 +309,8 @@ const LOGOS = [
     rotate: -9,
     depth: 1.3,
     float: [10, 6.2, 1.6, 0],
+    // from the top-left, violet into pink (the key light)
+    lit: { angle: 135, from: '160,100,232', to: '240,96,188', alpha: 0.5 },
   },
   {
     id: 'comfy',
@@ -299,6 +322,8 @@ const LOGOS = [
     rotate: 5,
     depth: 1.5,
     float: [12, 7.4, 1.2, 0.8],
+    // from the top-right, pink into violet
+    lit: { angle: 215, from: '240,96,188', to: '160,100,232', alpha: 0.42 },
   },
   {
     id: 'squiggle',
@@ -311,6 +336,8 @@ const LOGOS = [
     rotate: -8,
     depth: 1.25,
     float: [9, 6.6, 1.5, 2],
+    // from the bottom-right, pink into orchid
+    lit: { angle: 315, from: '240,96,188', to: '200,98,214', alpha: 0.46 },
   },
   {
     id: 'n8n',
@@ -337,6 +364,8 @@ const LOGOS = [
     rotate: 7,
     depth: 0.5,
     float: [5, 5.2, 1.8, 1.1],
+    // from the top, a cool periwinkle into violet
+    lit: { angle: 160, from: '125,108,255', to: '160,100,232', alpha: 0.5 },
   },
   {
     id: 'elevenlabs',
@@ -442,10 +471,10 @@ function Blob({ blob, active }) {
 }
 
 /**
- * One coloured light (see LIGHTS). Three layers, so no two animations fight
- * over a property: the outer box carries the position, the scroll fade and the
- * mouse slide; the middle one the fade-in, the breathing scale and the drift;
- * the inner one the fixed tilt and the gradient.
+ * One coloured scene light (see LIGHTS). Three layers, so no two animations
+ * fight over a property: the outer box carries the position, the scroll fade
+ * and the mouse slide; the middle one the fade-in, the breathing scale and the
+ * drift; the inner one the fixed tilt and the gradient.
  */
 function Light({ light, mouseX, mouseY, active }) {
   const reduceMotion = useReducedMotion();
@@ -619,6 +648,7 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
           >
             {/* resting tilt: spins in while it pops */}
             <motion.div
+              className='relative'
               initial={reduceMotion ? false : { rotate: rotate - 16 }}
               animate={{ rotate }}
               transition={{
@@ -640,6 +670,34 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
                 draggable={false}
                 className='h-auto w-full select-none'
               />
+
+              {/* light on the logo itself: a gradient masked with the logo's
+                  own artwork, so it tints only the logo's pixels (never the
+                  paper around it). It sits inside the tilt box, so it turns
+                  and floats with the logo, and fades in once the logo has
+                  landed. */}
+              {logo.lit ? (
+                <motion.span
+                  aria-hidden='true'
+                  className='pointer-events-none absolute inset-0 block'
+                  style={{
+                    backgroundImage: litBackground(logo.lit),
+                    WebkitMaskImage: `url(${logo.src})`,
+                    maskImage: `url(${logo.src})`,
+                    WebkitMaskSize: '100% 100%',
+                    maskSize: '100% 100%',
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskRepeat: 'no-repeat',
+                  }}
+                  initial={reduceMotion ? false : { opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{
+                    duration: 1.2,
+                    ease: 'easeOut',
+                    delay: enterDelay + 0.7,
+                  }}
+                />
+              ) : null}
             </motion.div>
           </motion.div>
         </motion.div>
@@ -697,8 +755,8 @@ export function HeroLogos() {
         />
       ))}
 
-      {/* lights last, so they fall on top of the logos (the headline is a
-          later sibling in index.jsx, so the text still sits above them) */}
+      {/* scene lights last, so they fall on top of the logos (the headline is
+          a later sibling in index.jsx, so the text still sits above them) */}
       {LIGHTS.map(light => (
         <Light
           key={light.id}
