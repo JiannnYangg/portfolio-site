@@ -206,11 +206,11 @@ export const LENS = {
   rimInward: 0, // extra inward pull at the rim
   rimFreq1: 2, // fluid wave frequency 1
   rimFreq2: 1, // fluid wave frequency 2
-  // The lens tint / ring colour, the one place to change it. Same value and
-  // same handling as upstream (three's default colour management, then added
-  // straight onto the picture), so the ring reads as upstream's cyan-blue
-  // rather than as the hex itself.
-  blueColor: '#009dff',
+  // The lens tint / ring colour, the one place to change it. It is added
+  // straight onto the picture (three's default colour management), so the ring
+  // glows in the brand violet of the .social logo's "C" instead of the old
+  // cyan-blue.
+  blueColor: '#a064e8',
   rimLine: 1.4, // bright white border line intensity (0 = off)
   rimLinePos: 0.488, // where the white border sits (0..0.5)
   rimLineWidth: 0.003, // sharpness of the white border
