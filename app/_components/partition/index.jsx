@@ -10,26 +10,31 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
  * - <SiteGuides />  two vertical dashed guides, running the whole page, at the
  *   left and right edge of the content column.
  * - <Partition />   a full-width horizontal dashed line that marks where one
- *   section ends and the next begins. It crosses the guides, and a small blue
- *   label sits on each crossing: the section name on the left, its number on
- *   the right, like a drawing sheet.
+ *   section ends and the next begins. It crosses the guides, and a small
+ *   violet-to-magenta label sits on each crossing: the section name on the
+ *   left, its number on the right, like a drawing sheet.
  *
  * Both are decorative (aria-hidden, no pointer events).
  */
-/** Theme blue (same as the Tailwind `primary`, hsl 232 79% 59%): the labels */
-const BLUE = '#445ae9';
 /**
- * The dashed lines are a dark slate that leans blue-black (between the theme
- * blue and black / dark grey), so they read as quiet structure and the blue
- * labels on the crossings stay the accent. Exported so every dashed line on
- * the site (e.g. the dividers in Skills) shares one colour instead of a copy.
- * Contrast on the paper sheet (#f3f3f5) is about 10:1, so the dashes stay
- * visible on every screen.
+ * Label fill: the logo's violet-to-pink gradient, deepened just enough for
+ * white text. LABEL_SOLID paints first, as the fallback for a browser that
+ * can't draw the gradient.
  */
-export const PARTITION_LINE = '#2f3550';
+const LABEL_SOLID = '#8247e5';
+const LABEL_GRADIENT =
+  'linear-gradient(135deg, #8a4fe6 0%, #a845d2 50%, #c2379d 100%)';
 /**
- * White label text: 5.4:1 on the blue. The old dark green only reaches about
- * 3.2:1 on it, too low for 10-11px bold text.
+ * The dashed lines are a dark slate that leans violet-black, so they read as
+ * quiet structure and the gradient labels on the crossings stay the accent.
+ * Exported so every dashed line on the site (e.g. the dividers in Skills)
+ * shares one colour instead of a copy. Contrast on the paper sheet (#f3f3f5)
+ * is about 11:1, so the dashes stay visible on every screen.
+ */
+export const PARTITION_LINE = '#2e2a4a';
+/**
+ * White label text: at least 4.7:1 on every stop of the gradient above, which
+ * clears the 4.5:1 bar for 10-11px bold text.
  */
 const LABEL_TEXT = '#ffffff';
 
@@ -82,7 +87,7 @@ const randomGlyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
 
 /** Thin colour split used while the label is scrambling */
 const GLITCH_SHADOW =
-  '1px 0 rgba(255, 46, 99, 0.85), -1px 0 rgba(8, 217, 214, 0.85)';
+  '1px 0 rgba(255, 90, 190, 0.85), -1px 0 rgba(150, 160, 255, 0.85)';
 
 /** Speed knobs (ms). Bigger = slower. */
 const PAUSE_MS = 1000; // readable hold between two decodes
@@ -151,7 +156,7 @@ function useGlitchText({ text, active, startDelayMs, reduceMotion }) {
   return { display, glitching };
 }
 
-/** Small blue label sitting on a guide crossing */
+/** Small gradient label sitting on a guide crossing */
 function Tag({ side, delay, text }) {
   const ref = useRef(null);
   const reduceMotion = useReducedMotion();
@@ -172,7 +177,8 @@ function Tag({ side, delay, text }) {
         [side]: GUIDE_X,
         x: side === 'left' ? '-50%' : '50%',
         y: '-50%',
-        backgroundColor: BLUE,
+        backgroundColor: LABEL_SOLID,
+        backgroundImage: LABEL_GRADIENT,
         color: LABEL_TEXT,
         textShadow: glitching ? GLITCH_SHADOW : 'none',
         // paper-coloured ring so the label cuts cleanly through the dashes
