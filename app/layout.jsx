@@ -10,7 +10,7 @@ import './globals.css';
 export const metadata = rootMetadata;
 
 /** @type {import('next').Viewport} */
-export const viewport = { themeColor: '#1f2024' };
+export const viewport = { themeColor: '#14152b' };
 
 /** @param {import('react').PropsWithChildren<unknown>} */
 export default function RootLayout({ children }) {

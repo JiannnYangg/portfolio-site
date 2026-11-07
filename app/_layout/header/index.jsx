@@ -79,7 +79,7 @@ const MENU_BG = 'rgba(56, 76, 214, 0.88)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
 /**
- * "Calm zones": the site backdrop (paper folds, grid, blooms, lime glows) is
+ * "Calm zones": the site backdrop (paper folds, grid, blooms, blue/violet glows) is
  * washed back toward the paper colour behind the headline and behind the
  * CTA, and nowhere else. The backdrop itself is now one fixed layer shared by
  * every page, so the calm zones are a soft paper-coloured wash that belongs
@@ -225,7 +225,7 @@ function Emphasis({ children }) {
  * - the shape is cut as an uneven quadrilateral (left edge short and
  *   slanted, right edge tall, indented bottom-right corner)
  * - it sits low, under the lower half of the letters
- * Theme lime at 50%, text stays dark and crisp on top. It sweeps in from the
+ * Theme blue at 40%, text stays dark and crisp on top. It sweeps in from the
  * left after the line settles.
  */
 function Marker({ children }) {
@@ -235,7 +235,7 @@ function Marker({ children }) {
     <span className='relative inline-block'>
       <motion.span
         aria-hidden='true'
-        className='absolute -left-[0.04em] -right-[0.3em] bottom-[0.02em] h-[0.5em] origin-left bg-[#b6f500]/50'
+        className='absolute -left-[0.04em] -right-[0.3em] bottom-[0.02em] h-[0.5em] origin-left bg-[#5a6cff]/40'
         style={{
           rotate: -1.8,
           clipPath: 'polygon(0% 22%, 100% 0%, 94% 100%, 4% 82%)',
@@ -348,7 +348,7 @@ function IosCallout() {
 
 /**
  * The "text selection" effect from the reference:
- * lime highlight box, dark-green ExtraBold Italic text,
+ * periwinkle highlight box, deep-indigo ExtraBold Italic text,
  * the two selection handles (top-left ▼ / bottom-right ▲)
  * and the iPhone-style callout menu above it.
  */
@@ -360,7 +360,7 @@ function Selection({ children }) {
       {/* highlight box */}
       <motion.span
         aria-hidden='true'
-        className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px] border border-[#b6f500]/60 bg-[#d8f6a2]'
+        className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px] border border-[#5a6cff]/60 bg-[#dfe3ff]'
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{
@@ -382,15 +382,15 @@ function Selection({ children }) {
           ease: EASE_OUT_EXPO,
         }}
       >
-        <span className='absolute inset-y-[0.06em] left-0 w-[0.035em] bg-[#b6f500]' />
-        <span className='absolute -left-[0.135em] -top-[0.1em] h-[0.26em] w-[0.3em] bg-[#b6f500] [clip-path:polygon(0_0,100%_0,50%_100%)]' />
-        <span className='absolute inset-y-[0.06em] right-0 w-[0.035em] bg-[#b6f500]' />
-        <span className='absolute -bottom-[0.1em] -right-[0.135em] h-[0.26em] w-[0.3em] bg-[#b6f500] [clip-path:polygon(50%_0,100%_100%,0_100%)]' />
+        <span className='absolute inset-y-[0.06em] left-0 w-[0.035em] bg-[#5a6cff]' />
+        <span className='absolute -left-[0.135em] -top-[0.1em] h-[0.26em] w-[0.3em] bg-[#5a6cff] [clip-path:polygon(0_0,100%_0,50%_100%)]' />
+        <span className='absolute inset-y-[0.06em] right-0 w-[0.035em] bg-[#5a6cff]' />
+        <span className='absolute -bottom-[0.1em] -right-[0.135em] h-[0.26em] w-[0.3em] bg-[#5a6cff] [clip-path:polygon(50%_0,100%_100%,0_100%)]' />
       </motion.span>
 
       <IosCallout />
 
-      <em className='relative font-extrabold italic text-[#3d5a0e]'>
+      <em className='relative font-extrabold italic text-[#2b3bb8]'>
         {children}
       </em>
     </span>
@@ -400,7 +400,7 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='relative min-h-[100svh] overflow-hidden text-black selection:bg-[#d8f6a2] selection:text-[#3d5a0e]'
+      className='relative min-h-[100svh] overflow-hidden text-black selection:bg-[#dfe3ff] selection:text-[#2b3bb8]'
       variants={slideUp}
       initial='initial'
       animate='enter'
