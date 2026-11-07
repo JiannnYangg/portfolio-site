@@ -35,14 +35,14 @@ const MOUSE_Y = 11;
 
 /**
  * Lighting, matched to the artwork: the key light sits top-left, so every
- * shadow falls down and to the right. Shadow tint is a dark olive so it
- * belongs to the lime paper instead of looking like grey stickers.
+ * shadow falls down and to the right. Shadow tint is a deep indigo so it
+ * belongs to the light paper instead of looking like grey stickers.
  * Bigger depth = closer to the viewer = longer, softer shadow.
  */
 const shadowFor = depth =>
   [
-    `drop-shadow(${(3 * depth).toFixed(1)}px ${(5 * depth).toFixed(1)}px ${(4 * depth).toFixed(1)}px rgba(34,48,0,0.22))`,
-    `drop-shadow(${(14 * depth).toFixed(1)}px ${(24 * depth).toFixed(1)}px ${(20 * depth).toFixed(1)}px rgba(34,48,0,0.16))`,
+    `drop-shadow(${(3 * depth).toFixed(1)}px ${(5 * depth).toFixed(1)}px ${(4 * depth).toFixed(1)}px rgba(20,21,60,0.22))`,
+    `drop-shadow(${(14 * depth).toFixed(1)}px ${(24 * depth).toFixed(1)}px ${(20 * depth).toFixed(1)}px rgba(20,21,60,0.16))`,
   ].join(' ');
 
 /**
