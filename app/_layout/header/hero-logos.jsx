@@ -28,6 +28,9 @@ const LOGO_STAGGER = 0.13;
 /** The soft colour blobs melt in just after the first logos pop */
 const BLOBS_START = 3.2;
 
+/** The coloured lights switch on once the logos have settled */
+const LIGHTS_START = 3.9;
+
 /** Scroll: logos fade out and drift up at different speeds (depth) */
 const SCROLL_FADE_START = 30;
 const SCROLL_FADE_DISTANCE = 300;
@@ -35,6 +38,9 @@ const SCROLL_FADE_DISTANCE = 300;
 /** Mouse parallax travel in px at depth 1 */
 const MOUSE_X = 16;
 const MOUSE_Y = 11;
+
+/** Mouse travel of the lights in px at shift 1 (they slide against the logos) */
+const LIGHT_SHIFT = 26;
 
 /**
  * Lighting, matched to the artwork: the key light sits top-left, so every
@@ -148,6 +154,93 @@ const blobBackground = ({ a, b, alpha }) =>
   [
     `radial-gradient(closest-side at 38% 40%, rgba(${a},${alpha}) 0%, rgba(${a},${(alpha * 0.45).toFixed(3)}) 50%, rgba(${a},0) 100%)`,
     `radial-gradient(closest-side at 66% 62%, rgba(${b},${(alpha * 0.8).toFixed(3)}) 0%, rgba(${b},${(alpha * 0.3).toFixed(3)}) 55%, rgba(${b},0) 100%)`,
+  ].join(', ');
+
+/**
+ * Coloured lights: the blobs sit BEHIND the logos, these fall ON them. They
+ * are drawn above the logos (and below the headline, so the text stays crisp),
+ * which is what makes a logo catch a wash of violet or pink on one side only,
+ * like stage light landing on a shelf of objects.
+ *
+ * The lights are uneven on purpose:
+ *  - key: a long, slanted violet-to-pink streak entering from the top-left,
+ *    the same direction the key light and the shadows already use, so it
+ *    reads as the source of the lighting. It crosses "claude".
+ *  - pink-pool: a wide pool of pink in the lower right, over "squiggle" and
+ *    "elevenlabs", bleeding off the edge.
+ *  - periwinkle: a small cool spot at the middle left, over "n8n" and "runway".
+ *  - orchid: a thin tilted sliver near the top right, over "comfy" (desktop).
+ * Nothing mirrors, and most logos stay untouched.
+ *
+ * Each light is two stacked radial gradients (a main colour and a warmer
+ * core pushed to one side), so the colour shifts inside it. Alpha tops out
+ * at 0.15: a tint you notice, not a filter you see. No blur filter and no
+ * blend mode (both are costly on low-spec devices); the soft gradient does the
+ * work.
+ *
+ * Motion: a slow breathing scale and drift, and they slide against the mouse
+ * (opposite to the logos), so the light seems to move over the objects instead
+ * of being painted on them. All transform-only, running only while the hero
+ * is on screen, and all off with reduced motion. They fade out on scroll.
+ *
+ * rotate: degrees; shift: how far it follows the mouse (x LIGHT_SHIFT px)
+ * drift : [x px, y px, duration s, phase s]
+ */
+const LIGHTS = [
+  {
+    id: 'key',
+    position: '-left-[12%] top-[4%] md:-left-[8%] md:top-[8%]',
+    width: 'clamp(300px, 60vw, 1040px)',
+    aspect: 4,
+    rotate: 26,
+    a: '160,100,232',
+    b: '240,96,188',
+    alpha: 0.15,
+    shift: 1,
+    drift: [22, 10, 28, 0],
+  },
+  {
+    id: 'pink-pool',
+    position: '-right-[10%] bottom-[2%] md:-right-[5%] md:bottom-[5%]',
+    width: 'clamp(220px, 38vw, 680px)',
+    aspect: 1.15,
+    rotate: 0,
+    a: '240,96,188',
+    b: '200,98,214',
+    alpha: 0.14,
+    shift: 0.7,
+    drift: [-16, -12, 31, 2],
+  },
+  {
+    id: 'periwinkle',
+    position: '-left-[4%] top-[46%] md:left-[1%] md:top-[44%]',
+    width: 'clamp(150px, 20vw, 360px)',
+    aspect: 1.6,
+    rotate: -18,
+    a: '125,108,255',
+    b: '160,100,232',
+    alpha: 0.12,
+    shift: 1.3,
+    drift: [10, 14, 25, 4],
+  },
+  {
+    id: 'orchid',
+    position: 'hidden md:block md:right-[3%] md:top-[12%]',
+    width: 'clamp(170px, 24vw, 420px)',
+    aspect: 2.8,
+    rotate: -20,
+    a: '200,98,214',
+    b: '240,96,188',
+    alpha: 0.12,
+    shift: 0.9,
+    drift: [-10, 8, 27, 6],
+  },
+];
+
+const lightBackground = ({ a, b, alpha }) =>
+  [
+    `radial-gradient(closest-side at 28% 50%, rgba(${b},${(alpha * 0.9).toFixed(3)}) 0%, rgba(${b},0) 100%)`,
+    `radial-gradient(closest-side, rgba(${a},${alpha}) 0%, rgba(${a},${(alpha * 0.5).toFixed(3)}) 45%, rgba(${a},0) 100%)`,
   ].join(', ');
 
 /**
@@ -348,6 +441,82 @@ function Blob({ blob, active }) {
   );
 }
 
+/**
+ * One coloured light (see LIGHTS). Three layers, so no two animations fight
+ * over a property: the outer box carries the position, the scroll fade and the
+ * mouse slide; the middle one the fade-in, the breathing scale and the drift;
+ * the inner one the fixed tilt and the gradient.
+ */
+function Light({ light, mouseX, mouseY, active }) {
+  const reduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  const scrollOpacity = useTransform(scrollY, [0, 360], [1, 0]);
+
+  // slide against the mouse (logos travel the other way), by their own amount
+  const travel = LIGHT_SHIFT * light.shift;
+  const slideX = useTransform(mouseX, [-1, 1], [travel, -travel]);
+  const slideY = useTransform(mouseY, [-1, 1], [travel * 0.7, -travel * 0.7]);
+
+  const [driftX, driftY, duration, phase] = light.drift;
+  //? same rule as the blobs: the loop only runs while the hero is near the
+  //? screen, and only waits its intro delay the very first time
+  const breathing = !reduceMotion && active;
+  const introAt = introDelay(LIGHTS_START);
+  const loopDelay = useLoopDelay(breathing, introAt + 1.4 + phase);
+
+  const loop = {
+    duration,
+    ease: 'easeInOut',
+    repeat: Infinity,
+    delay: loopDelay,
+  };
+
+  return (
+    <motion.div
+      className={`pointer-events-none absolute z-0 ${light.position}`}
+      style={{
+        width: light.width,
+        aspectRatio: light.aspect,
+        ...(reduceMotion
+          ? {}
+          : { opacity: scrollOpacity, x: slideX, y: slideY }),
+      }}
+    >
+      <motion.div
+        className='h-full w-full'
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={
+          reduceMotion
+            ? { opacity: 1 }
+            : breathing
+              ? {
+                  opacity: 1,
+                  scale: [1, 1.07, 1],
+                  x: [0, driftX, 0],
+                  y: [0, driftY, 0],
+                }
+              : { opacity: 1, scale: 1, x: 0, y: 0 }
+        }
+        transition={{
+          opacity: { duration: 1.6, ease: 'easeOut', delay: introAt },
+          scale: breathing ? loop : { duration: 0 },
+          x: breathing ? loop : { duration: 0 },
+          y: breathing ? loop : { duration: 0 },
+        }}
+      >
+        <span
+          aria-hidden='true'
+          className='block h-full w-full rounded-full'
+          style={{
+            backgroundImage: lightBackground(light),
+            transform: `rotate(${light.rotate}deg)`,
+          }}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function Logo({ logo, index, mouseX, mouseY, active }) {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
@@ -479,7 +648,10 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
   );
 }
 
-/** Floating 3D logos scattered around the headline, over a few soft colour blobs */
+/**
+ * Floating 3D logos scattered around the headline: over soft colour blobs,
+ * and under a few coloured lights.
+ */
 export function HeroLogos() {
   const reduceMotion = useReducedMotion();
   const containerRef = useRef(null);
@@ -519,6 +691,18 @@ export function HeroLogos() {
           key={logo.id}
           logo={logo}
           index={index}
+          mouseX={mouseX}
+          mouseY={mouseY}
+          active={onScreen}
+        />
+      ))}
+
+      {/* lights last, so they fall on top of the logos (the headline is a
+          later sibling in index.jsx, so the text still sits above them) */}
+      {LIGHTS.map(light => (
+        <Light
+          key={light.id}
+          light={light}
           mouseX={mouseX}
           mouseY={mouseY}
           active={onScreen}
