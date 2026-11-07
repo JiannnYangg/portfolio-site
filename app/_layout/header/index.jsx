@@ -52,34 +52,47 @@ const CTA_DELAY = WORD_DELAY + CTA_INDEX * WORD_STAGGER;
 const CTA_CLIP = 'inset(-48px -48px 0px -48px)';
 
 /**
- * CTA colours. The old neon lime is replaced by the theme blue (#445ae9, the
- * Tailwind `primary`) as a soft diagonal gradient: a lighter periwinkle top
- * left, the theme blue in the middle, a deeper indigo bottom right. White
- * text on every stop stays readable (about 4.4:1 at the lightest stop, 5.4:1
- * on the theme blue, 9:1 on the deep end; the label is 20px semibold, which
- * counts as large text).
+ * Brand colours, taken from the "C" of the .social logo, which runs blue
+ * (#5a6cff) to violet (#a064e8) to pink (#f060bc). Violet and pink lead; blue
+ * only shows up as a faint start of a gradient.
+ *
+ * BRAND_GRADIENT is the logo's own gradient. It is used translucent (marker,
+ * selection box) where dark text sits on top of it.
+ */
+const BRAND_GRADIENT =
+  'linear-gradient(95deg, rgba(90,108,255,0.5) 0%, rgba(160,100,232,0.55) 50%, rgba(240,96,188,0.6) 100%)';
+const SELECTION_GRADIENT =
+  'linear-gradient(100deg, rgba(90,108,255,0.22) 0%, rgba(160,100,232,0.28) 50%, rgba(240,96,188,0.32) 100%)';
+const HANDLE_TOP = '#8a4fe6';
+const HANDLE_BOTTOM = '#d6409f';
+const SELECTION_INK = '#2b1466';
+
+/**
+ * CTA colours: a diagonal violet-to-magenta gradient, the logo's gradient
+ * deepened just enough for white text. Every stop clears 4.5:1 with white
+ * (4.8:1 at the lightest stop, 4.7:1 in the middle, 4.9:1 at the deep end),
+ * and the label is 20px semibold, which counts as large text anyway.
  *
  * CTA_SOLID is the fallback: it paints first, so a browser that can't draw
- * the gradient still shows a solid theme-blue pill with white text.
+ * the gradient still shows a solid violet pill with white text.
  */
-const CTA_SOLID = '#445ae9';
+const CTA_SOLID = '#8247e5';
 const CTA_GRADIENT =
-  'linear-gradient(135deg, #5068f0 0%, #445ae9 48%, #2b3bb8 100%)';
+  'linear-gradient(135deg, #8a4fe6 0%, #a845d2 50%, #c2379d 100%)';
 const CTA_DARK = '#1f2024';
 
 /**
- * Blue glass for the iOS-style callout: the theme blue (#445ae9) pushed a
- * touch deeper and kept 88% opaque, with the same frosted blur behind it.
- * Over the light paper background it blends to about 5.4:1 with the white
- * 12px label, above the 4.5:1 needed for small text. Because it is nearly
- * opaque, it still reads as a solid blue bubble in a browser without
+ * The iOS edit menu is neutral grey, so it carries no brand colour at all:
+ * the system dark grey (#2c2c2e, iOS "systemGray6") at 94% opacity, with the
+ * same frosted blur behind it. White on it is about 13.9:1. Because it is
+ * nearly opaque, it still reads as a solid grey bubble in a browser without
  * backdrop-filter support.
  */
-const MENU_BG = 'rgba(56, 76, 214, 0.88)';
+const MENU_BG = 'rgba(44, 44, 46, 0.94)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
 /**
- * "Calm zones": the site backdrop (paper folds, grid, blooms, blue/violet glows) is
+ * "Calm zones": the site backdrop (paper folds, grid, blooms, violet/pink glows) is
  * washed back toward the paper colour behind the headline and behind the
  * CTA, and nowhere else. The backdrop itself is now one fixed layer shared by
  * every page, so the calm zones are a soft paper-coloured wash that belongs
@@ -225,8 +238,8 @@ function Emphasis({ children }) {
  * - the shape is cut as an uneven quadrilateral (left edge short and
  *   slanted, right edge tall, indented bottom-right corner)
  * - it sits low, under the lower half of the letters
- * Theme blue at 40%, text stays dark and crisp on top. It sweeps in from the
- * left after the line settles.
+ * The brand gradient (blue to violet to pink, translucent), text stays dark
+ * and crisp on top. It sweeps in from the left after the line settles.
  */
 function Marker({ children }) {
   const reduceMotion = useReducedMotion();
@@ -235,8 +248,9 @@ function Marker({ children }) {
     <span className='relative inline-block'>
       <motion.span
         aria-hidden='true'
-        className='absolute -left-[0.04em] -right-[0.3em] bottom-[0.02em] h-[0.5em] origin-left bg-[#5a6cff]/40'
+        className='absolute -left-[0.04em] -right-[0.3em] bottom-[0.02em] h-[0.5em] origin-left'
         style={{
+          backgroundImage: BRAND_GRADIENT,
           rotate: -1.8,
           clipPath: 'polygon(0% 22%, 100% 0%, 94% 100%, 4% 82%)',
         }}
@@ -255,7 +269,7 @@ function Marker({ children }) {
 
 /**
  * iOS edit menu (the bubble shown when text is selected on iPhone):
- * frosted blue glass (see MENU_BG) with a soft blur, small radius,
+ * frosted grey glass (see MENU_BG) with a soft blur, small radius,
  * hairline dividers, a trailing chevron and a pointer arrow.
  * A slim, soft sheen sweeps slowly across it, like light catching glass.
  */
@@ -273,7 +287,7 @@ function IosCallout() {
       className='pointer-events-none absolute bottom-full left-1/2 z-10 mb-[16px] -translate-x-1/2'
     >
       <motion.span
-        className='relative flex select-none items-stretch whitespace-nowrap rounded-[9px] text-[12px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_6px_20px_rgba(68,90,233,0.35),0_0_0_0.5px_rgba(255,255,255,0.22)]'
+        className='relative flex select-none items-stretch whitespace-nowrap rounded-[9px] text-[12px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_6px_20px_rgba(0,0,0,0.28),0_0_0_0.5px_rgba(255,255,255,0.12)]'
         style={{
           fontFamily: IOS_FONT,
           background: MENU_BG,
@@ -292,12 +306,12 @@ function IosCallout() {
         {CALLOUT_ITEMS.map((item, index) => (
           <span
             key={item}
-            className={`flex items-center px-[10px] py-[9px] ${index > 0 ? 'border-l-[0.5px] border-white/25' : ''}`}
+            className={`flex items-center px-[10px] py-[9px] ${index > 0 ? 'border-l-[0.5px] border-white/20' : ''}`}
           >
             {item}
           </span>
         ))}
-        <span className='flex items-center border-l-[0.5px] border-white/25 px-[6px]'>
+        <span className='flex items-center border-l-[0.5px] border-white/20 px-[6px]'>
           <ChevronRight size={12} strokeWidth={2.5} />
         </span>
 
@@ -311,7 +325,7 @@ function IosCallout() {
               className='absolute inset-y-0 left-0 w-[24%]'
               style={{
                 background:
-                  'linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%)',
+                  'linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0) 100%)',
                 transform: 'skewX(-18deg)',
               }}
               initial={{ x: '-160%' }}
@@ -348,7 +362,7 @@ function IosCallout() {
 
 /**
  * The "text selection" effect from the reference:
- * periwinkle highlight box, deep-indigo ExtraBold Italic text,
+ * brand-gradient highlight box, deep-violet ExtraBold Italic text,
  * the two selection handles (top-left ▼ / bottom-right ▲)
  * and the iPhone-style callout menu above it.
  */
@@ -360,7 +374,11 @@ function Selection({ children }) {
       {/* highlight box */}
       <motion.span
         aria-hidden='true'
-        className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px] border border-[#5a6cff]/60 bg-[#dfe3ff]'
+        className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px]'
+        style={{
+          backgroundImage: SELECTION_GRADIENT,
+          boxShadow: 'inset 0 0 0 1px rgba(160,100,232,0.55)',
+        }}
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{
@@ -382,15 +400,30 @@ function Selection({ children }) {
           ease: EASE_OUT_EXPO,
         }}
       >
-        <span className='absolute inset-y-[0.06em] left-0 w-[0.035em] bg-[#5a6cff]' />
-        <span className='absolute -left-[0.135em] -top-[0.1em] h-[0.26em] w-[0.3em] bg-[#5a6cff] [clip-path:polygon(0_0,100%_0,50%_100%)]' />
-        <span className='absolute inset-y-[0.06em] right-0 w-[0.035em] bg-[#5a6cff]' />
-        <span className='absolute -bottom-[0.1em] -right-[0.135em] h-[0.26em] w-[0.3em] bg-[#5a6cff] [clip-path:polygon(50%_0,100%_100%,0_100%)]' />
+        <span
+          className='absolute inset-y-[0.06em] left-0 w-[0.035em]'
+          style={{ backgroundColor: HANDLE_TOP }}
+        />
+        <span
+          className='absolute -left-[0.135em] -top-[0.1em] h-[0.26em] w-[0.3em] [clip-path:polygon(0_0,100%_0,50%_100%)]'
+          style={{ backgroundColor: HANDLE_TOP }}
+        />
+        <span
+          className='absolute inset-y-[0.06em] right-0 w-[0.035em]'
+          style={{ backgroundColor: HANDLE_BOTTOM }}
+        />
+        <span
+          className='absolute -bottom-[0.1em] -right-[0.135em] h-[0.26em] w-[0.3em] [clip-path:polygon(50%_0,100%_100%,0_100%)]'
+          style={{ backgroundColor: HANDLE_BOTTOM }}
+        />
       </motion.span>
 
       <IosCallout />
 
-      <em className='relative font-extrabold italic text-[#2b3bb8]'>
+      <em
+        className='relative font-extrabold italic'
+        style={{ color: SELECTION_INK }}
+      >
         {children}
       </em>
     </span>
@@ -400,7 +433,7 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='relative min-h-[100svh] overflow-hidden text-black selection:bg-[#dfe3ff] selection:text-[#2b3bb8]'
+      className='relative min-h-[100svh] overflow-hidden text-black selection:bg-[#eadcff] selection:text-[#2b1466]'
       variants={slideUp}
       initial='initial'
       animate='enter'
@@ -471,14 +504,14 @@ export function Header() {
           {/* CTA: same shape and sizing as the reference (no border, no
               outer shadow). Near-white outer pill, 6px ring, 6px gap, 50px
               inner buttons. Only the colours are themed.
-              Resting state: a blue gradient label with white text, and a
+              Resting state: a violet gradient label with white text, and a
               dark circle with a white arrow. On hover the two swap (dark
               label, gradient circle). A CSS gradient can't be transitioned,
               so each button has its resting fill as the background and the
               other fill as an overlay that fades in on hover / keyboard
               focus. The overlay sits behind the text (-z-10 inside an
               `isolate` stacking context), so the label and arrow never
-              flicker. The solid theme blue is the fallback colour under the
+              flicker. The solid theme violet is the fallback colour under the
               gradient. A subtle top highlight gives the label some depth.
               Sits a deliberate, modest gap under the headline. It shares the
               headline's rise-from-mask intro and scroll fade (CtaReveal). */}
@@ -509,7 +542,7 @@ export function Header() {
                   className='relative isolate flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full'
                   style={{ backgroundColor: CTA_DARK }}
                 >
-                  {/* hover / focus: the blue gradient fades in behind the arrow */}
+                  {/* hover / focus: the violet gradient fades in behind the arrow */}
                   <span
                     aria-hidden='true'
                     className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
