@@ -121,9 +121,12 @@ export function Description() {
         </div>
 
         {/* Right column, top-aligned with the paragraph: the side note, and the
-            "About us" circle directly under it. The circle is in the normal flow
-            (not pinned), so it can never overlap the text; the gap keeps clear
-            air between the last line and the circle. */}
+            "About us" circle directly under it, pushed to the right edge of the
+            column. The circle is in the normal flow (not pinned), so it can
+            never overlap the text; the gap keeps clear air between the last
+            line and the circle. The Wrapper's side padding (2.5em or more)
+            keeps the circle well clear of the dashed guide on the right, and
+            its bottom padding keeps it clear of the dashed line below. */}
         <div className='flex basis-full flex-col gap-10 sm:basis-7/12 lg:basis-[40%] lg:gap-14 lg:self-start lg:pt-2'>
           <ParallaxFade>
             <p className={NOTE_TEXT}>We bring together the four D&rsquo;s:</p>
@@ -136,7 +139,7 @@ export function Description() {
           </ParallaxFade>
 
           <motion.div
-            className='flex justify-start'
+            className='flex justify-end'
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
