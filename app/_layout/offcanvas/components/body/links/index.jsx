@@ -10,16 +10,13 @@ import { usePathname } from 'next/navigation';
 import { navItems } from '@/data';
 import { useHashNav } from '@/hooks';
 
-import classes from './index.module.css';
 import { scale, slideOut } from './variants';
 
-/**
- * The menu links: big, theme-blue, turning violet on hover / keyboard focus
- * (the other links dim a little, so the one you are on stands out). A dot in a
- * reserved slot on the left marks the link under the pointer, or the current
- * page when nothing is hovered. The slot is always there, so the text never
- * jumps and nothing hangs outside the panel on small phones.
- */
+/** The menu slides out in 0.8 s; the page starts moving a little before it is gone */
+const MENU_EXIT_SCROLL_DELAY_MS = 300;
+
+const closeMenu = () => window.dispatchEvent(new Event('offcanvas:close'));
+
 export function OffcanvasLinks() {
   const pathname = usePathname();
   const handleHashNav = useHashNav();
@@ -30,7 +27,7 @@ export function OffcanvasLinks() {
     return (
       <motion.li
         key={id}
-        className={classes.item}
+        className='relative my-4 flex items-center'
         variants={slideOut}
         custom={id}
         initial='initial'
@@ -38,24 +35,20 @@ export function OffcanvasLinks() {
         exit='exit'
         onPointerEnter={() => setActiveLink(href)}
       >
-        <motion.span
-          className={classes.dot}
-          aria-hidden='true'
+        <motion.div
+          className='absolute -left-11'
           variants={scale}
           animate={activeLink === href ? 'open' : 'closed'}
         >
-          <Dot size={32} />
-        </motion.span>
+          <Dot size={36} />
+        </motion.div>
         <Link
           href={href}
-          className={classes.link}
-          aria-current={pathname === href ? 'page' : undefined}
-          onFocus={() => setActiveLink(href)}
+          className='text-6xl capitalize'
           onClick={event =>
             handleHashNav(event, href, {
-              onBeforeScroll: () =>
-                window.dispatchEvent(new Event('offcanvas:close')),
-              delay: 700,
+              onNavigate: closeMenu,
+              delay: MENU_EXIT_SCROLL_DELAY_MS,
             })
           }
         >
@@ -66,10 +59,13 @@ export function OffcanvasLinks() {
   });
 
   return (
-    <nav aria-label='Main menu'>
-      <ul className={classes.list} onPointerLeave={() => setActiveLink(pathname)}>
-        {items}
-      </ul>
-    </nav>
+    <div className='mt-20 flex flex-col gap-3'>
+      <div className='mb-10 border-b border-solid'>
+        <h5 className='text-xs uppercase text-secondary-foreground'>
+          Navigation
+        </h5>
+      </div>
+      <ul onPointerLeave={() => setActiveLink(pathname)}>{items}</ul>
+    </div>
   );
 }

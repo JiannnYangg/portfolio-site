@@ -15,6 +15,16 @@ export function Offcanvas() {
     setOpen(false);
   }, [pathname]);
 
+  //? Escape closes the menu (only listened for while it is open)
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKeyDown = event => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen]);
+
   useEffect(() => {
     const close = () => setOpen(false);
     window.addEventListener('offcanvas:close', close);

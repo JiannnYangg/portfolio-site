@@ -1,4 +1,4 @@
-import { getLenis } from '@/hooks';
+import { getLenis, NAV_SCROLL_START } from '@/hooks';
 
 /*
  * Scroll helpers for the showcase entry animation.
@@ -12,7 +12,9 @@ import { getLenis } from '@/hooks';
  * The lock is deliberately easy to leave, so nobody is ever trapped:
  * - any upward gesture (wheel up, finger down, PageUp / ArrowUp / Home)
  *   releases it straight away
- * - clicking any link releases it (navbar, offcanvas, footer links)
+ * - clicking any link releases it (navbar, offcanvas, footer links), and so does
+ *   anything that starts a navigation scroll (the logo, the hero button, "Back
+ *   to top": they are buttons, not links; see NAV_SCROLL_START)
  * - a fail-safe timer releases it no matter what
  * - the caller releases it when the carousel is destroyed
  */
@@ -62,7 +64,12 @@ export function lockScroll({ maxMs = 12000, onRelease } = {}) {
     if (event.cancelable) event.preventDefault();
   };
   const onKeyDown = event => {
-    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey)
+    if (
+      event.defaultPrevented ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey
+    )
       return;
     if (event.target?.closest?.(FIELDS)) return;
     if (RELEASE_KEYS.has(event.key) || (event.key === ' ' && event.shiftKey)) {
@@ -80,6 +87,7 @@ export function lockScroll({ maxMs = 12000, onRelease } = {}) {
   window.addEventListener('touchmove', onTouchMove, options);
   window.addEventListener('keydown', onKeyDown, options);
   document.addEventListener('click', onClick, true);
+  window.addEventListener(NAV_SCROLL_START, release);
   const failSafe = setTimeout(() => release(), maxMs);
 
   function release() {
@@ -91,6 +99,7 @@ export function lockScroll({ maxMs = 12000, onRelease } = {}) {
     window.removeEventListener('touchmove', onTouchMove, options);
     window.removeEventListener('keydown', onKeyDown, options);
     document.removeEventListener('click', onClick, true);
+    window.removeEventListener(NAV_SCROLL_START, release);
     try {
       lenis?.start();
     } catch {}

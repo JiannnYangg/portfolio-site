@@ -27,6 +27,12 @@
  * ends, which used to skip the first cards. The hold is easy to leave: scrolling
  * up, a link click, or the fail-safe timer all release it.
  *
+ * While a navigation click is scrolling the page (the logo, the top links, the
+ * side menu: see @/hooks nav-scroll) the section stays out of the way: it does
+ * not start its entry or hold the page as the scroll passes through it, so
+ * "Contact" really arrives at the footer. When that scroll ends it checks where
+ * the visitor landed (landing on the section itself plays the entry).
+ *
  * Performance / robustness:
  * - three.js and the engine are fetched, and the shader compiled, in an idle
  *   moment shortly after the page loads (and at the latest when the section is
@@ -50,6 +56,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { gsap } from 'gsap';
 import { createPortal } from 'react-dom';
+
+import { isNavScrolling, NAV_SCROLL_END } from '@/hooks';
 
 import { ENTRY, getScrollLength, PROJECTS, SCROLL, UI_ANIM } from './config';
 import { lockScroll, scrollToY } from './scroll-lock';
@@ -227,6 +235,8 @@ export function Showcase() {
     // hold takes over the moment the page is on the pin.
     const checkEntry = () => {
       if (entryTriggered || !engine || cancelled || !ENTRY.enabled) return;
+      // a navigation click is scrolling the page past us: not our moment
+      if (isNavScrolling()) return;
       if (stageVisibleShare() < ENTRY_VISIBILITY) return;
       entryTriggered = true;
       const top = wrapper.getBoundingClientRect().top;
@@ -258,7 +268,8 @@ export function Showcase() {
     const engageLock = () => {
       releaseLock?.();
       releaseLock = null;
-      if (cancelled || stageVisibleShare() < LOCK_VISIBILITY) return;
+      if (cancelled || isNavScrolling()) return;
+      if (stageVisibleShare() < LOCK_VISIBILITY) return;
       releaseLock = lockScroll({
         maxMs: ENTRY_LOCK_MS,
         onRelease: () => {
@@ -282,6 +293,16 @@ export function Showcase() {
         releaseLock = null;
       }
     };
+    // A navigation scroll has ended (its own start already released our hold).
+    // Look where the visitor landed: the entry may be due, and an entry that is
+    // still playing under the page gets its hold back.
+    const onNavScrollEnd = () => {
+      if (cancelled) return;
+      gliding = false;
+      if (entryRunning && !releaseLock) engageLock();
+      scheduleSync();
+    };
+    window.addEventListener(NAV_SCROLL_END, onNavScrollEnd);
 
     const boot = async () => {
       if (booting || cancelled) return;
@@ -384,6 +405,7 @@ export function Showcase() {
 
     return () => {
       cancelled = true;
+      window.removeEventListener(NAV_SCROLL_END, onNavScrollEnd);
       nearObserver.disconnect();
       visibilityObserver.disconnect();
       resizeObserver.disconnect();

@@ -38,6 +38,7 @@ export function OffcanvasToggle({ isOpen, handleOpen }) {
         size='md'
         variant='ghost'
         className='border border-solid border-muted-foreground'
+        aria-expanded={isOpen}
         onClick={() => handleOpen(!isOpen)}
       >
         <span

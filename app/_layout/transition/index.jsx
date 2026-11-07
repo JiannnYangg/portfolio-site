@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
 import { markIntroSeen, PRELOADER_DURATION_MS, resolveIntro } from '@/data';
-import { scrollToId, useLenis, useTimeOut } from '@/hooks';
+import { cancelNavScroll, scrollToId, useLenis, useTimeOut } from '@/hooks';
 
 import { Preloader } from './preloader';
 
@@ -27,6 +27,17 @@ export function Transition({ children }) {
   //? intro is removed in the layout effect below, before the browser paints.
   const [isLoading, setLoading] = useState(true);
   const pathname = usePathname();
+  const hashTimer = useRef(0);
+
+  //? Leaving the page: a pending #hash scroll must not run on the next page,
+  //? and a navigation scroll still in flight is cancelled.
+  useEffect(
+    () => () => {
+      window.clearTimeout(hashTimer.current);
+      cancelNavScroll();
+    },
+    [],
+  );
 
   //? A refresh must start the page (and the animations in it, like the
   //? showcase carousel) from the beginning. By default the browser restores
@@ -59,7 +70,10 @@ export function Transition({ children }) {
       const { hash } = window.location;
       if (hash) {
         //? Arrived via a link like /#contact-footer
-        setTimeout(() => scrollToId(hash.slice(1)), 100);
+        hashTimer.current = window.setTimeout(
+          () => scrollToId(hash.slice(1)),
+          100,
+        );
       }
     },
     //? Same constant the preloader reads (greetings * 0.4 s): the last greeting

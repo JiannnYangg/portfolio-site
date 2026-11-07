@@ -2,6 +2,8 @@
 
 import { ArrowUp } from 'lucide-react';
 
+import { scrollToTop } from '@/hooks';
+
 import styles from '../index.module.css';
 
 /**
@@ -11,11 +13,9 @@ import styles from '../index.module.css';
  * as they are so the row reads as one line.
  */
 export function BackToTop() {
+  //? same scroller as every other navigation click (reduced motion included)
   const handleClick = event => {
-    const calm = window.matchMedia?.(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
-    window.scrollTo({ top: 0, behavior: calm ? 'auto' : 'smooth' });
+    scrollToTop();
     event.currentTarget.blur();
   };
 

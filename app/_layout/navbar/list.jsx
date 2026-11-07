@@ -6,16 +6,16 @@ import Link from 'next/link';
 import { Center, MagneticButton } from '@/components';
 import { navItems } from '@/data';
 import { useHashNav } from '@/hooks';
-import { randomId } from '@/utils';
 
 export function NavbarList() {
   const handleHashNav = useHashNav();
   const items = navItems.slice(1).map(({ href, title }) => {
-    const id = randomId();
     return (
       //? flex + items-center: no inline baseline gap, so the link box sits on
-      //? the true vertical centre of the navbar band
-      <li key={id} className='group flex items-center p-4'>
+      //? the true vertical centre of the navbar band. The key is the link
+      //? itself (it used to be a new random id every render, which remounted
+      //? every link and dropped its hover state).
+      <li key={href} className='group flex items-center p-4'>
         <Link
           href={href}
           passHref
