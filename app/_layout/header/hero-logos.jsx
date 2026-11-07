@@ -46,6 +46,27 @@ const shadowFor = depth =>
   ].join(' ');
 
 /**
+ * Gradient halos: every logo gets a soft glow behind it, drawn from the .social
+ * logo's colours. Violet and pink lead; two logos start from the logo's blue
+ * as a faint periwinkle, so blue stays a hint. They are indexed like LOGOS
+ * (same order), and cycle if a logo is ever added.
+ * Each entry is [centre colour, edge colour] as "r,g,b", plus a strength.
+ */
+const HALOS = [
+  { from: '160,100,232', to: '240,96,188', alpha: 0.42 }, // claude: violet -> pink
+  { from: '240,96,188', to: '160,100,232', alpha: 0.4 }, // comfy: pink -> violet
+  { from: '125,108,255', to: '240,96,188', alpha: 0.38 }, // squiggle: periwinkle -> pink
+  { from: '160,100,232', to: '125,108,255', alpha: 0.34 }, // n8n: violet -> periwinkle
+  { from: '240,96,188', to: '200,98,214', alpha: 0.34 }, // github: pink -> orchid
+  { from: '200,98,214', to: '160,100,232', alpha: 0.34 }, // elevenlabs: orchid -> violet
+  { from: '160,100,232', to: '240,96,188', alpha: 0.36 }, // codex: violet -> pink
+  { from: '240,96,188', to: '125,108,255', alpha: 0.34 }, // runway: pink -> periwinkle
+];
+
+const haloBackground = ({ from, to, alpha }) =>
+  `radial-gradient(closest-side, rgba(${from},${alpha}) 0%, rgba(${to},${(alpha * 0.55).toFixed(2)}) 55%, rgba(${to},0) 100%)`;
+
+/**
  * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
  * the largest and close to the viewer; the supporting logos (n8n, github,
  * elevenlabs, codex, runway) are small and sit further back, so they add
@@ -216,78 +237,99 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
   );
   const y = useTransform([scrollLift, parallaxY], ([lift, par]) => lift + par);
 
+  const halo = HALOS[index % HALOS.length];
+
   return (
-    // filter lives on the outermost element so the shadow is cast in screen
-    // space: it keeps pointing down-right whatever the logo tilt or float is
+    // the outer box carries position, scroll fade and parallax, so the halo
+    // and the logo move and fade together
     <motion.div
       className={`pointer-events-none absolute z-0 ${logo.position}`}
       style={{
         width: logo.size,
-        filter: shadowFor(depth),
         ...(reduceMotion ? {} : { opacity: scrollOpacity, x: parallaxX, y }),
       }}
     >
-      {/* intro: pop up with a soft spring, opacity eased separately so it never overshoots */}
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.55, y: 34 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
+      {/* gradient halo: sits behind the logo and is not part of the filtered
+          box below, so it casts no shadow of its own. It fades in right after
+          the logo has popped. */}
+      <motion.span
+        aria-hidden='true'
+        className='absolute -inset-[42%] block rounded-full'
+        style={{ backgroundImage: haloBackground(halo) }}
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{
-          default: {
-            type: 'spring',
-            stiffness: 150,
-            damping: 13,
-            mass: 0.9,
-            delay: enterDelay,
-          },
-          opacity: { duration: 0.45, delay: enterDelay },
+          duration: 0.9,
+          ease: 'easeOut',
+          delay: enterDelay + 0.2,
         }}
-      >
-        {/* idle float: slow bob + a hair of tilt, each logo on its own beat */}
+      />
+
+      {/* filter lives on this box so the shadow is cast in screen space: it
+          keeps pointing down-right whatever the logo tilt or float is */}
+      <div className='relative' style={{ filter: shadowFor(depth) }}>
+        {/* intro: pop up with a soft spring, opacity eased separately so it never overshoots */}
         <motion.div
-          animate={
-            reduceMotion
-              ? undefined
-              : floating
-                ? { y: [0, -amplitude, 0], rotate: [0, tilt, 0] }
-                : { y: 0, rotate: 0 }
-          }
-          transition={
-            floating
-              ? {
-                  duration,
-                  ease: 'easeInOut',
-                  repeat: Infinity,
-                  delay: floatDelay,
-                }
-              : { duration: 0 }
-          }
-        >
-          {/* resting tilt: spins in while it pops */}
-          <motion.div
-            initial={reduceMotion ? false : { rotate: rotate - 16 }}
-            animate={{ rotate }}
-            transition={{
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.55, y: 34 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{
+            default: {
               type: 'spring',
-              stiffness: 90,
-              damping: 12,
+              stiffness: 150,
+              damping: 13,
+              mass: 0.9,
               delay: enterDelay,
-            }}
+            },
+            opacity: { duration: 0.45, delay: enterDelay },
+          }}
+        >
+          {/* idle float: slow bob + a hair of tilt, each logo on its own beat */}
+          <motion.div
+            animate={
+              reduceMotion
+                ? undefined
+                : floating
+                  ? { y: [0, -amplitude, 0], rotate: [0, tilt, 0] }
+                  : { y: 0, rotate: 0 }
+            }
+            transition={
+              floating
+                ? {
+                    duration,
+                    ease: 'easeInOut',
+                    repeat: Infinity,
+                    delay: floatDelay,
+                  }
+                : { duration: 0 }
+            }
           >
-            <Image
-              src={logo.src}
-              alt=''
-              width={logo.width}
-              height={logo.height}
-              sizes={logo.size}
-              {...(index < 4
-                ? { priority: true }
-                : { loading: 'eager', fetchPriority: 'low' })}
-              draggable={false}
-              className='h-auto w-full select-none'
-            />
+            {/* resting tilt: spins in while it pops */}
+            <motion.div
+              initial={reduceMotion ? false : { rotate: rotate - 16 }}
+              animate={{ rotate }}
+              transition={{
+                type: 'spring',
+                stiffness: 90,
+                damping: 12,
+                delay: enterDelay,
+              }}
+            >
+              <Image
+                src={logo.src}
+                alt=''
+                width={logo.width}
+                height={logo.height}
+                sizes={logo.size}
+                {...(index < 4
+                  ? { priority: true }
+                  : { loading: 'eager', fetchPriority: 'low' })}
+                draggable={false}
+                className='h-auto w-full select-none'
+              />
+            </motion.div>
           </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
