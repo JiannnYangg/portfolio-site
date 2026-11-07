@@ -4,9 +4,15 @@
  * The footer sits on solid paper, which is what ends the site's dashed
  * vertical guides cleanly at its top edge. The background is one picture
  * (public/images/footer-bg.webp, 1632x912) painted on a layer behind the
- * content (.bg), anchored to the bottom so the deep blue part always sits
- * behind the details. That layer is masked so its top edge fades into the
- * paper, so the footer and the section above it read as one surface.
+ * content (.bg), anchored to the bottom so the deep part always sits behind
+ * the details. That layer is masked so its top edge fades into the paper, so
+ * the footer and the section above it read as one surface.
+ *
+ * The picture itself is blue, so a gradient layer in the logo's violet and
+ * pink is blended over it (`mix-blend-mode: color`, see .bg::after). That
+ * keeps every tile's lightness and swaps only the hue and saturation, so the
+ * footer matches the theme without a new image and the white text on the
+ * lower part keeps its contrast.
  *
  * The picture's top ~150px are plain white, so from 768px up the footer is
  * only as tall as the lower 762px of the picture (see min-height below); the
@@ -14,50 +20,50 @@
  * phones the height simply follows the content.
  *
  * Two colour zones: the top (headline, CTA, email) sits on the light part of
- * the picture and uses dark ink; the bottom (.base) sits on deep blue and
- * switches to white text on translucent glass.
+ * the picture and uses dark ink; the bottom (.base) sits on the deep violet
+ * part and switches to white text on translucent glass.
  *
  * `--ft-cols` only sets the side gutters, so the text lines up with the rest
  * of the page at every breakpoint.
  */
 .root {
   --ft-cols: 8;
-  --ft-ink: #14152b;
-  --ft-muted: rgb(20 21 43 / 72%);
-  --ft-line: rgb(20 21 43 / 38%);
-  --ft-hair: rgb(20 21 43 / 22%);
+  --ft-ink: #1a1233;
+  --ft-muted: rgb(26 18 51 / 72%);
+  --ft-line: rgb(26 18 51 / 38%);
+  --ft-hair: rgb(26 18 51 / 22%);
   --ft-glass: rgb(255 255 255 / 62%);
   --ft-glass-hover: rgb(255 255 255 / 88%);
   --ft-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ft-icon-bg: #1f2024;
   --ft-icon-fg: #fff;
-  --ft-live: #5a6cff;
+  --ft-live: #a064e8;
 
   /* Same colours as the hero CTA (header/index.jsx: CTA_SOLID, CTA_GRADIENT,
      CTA_DARK), so the footer and the landing page match exactly. */
-  --ft-cta-solid: #445ae9;
+  --ft-cta-solid: #8247e5;
   --ft-cta-gradient: linear-gradient(
     135deg,
-    #5068f0 0%,
-    #445ae9 48%,
-    #2b3bb8 100%
+    #8a4fe6 0%,
+    #a845d2 50%,
+    #c2379d 100%
   );
   --ft-cta-dark: #1f2024;
   --ft-cta-ring: #f4f4f5;
 
   /* The "together!" pill: the CTA gradient, one notch darker so it holds its
-     own against the blue picture. */
-  --ft-pill-solid: #3a4ed6;
+     own against the violet picture. White on every stop is 5.5:1 or better. */
+  --ft-pill-solid: #7a3fd8;
   --ft-pill-gradient: linear-gradient(
     135deg,
-    #4559e0 0%,
-    #3a4ed6 48%,
-    #232f9c 100%
+    #8349e2 0%,
+    #9d3fc6 48%,
+    #ab2f8d 100%
   );
 
-  /* The headline's ink: a near-black navy, the same family as the pill's dark
-     end, so the two halves of the phrase belong together. */
-  --ft-headline-ink: #0b0f2e;
+  /* The headline's ink: a near-black deep violet, the same family as the
+     pill's dark end, so the two halves of the phrase belong together. */
+  --ft-headline-ink: #1a0f33;
 
   position: relative;
   isolation: isolate;
@@ -84,6 +90,24 @@
   overflow: hidden;
   pointer-events: none;
   mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft-fade));
+}
+
+/* Recolours the blue picture: hue and saturation come from this gradient (the
+   logo's violet, a touch of orchid, then pink at the very bottom), lightness
+   stays the picture's own. White stays white, so the faded top is unchanged. */
+.bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    180deg,
+    #c07cf0 0%,
+    #a064e8 42%,
+    #9a52d8 72%,
+    #c0409f 100%
+  );
+  mix-blend-mode: color;
+  pointer-events: none;
 }
 
 .bgImage {
@@ -188,7 +212,7 @@
     inset 0 0.03em 0 rgb(255 255 255 / 30%),
     inset 0 -0.05em 0.1em rgb(0 0 0 / 26%),
     0 0 0 0.055em var(--ft-cta-ring),
-    0 0.14em 0.45em rgb(35 47 156 / 42%);
+    0 0.14em 0.45em rgb(110 40 170 / 42%);
   color: #fff;
   font-weight: 800;
   font-style: italic;
@@ -267,7 +291,7 @@
   left: calc(100% + 0.36em);
   width: 0.15em;
   height: 0.15em;
-  color: #6f82f0;
+  color: #f060bc;
 }
 
 .headline:hover .starBig {
