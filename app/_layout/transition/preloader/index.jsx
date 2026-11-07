@@ -14,18 +14,18 @@ import { fade, slideUp } from './variants';
 const MotionComponent = motion(Center);
 
 /**
- * Deep forest green: the dark partner of the site's lime theme.
+ * Deep midnight indigo: the dark partner of the site's blue-violet theme.
  * Keep the container background and the curve fill on the SAME value, the
  * curved bottom edge is drawn in the fill colour.
  */
-const BG = 'bg-[#0b1f14]';
-const CURVE_FILL = 'fill-[#0b1f14]';
+const BG = 'bg-[#0b0f2e]';
+const CURVE_FILL = 'fill-[#0b0f2e]';
 
 /**
- * Greeting colour: ONE flat, light lime (the same pale lime as the text
- * selection in the hero), no gradient. It reads softly on the deep green.
+ * Greeting colour: ONE flat, light lilac (the same as the text selection in
+ * the hero), no gradient. It reads softly on the deep indigo.
  */
-const TEXT_COLOR = 'text-[#d8f6a2]';
+const TEXT_COLOR = 'text-[#e4defc]';
 
 /**
  * Timing: every greeting gets PRELOADER_GREETING_MS (0.4 s), including the

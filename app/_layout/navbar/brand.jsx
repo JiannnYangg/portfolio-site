@@ -20,8 +20,10 @@ const SHINE_REPEAT_DELAY = 0.5; // 0.5s pause between passes
  * Brand logo, top-left. Clicking it scrolls to the contact footer, same as
  * the old "Get in touch with me" label.
  * @param {{ tone?: 'light' | 'dark' }} props
- * `dark` = charcoal wordmark with a black dot (light backgrounds),
+ * `dark` = deep-navy wordmark (light backgrounds),
  * `light` = white wordmark (dark backgrounds, default)
+ * Both are vector (SVG) with a transparent background; the "C" carries the
+ * brand gradient (blue to violet to pink).
  */
 export function NavbarBrand({ tone = 'light' }) {
   const reduceMotion = useReducedMotion();
@@ -32,9 +34,8 @@ export function NavbarBrand({ tone = 'light' }) {
   const shineDelay = useLoopDelay(onScreen, introDelay(SHINE_FIRST_DELAY));
   const scrollToFooter = () => scrollToId('contact-footer');
   const isDark = tone === 'dark';
-  // logo-social.svg = the dark logo with the dot recolored to charcoal
-  // (an SVG wrapper around the image, so next/image must not optimize it)
-  const src = isDark ? '/logo-social.svg' : '/logo-light.png';
+  // SVGs are served as they are (next/image must not optimize them)
+  const src = isDark ? '/logo-social.svg' : '/logo-light.svg';
 
   return (
     <button
@@ -47,10 +48,10 @@ export function NavbarBrand({ tone = 'light' }) {
         <Image
           src={src}
           alt='Social'
-          width={640}
-          height={139}
+          width={722}
+          height={164}
           priority
-          unoptimized={isDark}
+          unoptimized
           className='block h-8 w-auto md:h-9'
         />
 
