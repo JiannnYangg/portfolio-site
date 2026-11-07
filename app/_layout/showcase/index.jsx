@@ -570,7 +570,7 @@ export function Showcase() {
             onClick={() => engineRef.current?.closeFocus()}
             aria-label='Close'
             tabIndex={focused ? 0 : -1}
-            className='absolute right-6 top-6 z-10 rounded-full bg-[#1f2024] px-4 py-2 text-sm text-[#9aa6ff] transition-opacity duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1f2024]'
+            className='absolute right-6 top-6 z-10 rounded-full bg-[#1f2024] px-4 py-2 text-sm text-[#d9c2ff] transition-opacity duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1f2024]'
             style={{
               opacity: focused ? 1 : 0,
               pointerEvents: focused ? 'auto' : 'none',
@@ -589,8 +589,10 @@ export function Showcase() {
           <div
             ref={cursorRef}
             aria-hidden='true'
-            className='pointer-events-none fixed left-4 top-4 z-50 whitespace-nowrap rounded-full bg-[#5a6cff] px-3 py-1 text-sm text-white'
+            className='pointer-events-none fixed left-4 top-4 z-50 whitespace-nowrap rounded-full bg-[#8247e5] px-3 py-1 text-sm text-white'
             style={{
+              backgroundImage:
+                'linear-gradient(135deg, #8a4fe6 0%, #a845d2 50%, #c2379d 100%)',
               willChange: 'transform',
               opacity: 0,
               visibility: 'hidden',
