@@ -3,27 +3,27 @@
  *
  * One palette for the whole menu, defined on .root so the panel, the curved
  * edge (back-drop) and the links (links/index.module.css) all read from it.
- * It is taken from the .social logo (public/logo-social.svg), whose "C"
- * runs pink (#f0546b) to magenta (#bb54b8) to purple (#8a52e8):
+ * It comes from the .social logo, whose "C" runs from pink to purple, with
+ * purple as the main colour and pink as the accent:
  *   --oc-bg        the panel: a very light, purple-tinted white
- *   --oc-accent    the links: the logo purple
- *   --oc-hover     solid fallback for a hovered / focused link: the magenta
- *                  from the middle of the logo gradient, a touch deeper
- *   --oc-gradient  the hovered / focused link: pink to magenta to purple,
- *                  the logo gradient pushed a little deeper so it stays
- *                  readable on the light panel
- * Contrast on --oc-bg (all large text, 3:1 needed): accent about 4:1,
- * hover magenta about 4:1, and the pink end of the gradient about 3.6:1.
+ *   --oc-accent    the links: the main purple
+ *   --oc-hover     solid fallback for a hovered / focused link: a lighter,
+ *                  pinker purple
+ *   --oc-gradient  the hovered / focused link: purple to pink, the logo
+ *                  gradient pushed a little deeper so it stays readable on
+ *                  the light panel
+ * Contrast on --oc-bg (all large text, 3:1 needed): accent about 6:1, hover
+ * about 4.5:1, and the pink end of the gradient about 3.6:1.
  *
  * The panel has a fixed width (600px, or the whole screen on small phones),
  * so its left edge always lines up with the curve drawn by the back-drop.
  * It scrolls on very short screens instead of cutting links off.
  */
 .root {
-  --oc-bg: #f6f1ff;
-  --oc-accent: #8a52e8;
-  --oc-hover: #b64fae;
-  --oc-gradient: linear-gradient(95deg, #e0486a 0%, #bb54b8 50%, #8a52e8 100%);
+  --oc-bg: #f4efff;
+  --oc-accent: #6a2fd8;
+  --oc-hover: #a23fd0;
+  --oc-gradient: linear-gradient(95deg, #6a2fd8 0%, #a23fd0 50%, #e0406f 100%);
 }
 
 .panel {
@@ -37,21 +37,21 @@
   background-color: var(--oc-bg);
 
   /* three soft blooms on the right edge, far from the curved left edge, so
-     the edge stays the same colour as the curve: logo purple at the top, a
-     faint touch of magenta in the middle, logo pink at the bottom */
+     the edge stays the same colour as the curve: purple at the top (the
+     main colour), a lighter purple in the middle, pink at the bottom */
   background-image:
+    radial-gradient(60% 45% at 100% 0%, rgb(139 76 240 / 24%), transparent 70%),
     radial-gradient(
-      60% 45% at 100% 0%,
-      rgb(138 82 232 / 26%),
+      45% 35% at 100% 55%,
+      rgb(150 80 230 / 12%),
       transparent 70%
     ),
-    radial-gradient(45% 35% at 100% 55%, rgb(187 84 184 / 8%), transparent 70%),
     radial-gradient(
       55% 40% at 100% 100%,
-      rgb(240 84 107 / 16%),
+      rgb(240 86 120 / 16%),
       transparent 70%
     );
-  box-shadow: -1.5rem 0 4rem rgb(80 40 150 / 16%);
+  box-shadow: -1.5rem 0 4rem rgb(80 40 160 / 16%);
 }
 
 /* Links centred in the panel. The top padding keeps them clear of the burger
