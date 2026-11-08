@@ -1,8 +1,8 @@
 /*
  * Menu links (see index.jsx). Colours come from the menu root
  * (body/index.module.css), which takes them from the .social logo:
- * --oc-accent (main purple), --oc-hover (pinker purple) and --oc-gradient
- * (purple to pink, shown on the hovered / focused link).
+ * --oc-accent (logo purple), --oc-hover (magenta) and --oc-gradient (pink to
+ * magenta to purple, shown on the hovered / focused link).
  */
 .list {
   display: flex;
