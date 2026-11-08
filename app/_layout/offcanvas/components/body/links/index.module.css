@@ -2,13 +2,13 @@
  * Menu links (see index.jsx). Colours come from the menu root
  * (body/index.module.css), which takes them from the .social logo:
  * --oc-accent (logo purple) and --oc-hover (magenta). The hovered / focused
- * link uses its own soft single-hue gradient (--oc-link-hover-gradient below),
+ * link uses its own single-hue gradient (--oc-link-hover-gradient below),
  * not the pink-magenta-purple logo gradient.
  */
 .list {
-  /* hover / focus: one light lavender gradient, two very close shades */
-  --oc-link-hover-gradient: linear-gradient(95deg, #a98af2 0%, #c3a6f7 100%);
-  --oc-link-hover-solid: #b496f5;
+  /* hover / focus: one deeper violet gradient, two very close shades */
+  --oc-link-hover-gradient: linear-gradient(95deg, #6f3bd6 0%, #8f5cee 100%);
+  --oc-link-hover-solid: #7d4ae0;
 
   display: flex;
   flex-direction: column;
@@ -61,8 +61,8 @@
   transform: translateX(0.4rem);
 }
 
-/* Browsers that can clip a background to the text get the soft lavender
-   gradient on the hovered link; the others keep the solid colour above. */
+/* Browsers that can clip a background to the text get the violet gradient on
+   the hovered link; the others keep the solid colour above. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .link:hover,
   .link:focus-visible {
