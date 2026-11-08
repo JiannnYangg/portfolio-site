@@ -71,12 +71,15 @@ const shadowFor = depth =>
  *
  * HALO_STRENGTH scales every halo at once: 1 was the first version, 0.5 is
  * half as strong (the halos are now a gentle tint, not a glow).
+ *
+ * The claude and squiggle (Higgsfield) halos were halved again (alpha 0.42 ->
+ * 0.21 and 0.38 -> 0.19): 50% less opacity on those two only.
  */
 const HALO_STRENGTH = 0.5;
 const HALOS = [
-  { from: PURPLE, to: PINK, alpha: 0.42 }, // claude: purple -> pink
+  { from: PURPLE, to: PINK, alpha: 0.21 }, // claude: purple -> pink (50% less)
   { from: PINK, to: PURPLE, alpha: 0.4 }, // comfy: pink -> purple
-  { from: MAGENTA, to: PINK, alpha: 0.38 }, // squiggle: magenta -> pink
+  { from: MAGENTA, to: PINK, alpha: 0.19 }, // squiggle: magenta -> pink (50% less)
   { from: PURPLE, to: MAGENTA, alpha: 0.34 }, // n8n: purple -> magenta
   { from: PINK, to: MAGENTA, alpha: 0.34 }, // github: pink -> magenta
   { from: MAGENTA, to: PURPLE, alpha: 0.34 }, // elevenlabs: magenta -> purple
@@ -317,8 +320,9 @@ const LOGOS = [
     rotate: -9,
     depth: 1.3,
     float: [10, 6.2, 1.6, 0],
-    // from the top-left, purple into pink (the key light)
-    lit: { angle: 135, from: PURPLE, to: PINK, alpha: 0.5 },
+    // from the top-left, purple into pink (the key light); alpha halved
+    // (0.5 -> 0.25)
+    lit: { angle: 135, from: PURPLE, to: PINK, alpha: 0.25 },
   },
   {
     id: 'comfy',
@@ -344,8 +348,8 @@ const LOGOS = [
     rotate: -8,
     depth: 1.25,
     float: [9, 6.6, 1.5, 2],
-    // from the bottom-right, pink into magenta
-    lit: { angle: 315, from: PINK, to: MAGENTA, alpha: 0.46 },
+    // from the bottom-right, pink into magenta; alpha halved (0.46 -> 0.23)
+    lit: { angle: 315, from: PINK, to: MAGENTA, alpha: 0.23 },
   },
   {
     id: 'n8n',
