@@ -52,46 +52,46 @@ const CTA_DELAY = WORD_DELAY + CTA_INDEX * WORD_STAGGER;
 const CTA_CLIP = 'inset(-48px -48px 0px -48px)';
 
 /**
- * Brand colours, taken from the "C" of the .social logo, which runs blue
- * (#5a6cff) to violet (#a064e8) to pink (#f060bc). Violet and pink lead; blue
- * only shows up as a faint start of a gradient.
+ * Brand colours, taken from the "C" of the .social logo, which runs pink
+ * (#f0546b) to magenta (#bb54b8) to purple (#8a52e8). Purple leads, pink is
+ * the accent, and there is no blue anywhere in the hero.
  *
  * BRAND_GRADIENT is the logo's own gradient. It is used translucent (marker,
  * selection box) where dark text sits on top of it.
  */
 const BRAND_GRADIENT =
-  'linear-gradient(95deg, rgba(90,108,255,0.5) 0%, rgba(160,100,232,0.55) 50%, rgba(240,96,188,0.6) 100%)';
+  'linear-gradient(95deg, rgba(240,84,107,0.5) 0%, rgba(187,84,184,0.55) 50%, rgba(138,82,232,0.6) 100%)';
 const SELECTION_GRADIENT =
-  'linear-gradient(100deg, rgba(90,108,255,0.22) 0%, rgba(160,100,232,0.28) 50%, rgba(240,96,188,0.32) 100%)';
-const HANDLE_TOP = '#8a4fe6';
-const HANDLE_BOTTOM = '#d6409f';
+  'linear-gradient(100deg, rgba(240,84,107,0.22) 0%, rgba(187,84,184,0.28) 50%, rgba(138,82,232,0.32) 100%)';
+const HANDLE_TOP = '#8a52e8';
+const HANDLE_BOTTOM = '#e0486a';
 const SELECTION_INK = '#2b1466';
 
 /**
- * Headline accent: the word "build" is filled with a violet-to-pink
+ * Headline accent: the word "build" is filled with a purple-to-pink
  * gradient (the same two colours that lead the logo and the CTA), deep enough
  * to stay clearly readable on the light paper (every stop is well above the
  * 3:1 needed for large text).
  *
  * BUILD_SOLID is the fallback: it is the text colour, so a browser that can't
- * clip a gradient to text still shows the word in solid violet.
+ * clip a gradient to text still shows the word in solid purple.
  */
-const BUILD_SOLID = '#8a4fe6';
+const BUILD_SOLID = '#8a52e8';
 const BUILD_GRADIENT =
-  'linear-gradient(95deg, #8a4fe6 0%, #b04ad8 55%, #d6409f 100%)';
+  'linear-gradient(95deg, #8a52e8 0%, #bb54b8 55%, #e0486a 100%)';
 
 /**
- * CTA colours: a diagonal violet-to-magenta gradient, the logo's gradient
+ * CTA colours: a diagonal purple-to-pink gradient, the logo's gradient
  * deepened just enough for white text. Every stop clears 4.5:1 with white
- * (4.8:1 at the lightest stop, 4.7:1 in the middle, 4.9:1 at the deep end),
- * and the label is 20px semibold, which counts as large text anyway.
+ * (4.7:1 at the purple start, 4.7:1 in the middle, 4.8:1 at the deep pink
+ * end), and the label is 20px semibold, which counts as large text anyway.
  *
  * CTA_SOLID is the fallback: it paints first, so a browser that can't draw
- * the gradient still shows a solid violet pill with white text.
+ * the gradient still shows a solid purple pill with white text.
  */
-const CTA_SOLID = '#8247e5';
+const CTA_SOLID = '#8a52e8';
 const CTA_GRADIENT =
-  'linear-gradient(135deg, #8a4fe6 0%, #a845d2 50%, #c2379d 100%)';
+  'linear-gradient(135deg, #8a52e8 0%, #a14fc9 50%, #c2437f 100%)';
 const CTA_DARK = '#1f2024';
 
 /**
@@ -105,7 +105,7 @@ const MENU_BG = 'rgba(44, 44, 46, 0.94)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
 /**
- * "Calm zones": the site backdrop (paper folds, grid, blooms, violet/pink glows) is
+ * "Calm zones": the site backdrop (paper folds, grid, blooms, purple/pink glows) is
  * washed back toward the paper colour behind the headline and behind the
  * CTA, and nowhere else. The backdrop itself is now one fixed layer shared by
  * every page, so the calm zones are a soft paper-coloured wash that belongs
@@ -241,8 +241,8 @@ function CtaReveal({ children }) {
 
 /**
  * Key word inside the headline: ExtraBold Italic, same weight as the
- * reference, filled with the violet-to-pink gradient (text-clip, solid
- * violet fallback). The italic glyphs lean past their box on the right, so a
+ * reference, filled with the purple-to-pink gradient (text-clip, solid
+ * purple fallback). The italic glyphs lean past their box on the right, so a
  * small padding (cancelled by an equal negative margin, so the layout does
  * not move) keeps the last letter from being clipped by the gradient box.
  */
@@ -272,8 +272,8 @@ function Emphasis({ children }) {
  * - the shape is cut as an uneven quadrilateral (left edge short and
  *   slanted, right edge tall, indented bottom-right corner)
  * - it sits low, under the lower half of the letters
- * The brand gradient (blue to violet to pink, translucent), text stays dark
- * and crisp on top. It sweeps in from the left after the line settles.
+ * The brand gradient (pink to magenta to purple, translucent), text stays
+ * dark and crisp on top. It sweeps in from the left after the line settles.
  */
 function Marker({ children }) {
   const reduceMotion = useReducedMotion();
@@ -396,7 +396,7 @@ function IosCallout() {
 
 /**
  * The "text selection" effect from the reference:
- * brand-gradient highlight box, deep-violet ExtraBold Italic text,
+ * brand-gradient highlight box, deep-purple ExtraBold Italic text,
  * the two selection handles (top-left ▼ / bottom-right ▲)
  * and the iPhone-style callout menu above it.
  */
@@ -411,7 +411,7 @@ function Selection({ children }) {
         className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px]'
         style={{
           backgroundImage: SELECTION_GRADIENT,
-          boxShadow: 'inset 0 0 0 1px rgba(160,100,232,0.55)',
+          boxShadow: 'inset 0 0 0 1px rgba(138,82,232,0.55)',
         }}
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
@@ -538,14 +538,14 @@ export function Header() {
           {/* CTA: same shape and sizing as the reference (no border, no
               outer shadow). Near-white outer pill, 6px ring, 6px gap, 50px
               inner buttons. Only the colours are themed.
-              Resting state: a violet gradient label with white text, and a
+              Resting state: a purple gradient label with white text, and a
               dark circle with a white arrow. On hover the two swap (dark
               label, gradient circle). A CSS gradient can't be transitioned,
               so each button has its resting fill as the background and the
               other fill as an overlay that fades in on hover / keyboard
               focus. The overlay sits behind the text (-z-10 inside an
               `isolate` stacking context), so the label and arrow never
-              flicker. The solid theme violet is the fallback colour under the
+              flicker. The solid theme purple is the fallback colour under the
               gradient. A subtle top highlight gives the label some depth.
               Sits a deliberate, modest gap under the headline. It shares the
               headline's rise-from-mask intro and scroll fade (CtaReveal). */}
@@ -576,7 +576,7 @@ export function Header() {
                   className='relative isolate flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full'
                   style={{ backgroundColor: CTA_DARK }}
                 >
-                  {/* hover / focus: the violet gradient fades in behind the arrow */}
+                  {/* hover / focus: the purple gradient fades in behind the arrow */}
                   <span
                     aria-hidden='true'
                     className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
