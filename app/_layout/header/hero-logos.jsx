@@ -43,6 +43,15 @@ const MOUSE_Y = 11;
 const LIGHT_SHIFT = 26;
 
 /**
+ * The three colours of the .social logo's "C", as "r,g,b": pink (#f0546b),
+ * magenta (#bb54b8) and purple (#8a52e8). Purple leads, pink is the accent,
+ * and there is no blue anywhere in the hero.
+ */
+const PURPLE = '138,82,232';
+const MAGENTA = '187,84,184';
+const PINK = '240,84,107';
+
+/**
  * Lighting, matched to the artwork: the key light sits top-left, so every
  * shadow falls down and to the right. Shadow tint is a deep violet so it
  * belongs to the light paper instead of looking like grey stickers.
@@ -56,9 +65,8 @@ const shadowFor = depth =>
 
 /**
  * Gradient halos: every logo gets a soft glow behind it, drawn from the .social
- * logo's colours. Violet and pink lead; two logos start from the logo's blue
- * as a faint periwinkle, so blue stays a hint. They are indexed like LOGOS
- * (same order), and cycle if a logo is ever added.
+ * logo's colours (purple, magenta, pink). They are indexed like LOGOS (same
+ * order), and cycle if a logo is ever added.
  * Each entry is [centre colour, edge colour] as "r,g,b", plus a strength.
  *
  * HALO_STRENGTH scales every halo at once: 1 was the first version, 0.5 is
@@ -66,14 +74,14 @@ const shadowFor = depth =>
  */
 const HALO_STRENGTH = 0.5;
 const HALOS = [
-  { from: '160,100,232', to: '240,96,188', alpha: 0.42 }, // claude: violet -> pink
-  { from: '240,96,188', to: '160,100,232', alpha: 0.4 }, // comfy: pink -> violet
-  { from: '125,108,255', to: '240,96,188', alpha: 0.38 }, // squiggle: periwinkle -> pink
-  { from: '160,100,232', to: '125,108,255', alpha: 0.34 }, // n8n: violet -> periwinkle
-  { from: '240,96,188', to: '200,98,214', alpha: 0.34 }, // github: pink -> orchid
-  { from: '200,98,214', to: '160,100,232', alpha: 0.34 }, // elevenlabs: orchid -> violet
-  { from: '160,100,232', to: '240,96,188', alpha: 0.36 }, // codex: violet -> pink
-  { from: '240,96,188', to: '125,108,255', alpha: 0.34 }, // runway: pink -> periwinkle
+  { from: PURPLE, to: PINK, alpha: 0.42 }, // claude: purple -> pink
+  { from: PINK, to: PURPLE, alpha: 0.4 }, // comfy: pink -> purple
+  { from: MAGENTA, to: PINK, alpha: 0.38 }, // squiggle: magenta -> pink
+  { from: PURPLE, to: MAGENTA, alpha: 0.34 }, // n8n: purple -> magenta
+  { from: PINK, to: MAGENTA, alpha: 0.34 }, // github: pink -> magenta
+  { from: MAGENTA, to: PURPLE, alpha: 0.34 }, // elevenlabs: magenta -> purple
+  { from: PURPLE, to: PINK, alpha: 0.36 }, // codex: purple -> pink
+  { from: PINK, to: MAGENTA, alpha: 0.34 }, // runway: pink -> magenta
 ];
 
 const haloBackground = ({ from, to, alpha }) => {
@@ -104,36 +112,36 @@ const haloBackground = ({ from, to, alpha }) => {
  */
 const BLOBS = [
   {
-    // top-left: the largest, violet leaning to periwinkle, behind "claude"
+    // top-left: the largest, purple leaning to magenta, behind "claude"
     id: 'top-left',
     position: '-left-[14%] -top-[9%] md:-left-[7%] md:top-[0%]',
     width: 'clamp(250px, 42vw, 760px)',
     aspect: 1.25,
-    a: '160,100,232',
-    b: '125,108,255',
+    a: PURPLE,
+    b: MAGENTA,
     alpha: 0.2,
     drift: [16, 12, 24, 0],
   },
   {
-    // right edge, a little below the middle: pink into violet, behind the
+    // right edge, a little below the middle: pink into purple, behind the
     // big "comfy" / "squiggle" pair
     id: 'right',
     position: '-right-[16%] top-[36%] md:-right-[8%] md:top-[33%]',
     width: 'clamp(220px, 34vw, 620px)',
     aspect: 0.95,
-    a: '240,96,188',
-    b: '160,100,232',
+    a: PINK,
+    b: PURPLE,
     alpha: 0.17,
     drift: [-14, 14, 29, 2.5],
   },
   {
-    // lower left: orchid into periwinkle, smaller and lighter, near "github"
+    // lower left: magenta into purple, smaller and lighter, near "github"
     id: 'bottom-left',
     position: '-bottom-[2%] -left-[8%] md:bottom-[3%] md:left-[6%]',
     width: 'clamp(200px, 26vw, 460px)',
     aspect: 1.5,
-    a: '200,98,214',
-    b: '125,108,255',
+    a: MAGENTA,
+    b: PURPLE,
     alpha: 0.14,
     drift: [12, -10, 33, 5],
   },
@@ -143,8 +151,8 @@ const BLOBS = [
     position: 'hidden md:block md:right-[21%] md:top-[3%]',
     width: 'clamp(140px, 15vw, 280px)',
     aspect: 1.1,
-    a: '240,96,188',
-    b: '200,98,214',
+    a: PINK,
+    b: MAGENTA,
     alpha: 0.1,
     drift: [-8, 9, 26, 7],
   },
@@ -157,18 +165,18 @@ const blobBackground = ({ a, b, alpha }) =>
   ].join(', ');
 
 /**
- * Coloured lights, in the logo's own violet / pink / periwinkle (the same
+ * Coloured lights, in the logo's own purple / magenta / pink (the same
  * colours as the CTA, the marker and the halos). Two kinds, both drawn above
  * the logos and below the headline:
  *
  * 1. Scene lights (this list): big soft washes that fall across the hero and
  *    over some of the logos, like stage light. Uneven on purpose:
- *  - key: a long, slanted violet-to-pink streak from the top-left, the same
+ *  - key: a long, slanted purple-to-pink streak from the top-left, the same
  *    direction as the key light and the shadows, aimed so its centre line
  *    runs through "claude".
  *  - pink-pool: a wide pool of pink in the lower right, over "squiggle" and
  *    "elevenlabs", bleeding off the edge.
- *  - periwinkle: a small cool spot at the middle left, over "n8n".
+ *  - purple: a small purple spot at the middle left, over "n8n".
  *  - orchid: a thin tilted sliver near the top right, over "comfy" (desktop).
  *
  * 2. Logo lights (`lit` on a logo, see LOGOS): a light that lands on the logo
@@ -180,7 +188,7 @@ const blobBackground = ({ a, b, alpha }) =>
  * warmer core pushed to one side), so the colour shifts inside it. No blur
  * filter and no blend mode (both are costly on low-spec devices).
  *
- * The hero background is already a pale violet-pink, so a pale light of the
+ * The hero background is already a pale purple-pink, so a pale light of the
  * same hue simply disappears into it. The alphas are therefore strong enough to
  * register (0.2 to 0.26), while the soft falloff keeps them from looking like
  * a flat overlay.
@@ -201,8 +209,8 @@ const LIGHTS = [
     width: 'clamp(300px, 60vw, 1040px)',
     aspect: 4,
     rotate: 26,
-    a: '160,100,232',
-    b: '240,96,188',
+    a: PURPLE,
+    b: PINK,
     alpha: 0.26,
     shift: 1,
     drift: [22, 10, 28, 0],
@@ -213,20 +221,20 @@ const LIGHTS = [
     width: 'clamp(220px, 38vw, 680px)',
     aspect: 1.15,
     rotate: 0,
-    a: '240,96,188',
-    b: '200,98,214',
+    a: PINK,
+    b: MAGENTA,
     alpha: 0.24,
     shift: 0.7,
     drift: [-16, -12, 31, 2],
   },
   {
-    id: 'periwinkle',
+    id: 'purple',
     position: '-left-[4%] top-[46%] md:left-[1%] md:top-[44%]',
     width: 'clamp(150px, 20vw, 360px)',
     aspect: 1.6,
     rotate: -18,
-    a: '125,108,255',
-    b: '160,100,232',
+    a: PURPLE,
+    b: MAGENTA,
     alpha: 0.2,
     shift: 1.3,
     drift: [10, 14, 25, 4],
@@ -237,8 +245,8 @@ const LIGHTS = [
     width: 'clamp(170px, 24vw, 420px)',
     aspect: 2.8,
     rotate: -20,
-    a: '200,98,214',
-    b: '240,96,188',
+    a: MAGENTA,
+    b: PINK,
     alpha: 0.2,
     shift: 0.9,
     drift: [-10, 8, 27, 6],
@@ -309,8 +317,8 @@ const LOGOS = [
     rotate: -9,
     depth: 1.3,
     float: [10, 6.2, 1.6, 0],
-    // from the top-left, violet into pink (the key light)
-    lit: { angle: 135, from: '160,100,232', to: '240,96,188', alpha: 0.5 },
+    // from the top-left, purple into pink (the key light)
+    lit: { angle: 135, from: PURPLE, to: PINK, alpha: 0.5 },
   },
   {
     id: 'comfy',
@@ -322,8 +330,8 @@ const LOGOS = [
     rotate: 5,
     depth: 1.5,
     float: [12, 7.4, 1.2, 0.8],
-    // from the top-right, pink into violet
-    lit: { angle: 215, from: '240,96,188', to: '160,100,232', alpha: 0.42 },
+    // from the top-right, pink into purple
+    lit: { angle: 215, from: PINK, to: PURPLE, alpha: 0.42 },
   },
   {
     id: 'squiggle',
@@ -336,8 +344,8 @@ const LOGOS = [
     rotate: -8,
     depth: 1.25,
     float: [9, 6.6, 1.5, 2],
-    // from the bottom-right, pink into orchid
-    lit: { angle: 315, from: '240,96,188', to: '200,98,214', alpha: 0.46 },
+    // from the bottom-right, pink into magenta
+    lit: { angle: 315, from: PINK, to: MAGENTA, alpha: 0.46 },
   },
   {
     id: 'n8n',
@@ -364,8 +372,8 @@ const LOGOS = [
     rotate: 7,
     depth: 0.5,
     float: [5, 5.2, 1.8, 1.1],
-    // from the top, a cool periwinkle into violet
-    lit: { angle: 160, from: '125,108,255', to: '160,100,232', alpha: 0.5 },
+    // from the top, purple into magenta
+    lit: { angle: 160, from: PURPLE, to: MAGENTA, alpha: 0.5 },
   },
   {
     id: 'elevenlabs',
