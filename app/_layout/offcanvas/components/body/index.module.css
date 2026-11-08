@@ -4,17 +4,16 @@
  * One palette for the whole menu, defined on .root so the panel, the curved
  * edge (back-drop) and the links (links/index.module.css) all read from it.
  * It is taken from the .social logo (public/logo-social.svg), whose "C"
- * runs blue (#5a6cff) to violet (#a064e8) to pink (#f060bc), plus the theme
- * violet (#8247e5) used by the CTA buttons:
- *   --oc-bg        the panel: a very light, violet-tinted white
- *   --oc-accent    the links: the theme violet
- *   --oc-hover     solid fallback for a hovered / focused link: an orchid from
- *                  the middle of the CTA gradient
- *   --oc-gradient  the hovered / focused link: violet to orchid to pink,
+ * runs pink (#f0546b) to magenta (#bb54b8) to purple (#8a52e8):
+ *   --oc-bg        the panel: a very light, purple-tinted white
+ *   --oc-accent    the links: the logo purple
+ *   --oc-hover     solid fallback for a hovered / focused link: the magenta
+ *                  from the middle of the logo gradient, a touch deeper
+ *   --oc-gradient  the hovered / focused link: pink to magenta to purple,
  *                  the logo gradient pushed a little deeper so it stays
  *                  readable on the light panel
- * Contrast on --oc-bg (all large text, 3:1 needed): accent about 4.8:1,
- * hover orchid about 4.3:1, and the pink end of the gradient about 3.7:1.
+ * Contrast on --oc-bg (all large text, 3:1 needed): accent about 4:1,
+ * hover magenta about 4:1, and the pink end of the gradient about 3.6:1.
  *
  * The panel has a fixed width (600px, or the whole screen on small phones),
  * so its left edge always lines up with the curve drawn by the back-drop.
@@ -22,9 +21,9 @@
  */
 .root {
   --oc-bg: #f6f1ff;
-  --oc-accent: #8247e5;
-  --oc-hover: #a845d2;
-  --oc-gradient: linear-gradient(95deg, #8247e5 0%, #a845d2 55%, #d6409f 100%);
+  --oc-accent: #8a52e8;
+  --oc-hover: #b64fae;
+  --oc-gradient: linear-gradient(95deg, #e0486a 0%, #bb54b8 50%, #8a52e8 100%);
 }
 
 .panel {
@@ -38,18 +37,18 @@
   background-color: var(--oc-bg);
 
   /* three soft blooms on the right edge, far from the curved left edge, so
-     the edge stays the same colour as the curve: logo violet at the top, a
-     faint touch of logo blue in the middle, logo pink at the bottom */
+     the edge stays the same colour as the curve: logo purple at the top, a
+     faint touch of magenta in the middle, logo pink at the bottom */
   background-image:
     radial-gradient(
       60% 45% at 100% 0%,
-      rgb(160 100 232 / 26%),
+      rgb(138 82 232 / 26%),
       transparent 70%
     ),
-    radial-gradient(45% 35% at 100% 55%, rgb(90 108 255 / 8%), transparent 70%),
+    radial-gradient(45% 35% at 100% 55%, rgb(187 84 184 / 8%), transparent 70%),
     radial-gradient(
       55% 40% at 100% 100%,
-      rgb(240 96 188 / 16%),
+      rgb(240 84 107 / 16%),
       transparent 70%
     );
   box-shadow: -1.5rem 0 4rem rgb(80 40 150 / 16%);

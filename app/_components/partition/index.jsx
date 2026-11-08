@@ -11,19 +11,19 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
  *   left and right edge of the content column.
  * - <Partition />   a full-width horizontal dashed line that marks where one
  *   section ends and the next begins. It crosses the guides, and a small
- *   violet-to-magenta label sits on each crossing: the section name on the
+ *   pink-to-purple label sits on each crossing: the section name on the
  *   left, its number on the right, like a drawing sheet.
  *
  * Both are decorative (aria-hidden, no pointer events).
  */
 /**
- * Label fill: the logo's violet-to-pink gradient, deepened just enough for
+ * Label fill: the logo's pink-to-purple gradient, deepened just enough for
  * white text. LABEL_SOLID paints first, as the fallback for a browser that
  * can't draw the gradient.
  */
-const LABEL_SOLID = '#8247e5';
+const LABEL_SOLID = '#a845a5';
 const LABEL_GRADIENT =
-  'linear-gradient(135deg, #8a4fe6 0%, #a845d2 50%, #c2379d 100%)';
+  'linear-gradient(135deg, #c93f63 0%, #a845a5 50%, #7d45e0 100%)';
 /**
  * The dashed lines are a dark slate that leans violet-black, so they read as
  * quiet structure and the gradient labels on the crossings stay the accent.
@@ -87,7 +87,7 @@ const randomGlyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
 
 /** Thin colour split used while the label is scrambling */
 const GLITCH_SHADOW =
-  '1px 0 rgba(255, 90, 190, 0.85), -1px 0 rgba(150, 160, 255, 0.85)';
+  '1px 0 rgba(240, 84, 107, 0.85), -1px 0 rgba(138, 82, 232, 0.85)';
 
 /** Speed knobs (ms). Bigger = slower. */
 const PAUSE_MS = 1000; // readable hold between two decodes

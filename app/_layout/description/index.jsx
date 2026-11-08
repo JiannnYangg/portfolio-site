@@ -46,10 +46,10 @@ const NOTE_TEXT =
 
 /**
  * Hover colour of the circle: the brand pink (the end of the logo's gradient)
- * with dark text on top (about 6:1), instead of the default blue fill.
+ * with dark text on top (about 6:1), instead of the default fill.
  */
 const CIRCLE_HOVER =
-  'before:bg-[#f060bc] after:bg-[#f060bc] hover:text-[#1f2024]';
+  'before:bg-[#f0546b] after:bg-[#f0546b] hover:text-[#1f2024]';
 
 /**
  * Shape of the circle. The default "xl" button size is padding-driven, which
