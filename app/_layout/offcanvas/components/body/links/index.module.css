@@ -1,10 +1,15 @@
 /*
  * Menu links (see index.jsx). Colours come from the menu root
  * (body/index.module.css), which takes them from the .social logo:
- * --oc-accent (logo purple), --oc-hover (magenta) and --oc-gradient (pink to
- * magenta to purple, shown on the hovered / focused link).
+ * --oc-accent (logo purple) and --oc-hover (magenta). The hovered / focused
+ * link uses its own soft single-hue gradient (--oc-link-hover-gradient below),
+ * not the pink-magenta-purple logo gradient.
  */
 .list {
+  /* hover / focus: one light lavender gradient, two very close shades */
+  --oc-link-hover-gradient: linear-gradient(95deg, #a98af2 0%, #c3a6f7 100%);
+  --oc-link-hover-solid: #b496f5;
+
   display: flex;
   flex-direction: column;
   gap: clamp(0.4rem, 1.8vh, 1rem);
@@ -27,7 +32,7 @@
   place-items: center;
   width: 2rem;
   height: 2rem;
-  color: var(--oc-hover);
+  color: var(--oc-link-hover-solid);
 }
 
 /* The block is a little taller than the text (padding) and pulled back by the
@@ -52,23 +57,23 @@
 
 .link:hover,
 .link:focus-visible {
-  color: var(--oc-hover);
+  color: var(--oc-link-hover-solid);
   transform: translateX(0.4rem);
 }
 
-/* Browsers that can clip a background to the text get the logo gradient on
-   the hovered link; the others keep the solid colour above. */
+/* Browsers that can clip a background to the text get the soft lavender
+   gradient on the hovered link; the others keep the solid colour above. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .link:hover,
   .link:focus-visible {
-    background-image: var(--oc-gradient);
+    background-image: var(--oc-link-hover-gradient);
     background-clip: text;
     color: transparent;
   }
 }
 
 .link:focus-visible {
-  outline: 2px solid var(--oc-hover);
+  outline: 2px solid var(--oc-link-hover-solid);
   outline-offset: 6px;
 }
 
