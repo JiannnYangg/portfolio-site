@@ -1,0 +1,34 @@
+/*
+ * A footer social whose link is not ready yet (see social-links.jsx).
+ *
+ * Same look as the live chips in ../index.module.css (.chip), but dimmed and
+ * with no hover lift, no pointer cursor and no focus stop, so it reads as
+ * "coming soon" and never as a broken button. It is its own small file so the
+ * footer stylesheet does not have to change; the colours come from the
+ * --ft-* variables the footer's bottom part (.base) already defines.
+ */
+.pending {
+  display: inline-flex;
+  gap: 0.55rem;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-inline: 1rem 1.15rem;
+  border: 1px solid var(--ft-line);
+  border-radius: 999px;
+  background-color: var(--ft-glass);
+  backdrop-filter: blur(8px);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1;
+  opacity: 0.65;
+  cursor: default;
+  user-select: none;
+}
+
+@media print {
+  .pending {
+    display: none;
+  }
+}
