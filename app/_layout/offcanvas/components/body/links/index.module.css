@@ -1,14 +1,13 @@
 /*
  * Menu links (see index.jsx). Colours come from the menu root
- * (body/index.module.css): --oc-accent (warm coral) and --oc-hover (deep
- * vermilion). The hovered / focused link uses its own darker gradient
- * (--oc-link-hover-gradient below): a rich, classic burnt-vermilion that
- * reads clearly darker than the resting coral.
+ * (body/index.module.css): --oc-accent (warm orange). The hovered / focused
+ * link goes only a touch darker, still clearly orange (no brown), with a very
+ * gentle gradient (--oc-link-hover-gradient below).
  */
 .list {
-  /* hover / focus: darker, richer vermilion gradient */
-  --oc-link-hover-gradient: linear-gradient(95deg, #8c2410 0%, #b8321a 55%, #d44a24 100%);
-  --oc-link-hover-solid: #a82f16;
+  /* hover / focus: a slightly deeper orange, with a very small gradient */
+  --oc-link-hover-gradient: linear-gradient(95deg, #d84c20 0%, #e45f2c 100%);
+  --oc-link-hover-solid: #dc5226;
 
   display: flex;
   flex-direction: column;
@@ -61,7 +60,7 @@
   transform: translateX(0.4rem);
 }
 
-/* Browsers that can clip a background to the text get the darker gradient on
+/* Browsers that can clip a background to the text get the gentle gradient on
    the hovered link; the others keep the solid colour above. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .link:hover,

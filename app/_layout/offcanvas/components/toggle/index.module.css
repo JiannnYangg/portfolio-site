@@ -6,6 +6,7 @@
   z-index: theme(zIndex.40);
 }
 
+/* The lines are dark charcoal, so they read on the light peach-coral button */
 .burger {
   display: inherit;
   width: theme(width.8);
@@ -18,7 +19,7 @@
     content: '';
     position: absolute;
     display: block;
-    background-color: theme(colors.background);
+    background-color: #1f1b18;
     transition: transform 300ms theme(transitionTimingFunction.in-expo);
   }
 
