@@ -3,23 +3,24 @@
  *
  * One palette for the whole menu, defined on .root so the panel, the curved
  * edge (back-drop) and the links (links/index.module.css) all read from it.
- * It is the site's orange, beige and white palette:
- *   --oc-bg        the panel: a very light, orange-tinted white
- *   --oc-accent    the links: the brand orange
- *   --oc-hover     solid fallback for a hovered / focused link
- *   --oc-gradient  the hovered / focused link: a deepening orange gradient
- * Contrast on --oc-bg (all large text, 3:1 needed): every colour and every
- * gradient stop is about 3.4:1 or better.
+ * It matches the light peach-coral hover of the round "About us" / "Works"
+ * buttons:
+ *   --oc-bg        the panel: a soft peach cream
+ *   --oc-accent    the links: a warm coral
+ *   --oc-hover     solid fallback for a hovered / focused link (deep vermilion)
+ *   --oc-gradient  the hovered / focused link: a rich, darker vermilion gradient
+ * Contrast on --oc-bg (all large text, 3:1 needed): the coral links are about
+ * 3.5:1 and the hovered deep vermilion is well above 5:1.
  *
  * The panel has a fixed width (600px, or the whole screen on small phones),
  * so its left edge always lines up with the curve drawn by the back-drop.
  * It scrolls on very short screens instead of cutting links off.
  */
 .root {
-  --oc-bg: #fff6ec;
-  --oc-accent: #d9531a;
-  --oc-hover: #d9531a;
-  --oc-gradient: linear-gradient(95deg, #e0681c 0%, #d9531a 50%, #c2410c 100%);
+  --oc-bg: #fff0e4;
+  --oc-accent: #e0522a;
+  --oc-hover: #a82f16;
+  --oc-gradient: linear-gradient(95deg, #e0562c 0%, #c2381c 50%, #8c2410 100%);
 }
 
 .panel {
@@ -32,22 +33,22 @@
   overscroll-behavior: contain;
   background-color: var(--oc-bg);
 
-  /* three soft blooms on the right edge, far from the curved left edge, so
-     the edge stays the same colour as the curve: orange at the top (the
-     main colour), a faint tangerine in the middle, amber at the bottom */
+  /* soft peach-to-coral blooms on the right edge, far from the curved left
+     edge, so the edge stays the same colour as the curve: coral at the top,
+     light peach in the middle, a warm rose-coral at the bottom */
   background-image:
-    radial-gradient(60% 45% at 100% 0%, rgb(236 100 38 / 26%), transparent 70%),
+    radial-gradient(65% 50% at 100% 0%, rgb(255 138 99 / 42%), transparent 72%),
     radial-gradient(
-      45% 35% at 100% 55%,
-      rgb(243 128 52 / 10%),
-      transparent 70%
+      50% 38% at 100% 52%,
+      rgb(255 190 150 / 38%),
+      transparent 72%
     ),
     radial-gradient(
-      55% 40% at 100% 100%,
-      rgb(250 170 90 / 18%),
-      transparent 70%
+      60% 45% at 100% 100%,
+      rgb(255 112 96 / 28%),
+      transparent 72%
     );
-  box-shadow: -1.5rem 0 4rem rgb(150 70 20 / 16%);
+  box-shadow: -1.5rem 0 4rem rgb(190 80 40 / 18%);
 }
 
 /* Links centred in the panel. The top padding keeps them clear of the burger
