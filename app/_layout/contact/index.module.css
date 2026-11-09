@@ -2,31 +2,27 @@
  * Contact footer (see index.jsx).
  *
  * The footer sits on solid paper, which is what ends the site's dashed
- * vertical guides cleanly at its top edge. The background is one picture
- * (public/images/footer-bg.webp, 1632x912) painted on a layer behind the
- * content (.bg), anchored to the bottom so the deep part always sits behind
- * the details. That layer is masked so its top edge fades into the paper, so
- * the footer and the section above it read as one surface.
+ * vertical guides cleanly at its top edge. The background is one CSS layer
+ * behind the content (.bg): soft clouds of light orange, peach and beige on a
+ * pale warm base, built only from radial gradients (no picture, no blur
+ * filter, nothing to download). The layer is masked so its top edge fades into
+ * the paper, so the footer and the section above it read as one surface.
  *
- * The picture itself is blue, so a gradient layer in the brand orange is
- * blended over it (`mix-blend-mode: color`, see .bg::after). That
- * keeps every tile's lightness and swaps only the hue and saturation, so the
- * footer matches the theme without a new image and the white text on the
- * lower part keeps its contrast.
+ * The clouds are uneven on purpose (different sizes, positions and strengths):
+ * a big orange one low on the left, a smaller one low on the right, a peach
+ * band along the bottom, and beige in the upper half, so the colour moves
+ * across the footer instead of sitting in a grid.
  *
- * The picture's top ~150px are plain white, so from 768px up the footer is
- * only as tall as the lower 762px of the picture (see min-height below); the
- * picture is bottom-anchored, so exactly that white strip is cropped. On
- * phones the height simply follows the content.
+ * LIGHT ONLY: the deepest colour anywhere is a light orange (about #f48054).
+ * There is no dark orange, no brown and no black in the background, which is
+ * why the bottom row (socials, back to top, version, local time) uses dark ink
+ * on translucent white glass instead of white text.
  *
- * Two colour zones: the top (headline, CTA, email) sits on the light part of
- * the picture and uses dark ink; the bottom (.base) sits on the deep orange
- * part and switches to white text on translucent glass.
+ * The "together!" pill and the CTA keep the brand vermilion, so they stay the
+ * strongest thing on the page.
  *
- * Palette (from the brand reference): vermilion orange #e24a28, neutral
- * charcoal ink #1f1b18, soft grey-beige paper. NO BROWN: orange is never
- * darkened below #d63f20 (darker orange reads as brown), so the deep end of
- * every gradient stays a saturated orange.
+ * Palette: vermilion orange #e24a28 (buttons only), light orange #f48054,
+ * peach #f9c6a0, beige #f6e9d8, neutral charcoal ink #1f1b18.
  *
  * `--ft-cols` only sets the side gutters, so the text lines up with the rest
  * of the page at every breakpoint.
@@ -35,14 +31,14 @@
   --ft-cols: 8;
   --ft-ink: #1f1b18;
   --ft-muted: rgb(31 27 24 / 72%);
-  --ft-line: rgb(31 27 24 / 38%);
-  --ft-hair: rgb(31 27 24 / 22%);
+  --ft-line: rgb(31 27 24 / 30%);
+  --ft-hair: rgb(31 27 24 / 18%);
   --ft-glass: rgb(255 255 255 / 62%);
   --ft-glass-hover: rgb(255 255 255 / 88%);
   --ft-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ft-icon-bg: #1f1b18;
   --ft-icon-fg: #fff;
-  --ft-live: #f58a5a;
+  --ft-live: #1f9d55;
 
   /* Same colours as the hero CTA (header/index.jsx: CTA_SOLID, CTA_GRADIENT,
      CTA_DARK), so the footer and the landing page match exactly. */
@@ -57,7 +53,7 @@
   --ft-cta-ring: #f6f4f0;
 
   /* The "together!" pill: the CTA gradient, one notch deeper so it holds its
-     own against the orange picture. White on every stop is 4:1 or better. */
+     own against the light clouds. White on every stop is 4:1 or better. */
   --ft-pill-solid: #d63f20;
   --ft-pill-gradient: linear-gradient(
     135deg,
@@ -84,8 +80,10 @@
   font-synthesis: none;
 }
 
-/* The picture layer. Fully see-through at the very top (paper shows), solid
-   from --ft-fade down. */
+/* The cloud layer. Fully see-through at the very top (paper shows), solid from
+   --ft-fade down. Layers are listed top to bottom: beige first, then the
+   orange clouds, then the pale warm base. Every cloud fades to transparent
+   at its edge, so there are no hard lines. */
 .bg {
   --ft-fade: clamp(2rem, 6vw, 5rem);
 
@@ -94,32 +92,49 @@
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
+  background-color: #f8ecdd;
+  background-image:
+    /* beige, upper right */
+    radial-gradient(
+      ellipse 46% 52% at 74% 22%,
+      rgb(246 233 216 / 95%) 0%,
+      rgb(246 233 216 / 0%) 72%
+    ),
+    /* big light-orange cloud, low left */
+    radial-gradient(
+      ellipse 58% 62% at 10% 92%,
+      rgb(246 140 94 / 78%) 0%,
+      rgb(246 150 106 / 38%) 48%,
+      rgb(246 150 106 / 0%) 78%
+    ),
+    /* smaller light-orange cloud, low right */
+    radial-gradient(
+      ellipse 40% 52% at 88% 84%,
+      rgb(244 128 84 / 66%) 0%,
+      rgb(244 140 98 / 30%) 52%,
+      rgb(244 140 98 / 0%) 80%
+    ),
+    /* peach band along the bottom, a little right of centre */
+    radial-gradient(
+      ellipse 52% 44% at 52% 104%,
+      rgb(250 188 146 / 85%) 0%,
+      rgb(250 188 146 / 0%) 74%
+    ),
+    /* soft peach, mid left, behind the headline and the CTA */
+    radial-gradient(
+      ellipse 44% 50% at 18% 42%,
+      rgb(250 208 172 / 70%) 0%,
+      rgb(250 208 172 / 0%) 72%
+    ),
+    /* faint orange haze, upper left of centre */
+    radial-gradient(
+      ellipse 30% 34% at 44% 14%,
+      rgb(248 170 124 / 34%) 0%,
+      rgb(248 170 124 / 0%) 78%
+    ),
+    /* the pale warm base, beige at the top to peach at the bottom */
+    linear-gradient(180deg, #fbf4ea 0%, #f9e6d2 52%, #f8d9bf 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft-fade));
-}
-
-/* Recolours the blue picture: hue and saturation come from this gradient (a
-   light coral, then the brand vermilion all the way down), lightness stays
-   the picture's own. The deep end stays a bright orange, never a dark one,
-   so the dark parts of the picture read as rich orange and not brown. White
-   stays white, so the faded top is unchanged. */
-.bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(
-    180deg,
-    #f59a6c 0%,
-    #ee5a30 40%,
-    #e24a28 70%,
-    #e8481f 100%
-  );
-  mix-blend-mode: color;
-  pointer-events: none;
-}
-
-.bgImage {
-  object-fit: cover;
-  object-position: center bottom;
 }
 
 /* Phones: line up with the site's dashed guides (32px from each edge) */
@@ -139,7 +154,8 @@
   .root {
     --ft-cols: 12;
 
-    /* the picture is 1632 wide and its lower 762px are kept (912 - 150) */
+    /* about one screen tall (this was the old picture's ratio, kept so the
+       footer keeps the same height) */
     min-height: calc(100vw * 762 / 1632);
   }
 }
@@ -201,7 +217,7 @@
 
 /* The key word: a glossy orange sticker pill, the CTA's gradient one notch
    deeper (--ft-pill-*). The light ring and the inner top highlight are what
-   keep it crisp against the orange picture.
+   keep it crisp against the light clouds.
    Slightly tilted like a sticker; it straightens and catches a shine on
    hover. The right padding keeps the italic "!" off the edge, and nowrap
    keeps the pill whole on the narrowest phones. */
@@ -476,27 +492,27 @@
 }
 
 /* ---------- bottom: socials + back to top, then the details ----------
-   This part sits on the deep orange of the picture, so it flips to white text
-   on translucent glass. Everything below reads its colours from these
-   variables, so the rules further down need no changes. */
+   This part sits on the light orange and peach clouds, so it uses the same
+   dark ink as the top half, on translucent white glass. Everything below
+   reads its colours from these variables. */
 .base {
-  --ft-line: rgb(255 255 255 / 45%);
-  --ft-hair: rgb(255 255 255 / 28%);
-  --ft-muted: rgb(255 255 255 / 80%);
-  --ft-glass: rgb(255 255 255 / 14%);
-  --ft-glass-hover: rgb(255 255 255 / 30%);
-  --ft-icon-bg: #fff;
-  --ft-icon-fg: #1f1b18;
-  --ft-live: #5eea8a;
+  --ft-line: rgb(31 27 24 / 30%);
+  --ft-hair: rgb(31 27 24 / 20%);
+  --ft-muted: rgb(31 27 24 / 72%);
+  --ft-glass: rgb(255 255 255 / 55%);
+  --ft-glass-hover: rgb(255 255 255 / 82%);
+  --ft-icon-bg: #1f1b18;
+  --ft-icon-fg: #fff;
+  --ft-live: #1f9d55;
 
   display: flex;
   flex-direction: column;
   gap: clamp(1.25rem, 2.4vw, 2rem);
-  color: #fff;
+  color: var(--ft-ink);
 }
 
 .base :focus-visible {
-  outline-color: #fff;
+  outline-color: var(--ft-cta-dark);
 }
 
 .baseRow {
@@ -708,8 +724,7 @@
   }
 }
 
-/* Print: the picture is hidden, so the white-on-orange bottom would vanish.
-   Back to black on paper. */
+/* Print: the clouds are hidden, so everything is plain black on paper. */
 @media print {
   .bg {
     display: none;
@@ -723,12 +738,6 @@
   }
 
   .base {
-    --ft-line: rgb(31 27 24 / 38%);
-    --ft-hair: rgb(31 27 24 / 22%);
-    --ft-muted: rgb(31 27 24 / 72%);
-    --ft-icon-bg: #1f1b18;
-    --ft-icon-fg: #fff;
-
     color: #000;
   }
 }
