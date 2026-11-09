@@ -11,13 +11,15 @@ import { cn } from '@/utils';
 import classes from './index.module.css';
 
 /**
- * The menu button wears the SAME light peach-coral gradient as the hover of
- * the round "About us" / "Works" buttons (see layout/circle-button.js). The
- * two hover layers (before / after) get the same gradient so the colour never
- * jumps. Whole class names on purpose (Tailwind reads them as plain strings).
+ * Same behaviour as the round "About us" / "Works" buttons (see
+ * layout/circle-button.js): dark by default, and on HOVER the light
+ * peach-coral gradient grows in. Only the two hover layers (before = the
+ * growing disc, after = the final fill) carry the gradient, so the resting
+ * button stays dark. Whole class names on purpose (Tailwind reads them as
+ * plain strings).
  */
-const TOGGLE_LOOK =
-  '!bg-[#ffb594] ![background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] before:!bg-[#ffb594] after:!bg-[#ffb594] before:![background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] after:![background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] !border-[#f5a984]';
+const TOGGLE_HOVER =
+  'before:!bg-[#ffb594] after:!bg-[#ffb594] before:![background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] after:![background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)]';
 
 /**
  * @param {Object} props
@@ -46,7 +48,7 @@ export function OffcanvasToggle({ isOpen, handleOpen }) {
       <MagneticButton
         size='md'
         variant='ghost'
-        className={`border border-solid ${TOGGLE_LOOK}`}
+        className={`border border-solid border-muted-foreground ${TOGGLE_HOVER}`}
         aria-expanded={isOpen}
         onClick={() => handleOpen(!isOpen)}
       >

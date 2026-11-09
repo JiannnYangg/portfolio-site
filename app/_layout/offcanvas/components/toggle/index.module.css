@@ -6,7 +6,8 @@
   z-index: theme(zIndex.40);
 }
 
-/* The lines are dark charcoal, so they read on the light peach-coral button */
+/* The lines are light by default (the button is dark) and turn dark charcoal
+   on hover, when the light peach-coral gradient fills the button. */
 .burger {
   display: inherit;
   width: theme(width.8);
@@ -19,8 +20,10 @@
     content: '';
     position: absolute;
     display: block;
-    background-color: #1f1b18;
-    transition: transform 300ms theme(transitionTimingFunction.in-expo);
+    background-color: theme(colors.background);
+    transition:
+      transform 300ms theme(transitionTimingFunction.in-expo),
+      background-color 300ms ease;
   }
 
   &::before {
@@ -30,6 +33,11 @@
   &::after {
     bottom: 0;
   }
+}
+
+.wrapper:hover .burger::before,
+.wrapper:hover .burger::after {
+  background-color: #1f1b18;
 }
 
 .burgerActive {
