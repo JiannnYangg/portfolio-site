@@ -3,28 +3,30 @@ import plugin from 'tailwindcss/plugin';
 /** @type {import('tailwindcss').Config} */
 export const tailwindPlugin = plugin(
   //? Add CSS variable definitions to the base layer
+  //? Palette: soft grey-beige paper, vermilion orange (#e24a28), neutral
+  //? charcoal ink. No brown anywhere: every neutral is a low-saturation warm grey.
   function ({ addBase }) {
     addBase({
       ':root': {
         '--background': '0 0% 100%',
-        '--foreground': '20 35% 9%',
+        '--foreground': '30 8% 10%',
         '--card': '0 0% 100%',
-        '--card-foreground': '20 35% 9%',
+        '--card-foreground': '30 8% 10%',
         '--popover': '0 0% 100%',
-        '--popover-foreground': '20 35% 9%',
-        '--primary': '19 84% 53%',
-        '--primary-foreground': '27 88% 55%',
-        '--secondary': '34 32% 88%',
-        '--secondary-foreground': '28 18% 52%',
-        '--muted': '36 45% 94%',
-        '--muted-foreground': '24 14% 36%',
-        '--accent': '36 45% 94%',
-        '--accent-foreground': '28 18% 52%',
+        '--popover-foreground': '30 8% 10%',
+        '--primary': '10 77% 52%',
+        '--primary-foreground': '14 85% 58%',
+        '--secondary': '45 9% 86%',
+        '--secondary-foreground': '30 5% 46%',
+        '--muted': '45 12% 92%',
+        '--muted-foreground': '30 5% 34%',
+        '--accent': '45 12% 92%',
+        '--accent-foreground': '30 5% 46%',
         '--destructive': '0 84.2% 60.2%',
         '--destructive-foreground': '0 0% 98%',
-        '--border': '32 30% 85%',
-        '--input': '32 30% 85%',
-        '--ring': '19 84% 53%',
+        '--border': '40 8% 80%',
+        '--input': '40 8% 80%',
+        '--ring': '10 77% 52%',
         '--radius': '0.5rem',
       },
     });

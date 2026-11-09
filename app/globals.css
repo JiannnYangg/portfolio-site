@@ -4,11 +4,12 @@
 
 @layer base {
   :root {
-    /* Same sheet colour as the site backdrop (PAPER_RGB 250,243,232) */
-    --paper: #faf3e8;
+    /* Same sheet colour as the site backdrop (PAPER_RGB 229,227,221): the soft
+       grey-beige of the brand reference */
+    --paper: #e5e3dd;
     /* Slightly stronger than the default so dividers and pill outlines stay
        readable on the paper + grid background */
-    --border: 30 28% 80%;
+    --border: 40 8% 76%;
   }
 
   * {
