@@ -6,9 +6,9 @@ export default function manifest() {
     description: 'I help brands thrive.',
     start_url: '/',
     display: 'standalone',
-    // same deep plum as the preloader and the browser theme colour
-    background_color: '#2b1233',
-    theme_color: '#2b1233',
+    // splash background is the beige paper; theme colour is the brand orange
+    background_color: '#faf3e8',
+    theme_color: '#ec6426',
     icons: [
       { src: '/icon.png', sizes: '512x512', type: 'image/png' },
       { src: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
