@@ -11,15 +11,15 @@ import { cn } from '@/utils';
 import classes from './index.module.css';
 
 /**
- * Same behaviour as the round "About us" / "Works" buttons (see
- * layout/circle-button.js): dark by default, and on HOVER the light
- * peach-coral gradient grows in. Only the two hover layers (before = the
- * growing disc, after = the final fill) carry the gradient, so the resting
+ * Same behaviour and colours as the round "About us" / "Works" buttons (see
+ * layout/circle-button.js): dark by default, and on HOVER a plain orange with
+ * a tiny touch of beige grows in. Only the two hover layers (before = the
+ * growing disc, after = the final fill) carry the colour, so the resting
  * button stays dark. Whole class names on purpose (Tailwind reads them as
  * plain strings).
  */
 const TOGGLE_HOVER =
-  'before:!bg-[#ffb594] after:!bg-[#ffb594] before:![background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] after:![background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)]';
+  'before:!bg-[#ee7a3d] after:!bg-[#ee7a3d] before:![background-image:linear-gradient(135deg,#f3ad7e_0%,#ee7a3d_55%,#ec732f_100%)] after:![background-image:linear-gradient(135deg,#f3ad7e_0%,#ee7a3d_55%,#ec732f_100%)]';
 
 /**
  * @param {Object} props

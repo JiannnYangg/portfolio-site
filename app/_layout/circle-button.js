@@ -5,18 +5,19 @@
  */
 
 /**
- * Hover fill: a LIGHT warm gradient (soft peach to coral, matching the .social
- * logo's red-orange), with dark text on top so the label stays readable. The
- * solid peach is the fallback colour under the gradient. Both hover layers
- * (before = the growing disc, after = the final fill) get the same gradient,
- * so the colour never jumps.
+ * Hover fill: a plain, warm orange with only a tiny touch of beige at the
+ * start of the gradient (no pink, no brown, no dark end), with dark text on
+ * top so the label stays readable. The solid orange is the fallback colour
+ * under the gradient. Both hover layers (before = the growing disc, after =
+ * the final fill) get the same gradient, so the colour never jumps. The menu
+ * button (layout/offcanvas/components/toggle) uses the same colours.
  *
  * Written out as complete class names on purpose: Tailwind only generates
  * classes it can read as whole strings in the source, so these must not be
  * built by joining pieces.
  */
 export const CIRCLE_HOVER =
-  'before:bg-[#ffb594] after:bg-[#ffb594] before:[background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] after:[background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] hover:text-[#1f1b18]';
+  'before:bg-[#ee7a3d] after:bg-[#ee7a3d] before:[background-image:linear-gradient(135deg,#f3ad7e_0%,#ee7a3d_55%,#ec732f_100%)] after:[background-image:linear-gradient(135deg,#f3ad7e_0%,#ee7a3d_55%,#ec732f_100%)] hover:text-[#1f1b18]';
 
 /**
  * Shape of the circle. The default "xl" button size is padding-driven, which
