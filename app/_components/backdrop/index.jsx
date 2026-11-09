@@ -12,8 +12,8 @@ import { memo, useEffect, useRef, useState } from 'react';
  *   - the big bloom swaps sides from band to band (left, right, left ...)
  *   - the smaller counter-bloom sits on the opposite side, tilted the other way
  *   - an elongated accent drifts near the middle on two bands out of three
- *   - a strong brand glow bleeds off one edge, alternating purple top-right / pink lower-left
- *   - faint grey folds and white highlights keep the "paper" feel
+ *   - a strong brand glow bleeds off one edge, alternating orange top-right / amber lower-left
+ *   - faint warm folds and white highlights keep the "paper" feel
  *   - every band has its own intensity, so the page breathes: loud, quiet,
  *     medium, quiet, ...
  * Shapes are ellipses with their own width, height and tilt, so no two
@@ -32,21 +32,21 @@ import { memo, useEffect, useRef, useState } from 'react';
  * - The number of bands follows the document height (ResizeObserver).
  *
  * Sections on top of it must stay transparent (the footer is the one
- * deliberate dark block).
+ * deliberate solid block).
  */
 
-/** Base sheet colour (also the body background, see globals.css) */
-export const PAPER_RGB = '243,243,245';
+/** Base sheet colour (also the body background, see globals.css): warm beige */
+export const PAPER_RGB = '250,243,232';
 
 /** Enough bands to cover a tall first paint before the measurement runs */
 const INITIAL_BANDS = 8;
 
 /**
- * Graph-paper grid, drawn on TOP of the blooms in the logo purple so the lines
- * stay readable on both the off-white and the coloured areas.
+ * Graph-paper grid, drawn on TOP of the blooms in the brand orange so the
+ * lines stay readable on both the beige and the coloured areas.
  * Alpha lowered ~40% (0.133 -> 0.08) so the grid sits quietly behind the text.
  */
-const GRID_COLOR = '138,82,232';
+const GRID_COLOR = '236,100,38';
 const GRID_ALPHA = 0.08;
 const GRID_CELL = '62px 57px';
 const GRID = [
@@ -55,23 +55,21 @@ const GRID = [
 ].join(', ');
 
 /**
- * Palette taken from the logo's "C", which runs pink (#f0546b) to magenta
- * (#bb54b8) to purple (#8a52e8). Purple leads and pink is the accent; there
- * is no blue anywhere. The big glows use the vivid steps (glowViolet = the
- * logo purple, top-right; glowPink = the logo pink, lower-left); the blooms
- * are soft pastel versions of the same hues, so the page reads as one
- * purple-to-pink wash. The single orchid bloom on the landing screen is a
- * soft magenta.
+ * Orange, beige and white palette. The brand orange is #ec6426. The big glows
+ * use the vivid steps (glowOrange = the brand orange, top-right; glowAmber =
+ * a lighter amber-orange, lower-left); the blooms are soft peach, beige and
+ * sand versions of the same warm hues, so the page reads as one warm wash on
+ * beige paper. The single cream bloom on the landing screen is a pale peach.
  */
 const COLOR = {
-  glowViolet: '138,82,232',
-  glowPink: '240,84,107',
-  softViolet: '226,208,255',
-  softPink: '255,212,222',
-  orchid: '236,206,246',
-  lilac: '218,198,255',
+  glowOrange: '236,100,38',
+  glowAmber: '247,160,80',
+  softPeach: '253,214,184',
+  softBeige: '248,228,200',
+  cream: '255,226,196',
+  sand: '246,216,178',
   white: '255,255,255',
-  fold: '80,80,90',
+  fold: '130,85,40',
 };
 
 /** How loud each band is. Cycles, so the page has a rhythm. */
@@ -110,30 +108,30 @@ const LANDING_BLOBS = [
   { cx: 22, cy: 0.84, rx: 40, ry: 0.22, rgb: COLOR.fold, a: 0.08 * LANDING_PAPER },
   { cx: 85, cy: 0.12, rx: 60, ry: 0.4, rgb: COLOR.white, a: 0.9 * LANDING_PAPER },
   // soft blooms
-  { cx: 14, cy: 0.18, rx: 34, ry: 0.3, rgb: COLOR.softViolet, a: 0.55 * LANDING_BLOOM },
-  { cx: 52, cy: 0.08, rx: 30, ry: 0.28, rgb: COLOR.softViolet, a: 0.5 * LANDING_BLOOM },
+  { cx: 14, cy: 0.18, rx: 34, ry: 0.3, rgb: COLOR.softPeach, a: 0.55 * LANDING_BLOOM },
+  { cx: 52, cy: 0.08, rx: 30, ry: 0.28, rgb: COLOR.softPeach, a: 0.5 * LANDING_BLOOM },
   {
     cx: 84,
     cy: 0.4,
     rx: 32,
     ry: 0.3,
-    rgb: COLOR.orchid,
+    rgb: COLOR.cream,
     a: 0.4 * LANDING_BLOOM,
   },
-  { cx: 40, cy: 0.62, rx: 30, ry: 0.28, rgb: COLOR.softPink, a: 0.45 * LANDING_BLOOM },
-  { cx: 70, cy: 0.9, rx: 34, ry: 0.3, rgb: COLOR.lilac, a: 0.5 * LANDING_BLOOM },
-  { cx: 6, cy: 0.66, rx: 28, ry: 0.26, rgb: '255,226,232', a: 0.5 * LANDING_BLOOM },
+  { cx: 40, cy: 0.62, rx: 30, ry: 0.28, rgb: COLOR.softBeige, a: 0.45 * LANDING_BLOOM },
+  { cx: 70, cy: 0.9, rx: 34, ry: 0.3, rgb: COLOR.sand, a: 0.5 * LANDING_BLOOM },
+  { cx: 6, cy: 0.66, rx: 28, ry: 0.26, rgb: '255,234,212', a: 0.5 * LANDING_BLOOM },
   // brand corner glows (fade out at 70% of the radius)
-  { cx: 100, cy: 0, rx: 55, ry: 0.42, rgb: COLOR.glowViolet, a: 0.7, fade: 70 },
-  { cx: 0, cy: 1, rx: 50, ry: 0.38, rgb: COLOR.glowPink, a: 0.65, fade: 70 },
+  { cx: 100, cy: 0, rx: 55, ry: 0.42, rgb: COLOR.glowOrange, a: 0.7, fade: 70 },
+  { cx: 0, cy: 1, rx: 50, ry: 0.38, rgb: COLOR.glowAmber, a: 0.65, fade: 70 },
 ];
 
 /** Diagonal paper folds of the old hero: one screen-sized layer, fully
  *  transparent well before its bottom edge, so there is no seam. */
 const LANDING_FOLDS = [
-  'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(70,70,80,0.07) 24%, rgba(255,255,255,0) 36%)',
-  'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(70,70,80,0.06) 48%, rgba(255,255,255,0) 60%)',
-  'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(70,70,80,0.05) 64%, rgba(255,255,255,0) 78%)',
+  'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(130,85,40,0.07) 24%, rgba(255,255,255,0) 36%)',
+  'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(130,85,40,0.06) 48%, rgba(255,255,255,0) 60%)',
+  'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(130,85,40,0.05) 64%, rgba(255,255,255,0) 78%)',
 ].join(', ');
 
 function landingStyle({ cx, cy, rx, ry, rgb, a, fade = 100 }) {
@@ -214,7 +212,7 @@ function bandBlobs(band) {
       w: between(rand, 55, 80),
       h: between(rand, 0.55, 0.8),
       rot: dir * between(rand, 10, 35),
-      rgb: pick(rand, [COLOR.softViolet, COLOR.softPink, COLOR.softViolet]),
+      rgb: pick(rand, [COLOR.softPeach, COLOR.softBeige, COLOR.softPeach]),
       a: between(rand, 0.45, 0.6) * power,
     },
     {
@@ -223,7 +221,7 @@ function bandBlobs(band) {
       w: between(rand, 40, 60),
       h: between(rand, 0.4, 0.6),
       rot: -dir * between(rand, 8, 28),
-      rgb: pick(rand, [COLOR.lilac, COLOR.softPink, COLOR.lilac]),
+      rgb: pick(rand, [COLOR.sand, COLOR.softBeige, COLOR.sand]),
       a: between(rand, 0.4, 0.55) * power,
     },
   ];
@@ -236,12 +234,12 @@ function bandBlobs(band) {
       w: between(rand, 28, 42),
       h: between(rand, 0.22, 0.34),
       rot: between(rand, -20, 20),
-      rgb: pick(rand, [COLOR.softPink, COLOR.lilac]),
+      rgb: pick(rand, [COLOR.softBeige, COLOR.sand]),
       a: between(rand, 0.3, 0.42) * power,
     });
   }
 
-  // brand glow bleeding off an edge: purple top-right on even bands, pink lower-left on odd
+  // brand glow bleeding off an edge: orange top-right on even bands, amber lower-left on odd
   const glows =
     band % 2 === 0
       ? [
@@ -251,7 +249,7 @@ function bandBlobs(band) {
             w: between(rand, 48, 62),
             h: between(rand, 0.5, 0.7),
             rot: between(rand, -12, 12),
-            rgb: COLOR.glowViolet,
+            rgb: COLOR.glowOrange,
             a: between(rand, 0.5, 0.65) * power,
           },
         ]
@@ -262,7 +260,7 @@ function bandBlobs(band) {
             w: between(rand, 44, 58),
             h: between(rand, 0.45, 0.65),
             rot: between(rand, -14, 14),
-            rgb: COLOR.glowPink,
+            rgb: COLOR.glowAmber,
             a: between(rand, 0.45, 0.6) * power,
           },
         ];
