@@ -13,16 +13,8 @@ import {
   CIRCLE_SIZE,
 } from '../circle-button';
 import { PAGE_INSET, PageHero } from '../page-hero';
-import { Thrive } from './thrive';
 
 const heroLine = 'We help brands thrive.';
-
-/**
- * "thrive." is drawn by <Thrive /> (it grows, see ./thrive.jsx); every other
- * word of the headline is the plain rising word.
- */
-const renderHeroWord = (word, index) =>
-  word === 'thrive.' ? <Thrive key={`${word}-${index}`} index={index} /> : null;
 
 /**
  * Overview paragraph, split so a few key phrases can carry the marker
@@ -221,15 +213,7 @@ function WorksButton() {
 }
 
 export function AboutHero() {
-  return (
-    <PageHero
-      label='About us'
-      title={heroLine}
-      inset
-      balance
-      renderWord={renderHeroWord}
-    />
-  );
+  return <PageHero label='About us' title={heroLine} inset balance />;
 }
 
 export function AboutBody() {

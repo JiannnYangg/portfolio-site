@@ -50,20 +50,9 @@ function HeroWord({ index, children }) {
  * `inset` pulls the text in from the dashed guides (same inset as the rest of
  * the site); it is opt-in so other pages keep their current look.
  * `balance` evens out the line lengths so a short last word is not left alone.
- * `renderWord` lets a page draw one of its title words in its own way: it is
- * called with (word, index) for every word, and when it returns an element
- * that element is used instead of the plain rising word (it must handle its
- * own intro timing and scroll fade, see about/thrive.jsx). Return null to keep
- * the plain word. Other pages do not pass it and are unchanged.
- * @param {{ label: string, title: string, inset?: boolean, balance?: boolean, renderWord?: (word: string, index: number) => import('react').ReactNode }} props
+ * @param {{ label: string, title: string, inset?: boolean, balance?: boolean }} props
  */
-export function PageHero({
-  label,
-  title,
-  inset = false,
-  balance = false,
-  renderWord,
-}) {
+export function PageHero({ label, title, inset = false, balance = false }) {
   const words = title.split(' ');
 
   return (
@@ -86,17 +75,11 @@ export function PageHero({
             className={`leading-[1.02] ${balance ? 'text-balance' : ''}`}
             style={{ fontSize: 'clamp(3.25em, 10vw, 11em)' }}
           >
-            {words.map((word, index) => {
-              const custom = renderWord?.(word, index);
-
-              return (
-                custom ?? (
-                  <HeroWord key={`${word}-${index}`} index={index}>
-                    {word}
-                  </HeroWord>
-                )
-              );
-            })}
+            {words.map((word, index) => (
+              <HeroWord key={`${word}-${index}`} index={index}>
+                {word}
+              </HeroWord>
+            ))}
           </h1>
         </div>
       </div>
