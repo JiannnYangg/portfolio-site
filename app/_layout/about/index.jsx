@@ -1,9 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
-import { ParallaxFade } from '@/components';
+import { MagneticButton, ParallaxFade } from '@/components';
+import { useHashNav } from '@/hooks';
 
+import {
+  CIRCLE_HOVER,
+  CIRCLE_SHAPE_BASE,
+  CIRCLE_SIZE_SMALL,
+} from '../circle-button';
 import { PAGE_INSET, PageHero } from '../page-hero';
 
 const heroLine = 'We help brands thrive.';
@@ -165,6 +172,44 @@ function Label({ children }) {
   );
 }
 
+/** Where the Works circle goes: the pinned showcase on the home page */
+const WORKS_HREF = '/#works';
+
+/**
+ * The home page's round "About us" button, as "Works": same shape, colours and
+ * magnetic hover, but smaller (see ../circle-button). It goes to the Works
+ * section of the home page. Both pages' navbars use the same href: the home
+ * page is loaded first, then (once its intro is done) scrolled to #works by
+ * the Transition layout, so the visitor lands on the showcase animation.
+ */
+function WorksButton() {
+  const handleHashNav = useHashNav();
+
+  return (
+    <motion.div
+      className='flex justify-end'
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+    >
+      <Link
+        href={WORKS_HREF}
+        passHref
+        onClick={event => handleHashNav(event, WORKS_HREF)}
+      >
+        <MagneticButton
+          variant='ghost'
+          size='xl'
+          className={`${CIRCLE_SHAPE_BASE} ${CIRCLE_SIZE_SMALL} ${CIRCLE_HOVER}`}
+        >
+          Works
+        </MagneticButton>
+      </Link>
+    </motion.div>
+  );
+}
+
 export function AboutHero() {
   return <PageHero label='About us' title={heroLine} inset balance />;
 }
@@ -223,6 +268,11 @@ export function AboutBody() {
                 </p>
               </blockquote>
             </ParallaxFade>
+
+            {/* In the normal flow under the quote, pushed to the right edge of
+                the column like the landing page's circle. The section's own
+                bottom padding keeps it clear of the Contact partition. */}
+            <WorksButton />
           </div>
         </div>
       </section>
