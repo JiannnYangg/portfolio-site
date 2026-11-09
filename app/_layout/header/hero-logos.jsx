@@ -52,15 +52,33 @@ const TANGERINE = '243,128,52';
 const AMBER = '250,170,90';
 
 /**
+ * How strong the logo drop shadows are, as a share of their designed opacity:
+ * 1 = as designed, 0.2 = 80% less opacity. Only the shadow colour's alpha is
+ * scaled; the shadow's offset and blur (its shape and length) are unchanged.
+ * Valid range: 0 (no shadow) to 1.
+ */
+const SHADOW_STRENGTH = 0.2;
+
+/**
+ * How strong the hero's soft colour blobs (BLOBS below) are, as a share of
+ * their designed opacity: 1 = as designed, 0.2 = 80% less opacity. The
+ * site-wide background blobs have their own setting (BLOB_STRENGTH in
+ * components/backdrop). Valid range: 0 (no blobs) to 1.
+ */
+const BLOB_STRENGTH = 0.2;
+
+/**
  * Lighting, matched to the artwork: the key light sits top-left, so every
  * shadow falls down and to the right. Shadow tint is a deep warm brown so it
  * belongs to the beige paper instead of looking like grey stickers.
  * Bigger depth = closer to the viewer = longer, softer shadow.
+ * The designed alphas are 0.22 (tight contact shadow) and 0.16 (long soft
+ * one); both are multiplied by SHADOW_STRENGTH.
  */
 const shadowFor = depth =>
   [
-    `drop-shadow(${(3 * depth).toFixed(1)}px ${(5 * depth).toFixed(1)}px ${(4 * depth).toFixed(1)}px rgba(90,40,10,0.22))`,
-    `drop-shadow(${(14 * depth).toFixed(1)}px ${(24 * depth).toFixed(1)}px ${(20 * depth).toFixed(1)}px rgba(90,40,10,0.16))`,
+    `drop-shadow(${(3 * depth).toFixed(1)}px ${(5 * depth).toFixed(1)}px ${(4 * depth).toFixed(1)}px rgba(90,40,10,${(0.22 * SHADOW_STRENGTH).toFixed(3)}))`,
+    `drop-shadow(${(14 * depth).toFixed(1)}px ${(24 * depth).toFixed(1)}px ${(20 * depth).toFixed(1)}px rgba(90,40,10,${(0.16 * SHADOW_STRENGTH).toFixed(3)}))`,
   ].join(' ');
 
 /**
@@ -102,8 +120,9 @@ const haloBackground = ({ from, to, alpha }) => {
  *
  * Each blob is two overlapping radial gradients ("a" and "b", offset from each
  * other) so the colour shifts inside it like a mesh gradient. The stops fall
- * off in three steps (no hard edge, no banding), and the strongest alpha is
- * 0.2, so the headline text on top stays fully readable.
+ * off in three steps (no hard edge, no banding), and the strongest designed
+ * alpha is 0.2 (then scaled by BLOB_STRENGTH), so the headline text on top
+ * stays fully readable.
  *
  * Cost: no blur filter (the gradient itself is soft), no extra images. The slow
  * drift is transform-only, runs only while the hero is on screen, and is off
@@ -161,11 +180,13 @@ const BLOBS = [
   },
 ];
 
-const blobBackground = ({ a, b, alpha }) =>
-  [
-    `radial-gradient(closest-side at 38% 40%, rgba(${a},${alpha}) 0%, rgba(${a},${(alpha * 0.45).toFixed(3)}) 50%, rgba(${a},0) 100%)`,
+const blobBackground = ({ a, b, alpha: designed }) => {
+  const alpha = designed * BLOB_STRENGTH;
+  return [
+    `radial-gradient(closest-side at 38% 40%, rgba(${a},${alpha.toFixed(3)}) 0%, rgba(${a},${(alpha * 0.45).toFixed(3)}) 50%, rgba(${a},0) 100%)`,
     `radial-gradient(closest-side at 66% 62%, rgba(${b},${(alpha * 0.8).toFixed(3)}) 0%, rgba(${b},${(alpha * 0.3).toFixed(3)}) 55%, rgba(${b},0) 100%)`,
   ].join(', ');
+};
 
 /**
  * Coloured lights, in the theme's own orange / tangerine / amber (the same
