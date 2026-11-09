@@ -41,13 +41,15 @@ export const PAPER_RGB = '229,227,221';
 
 /**
  * How strong ALL the background blobs are, as a share of their designed
- * opacity: 1 = as designed, 0.2 = 80% less opacity. It is applied once, to the
- * whole blob layer (see SiteBackdrop), so every blob, fold, highlight and glow
- * is reduced by the same amount and the relative balance between them stays
- * the way it was designed. The graph-paper grid is NOT affected. Valid range:
- * 0 (no blobs) to 1.
+ * opacity: 1 = as designed, 0.05 = 95% less opacity (5% visible). It is
+ * applied once, to the whole blob layer (see SiteBackdrop), so every blob,
+ * fold, highlight and glow is reduced by the same amount and the relative
+ * balance between them stays the way it was designed. The graph-paper grid is
+ * NOT affected. Valid range: 0 (no blobs) to 1.
+ *
+ * Preview setting: it was 0.2 before the 5% landing-page preview.
  */
-const BLOB_STRENGTH = 0.2;
+const BLOB_STRENGTH = 0.05;
 
 /** Enough bands to cover a tall first paint before the measurement runs */
 const INITIAL_BANDS = 8;
