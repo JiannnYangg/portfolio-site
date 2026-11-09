@@ -52,60 +52,58 @@ const CTA_DELAY = WORD_DELAY + CTA_INDEX * WORD_STAGGER;
 const CTA_CLIP = 'inset(-48px -48px 0px -48px)';
 
 /**
- * Brand colours, taken from the "C" of the .social logo, which runs pink
- * (#f0546b) to magenta (#bb54b8) to purple (#8a52e8). Purple leads, pink is
- * the accent, and there is no blue anywhere in the hero.
+ * Brand colours: the orange, beige and white theme. The brand orange is
+ * #ec6426; the accent runs from amber (#f9a35a) through tangerine (#f38034)
+ * to that orange. There is no purple or pink anywhere in the hero.
  *
- * BRAND_GRADIENT is the logo's own gradient. It is used translucent (marker,
- * selection box) where dark text sits on top of it.
+ * BRAND_GRADIENT is the amber-to-orange gradient. It is used translucent
+ * (marker, selection box) where dark text sits on top of it.
  */
 const BRAND_GRADIENT =
-  'linear-gradient(95deg, rgba(240,84,107,0.5) 0%, rgba(187,84,184,0.55) 50%, rgba(138,82,232,0.6) 100%)';
+  'linear-gradient(95deg, rgba(250,170,90,0.55) 0%, rgba(243,128,52,0.6) 50%, rgba(236,100,38,0.65) 100%)';
 const SELECTION_GRADIENT =
-  'linear-gradient(100deg, rgba(240,84,107,0.22) 0%, rgba(187,84,184,0.28) 50%, rgba(138,82,232,0.32) 100%)';
-const HANDLE_TOP = '#8a52e8';
-const HANDLE_BOTTOM = '#e0486a';
-const SELECTION_INK = '#2b1466';
+  'linear-gradient(100deg, rgba(250,170,90,0.24) 0%, rgba(243,128,52,0.28) 50%, rgba(236,100,38,0.32) 100%)';
+const HANDLE_TOP = '#ec6426';
+const HANDLE_BOTTOM = '#c2410c';
+const SELECTION_INK = '#5a2208';
 
 /**
- * Headline accent: the word "build" is filled with a purple-to-pink
- * gradient (the same two colours that lead the logo and the CTA), deep enough
- * to stay clearly readable on the light paper (every stop is well above the
- * 3:1 needed for large text).
+ * Headline accent: the word "build" is filled with a deep-orange gradient
+ * (the same family as the CTA), deep enough to stay readable on the beige
+ * paper (every stop is about 3:1 or better, which is what large text needs).
  *
  * BUILD_SOLID is the fallback: it is the text colour, so a browser that can't
- * clip a gradient to text still shows the word in solid purple.
+ * clip a gradient to text still shows the word in solid orange.
  */
-const BUILD_SOLID = '#8a52e8';
+const BUILD_SOLID = '#d9531a';
 const BUILD_GRADIENT =
-  'linear-gradient(95deg, #8a52e8 0%, #bb54b8 55%, #e0486a 100%)';
+  'linear-gradient(95deg, #d9531a 0%, #e05a1c 55%, #e0681c 100%)';
 
 /**
- * CTA colours: a diagonal purple-to-pink gradient, the logo's gradient
- * deepened just enough for white text. Every stop clears 4.5:1 with white
- * (4.7:1 at the purple start, 4.7:1 in the middle, 4.8:1 at the deep pink
- * end), and the label is 20px semibold, which counts as large text anyway.
+ * CTA colours: a diagonal orange gradient, deepened just enough for white
+ * text. The label is 20px semibold, which reads as large text, and the
+ * stops stay at about 3.6:1 or better with white.
  *
  * CTA_SOLID is the fallback: it paints first, so a browser that can't draw
- * the gradient still shows a solid purple pill with white text.
+ * the gradient still shows a solid orange pill with white text.
  */
-const CTA_SOLID = '#8a52e8';
+const CTA_SOLID = '#e05a1c';
 const CTA_GRADIENT =
-  'linear-gradient(135deg, #8a52e8 0%, #a14fc9 50%, #c2437f 100%)';
-const CTA_DARK = '#1f2024';
+  'linear-gradient(135deg, #e05a1c 0%, #d4501a 50%, #bf400c 100%)';
+const CTA_DARK = '#2a1a10';
 
 /**
- * The iOS edit menu is neutral grey, so it carries no brand colour at all:
- * the system dark grey (#2c2c2e, iOS "systemGray6") at 94% opacity, with the
- * same frosted blur behind it. White on it is about 13.9:1. Because it is
- * nearly opaque, it still reads as a solid grey bubble in a browser without
+ * The iOS edit menu is a neutral dark bubble, here a warm dark brown so it
+ * belongs to the orange theme: (rgb 58,36,22) at 94% opacity, with the same
+ * frosted blur behind it. White on it is well above 12:1. Because it is
+ * nearly opaque, it still reads as a solid bubble in a browser without
  * backdrop-filter support.
  */
-const MENU_BG = 'rgba(44, 44, 46, 0.94)';
+const MENU_BG = 'rgba(58, 36, 22, 0.94)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
 /**
- * "Calm zones": the site backdrop (paper folds, grid, blooms, purple/pink glows) is
+ * "Calm zones": the site backdrop (paper folds, grid, blooms, orange/amber glows) is
  * washed back toward the paper colour behind the headline and behind the
  * CTA, and nowhere else. The backdrop itself is now one fixed layer shared by
  * every page, so the calm zones are a soft paper-coloured wash that belongs
@@ -118,7 +116,7 @@ const MENU_FILTER = 'blur(20px) saturate(180%)';
  *
  * The CTA zone is the exception: the pill is now a near-white, so a paper
  * (near-white) wash behind it made it vanish. Its wash uses a slightly darker
- * cool grey, and a bit stronger, so the pill reads clearly while the area
+ * warm sand, and a bit stronger, so the pill reads clearly while the area
  * still looks calm.
  *
  * The zones follow the content: the headline + CTA are one block centered in
@@ -127,7 +125,7 @@ const MENU_FILTER = 'blur(20px) saturate(180%)';
  */
 const CALM_OPACITY = 0.55;
 const CALM_WASH = 1 - CALM_OPACITY;
-const CTA_WASH_RGB = '222,224,229';
+const CTA_WASH_RGB = '240,222,196';
 const CTA_WASH = 0.75;
 const calmZone = (size, centerY, rgb = PAPER_RGB, wash = CALM_WASH) =>
   `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(${rgb},${wash}) 0%, rgba(${rgb},${wash}) 65%, rgba(${rgb},0) 100%)`;
@@ -241,8 +239,8 @@ function CtaReveal({ children }) {
 
 /**
  * Key word inside the headline: ExtraBold Italic, same weight as the
- * reference, filled with the purple-to-pink gradient (text-clip, solid
- * purple fallback). The italic glyphs lean past their box on the right, so a
+ * reference, filled with the orange gradient (text-clip, solid
+ * orange fallback). The italic glyphs lean past their box on the right, so a
  * small padding (cancelled by an equal negative margin, so the layout does
  * not move) keeps the last letter from being clipped by the gradient box.
  */
@@ -272,7 +270,7 @@ function Emphasis({ children }) {
  * - the shape is cut as an uneven quadrilateral (left edge short and
  *   slanted, right edge tall, indented bottom-right corner)
  * - it sits low, under the lower half of the letters
- * The brand gradient (pink to magenta to purple, translucent), text stays
+ * The brand gradient (amber to tangerine to orange, translucent), text stays
  * dark and crisp on top. It sweeps in from the left after the line settles.
  */
 function Marker({ children }) {
@@ -303,7 +301,7 @@ function Marker({ children }) {
 
 /**
  * iOS edit menu (the bubble shown when text is selected on iPhone):
- * frosted grey glass (see MENU_BG) with a soft blur, small radius,
+ * frosted warm-brown glass (see MENU_BG) with a soft blur, small radius,
  * hairline dividers, a trailing chevron and a pointer arrow.
  * A slim, soft sheen sweeps slowly across it, like light catching glass.
  */
@@ -396,7 +394,7 @@ function IosCallout() {
 
 /**
  * The "text selection" effect from the reference:
- * brand-gradient highlight box, deep-purple ExtraBold Italic text,
+ * brand-gradient highlight box, deep-orange ExtraBold Italic text,
  * the two selection handles (top-left ▼ / bottom-right ▲)
  * and the iPhone-style callout menu above it.
  */
@@ -411,7 +409,7 @@ function Selection({ children }) {
         className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px]'
         style={{
           backgroundImage: SELECTION_GRADIENT,
-          boxShadow: 'inset 0 0 0 1px rgba(138,82,232,0.55)',
+          boxShadow: 'inset 0 0 0 1px rgba(236,100,38,0.55)',
         }}
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
@@ -467,7 +465,7 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='relative min-h-[100svh] overflow-hidden text-black selection:bg-[#eadcff] selection:text-[#2b1466]'
+      className='relative min-h-[100svh] overflow-hidden text-[#2a1a10] selection:bg-[#fdddc2] selection:text-[#5a2208]'
       variants={slideUp}
       initial='initial'
       animate='enter'
@@ -476,7 +474,7 @@ export function Header() {
           <SiteBackdrop /> (root layout), so the hero is transparent and shares
           the exact same background as every other page. Only the two calm
           zones live here: a soft paper wash behind the headline and a slightly
-          darker, cooler wash behind the CTA (so the near-white pill stands
+          darker, warmer wash behind the CTA (so the near-white pill stands
           out).
           The zone centers (offsets from the vertical middle) differ per
           breakpoint because the headline scales with the viewport.
@@ -538,14 +536,14 @@ export function Header() {
           {/* CTA: same shape and sizing as the reference (no border, no
               outer shadow). Near-white outer pill, 6px ring, 6px gap, 50px
               inner buttons. Only the colours are themed.
-              Resting state: a purple gradient label with white text, and a
+              Resting state: an orange gradient label with white text, and a
               dark circle with a white arrow. On hover the two swap (dark
               label, gradient circle). A CSS gradient can't be transitioned,
               so each button has its resting fill as the background and the
               other fill as an overlay that fades in on hover / keyboard
               focus. The overlay sits behind the text (-z-10 inside an
               `isolate` stacking context), so the label and arrow never
-              flicker. The solid theme purple is the fallback colour under the
+              flicker. The solid theme orange is the fallback colour under the
               gradient. A subtle top highlight gives the label some depth.
               Sits a deliberate, modest gap under the headline. It shares the
               headline's rise-from-mask intro and scroll fade (CtaReveal). */}
@@ -555,7 +553,7 @@ export function Header() {
                 type='button'
                 onClick={() => scrollToId('contact-footer')}
                 aria-label="Let's talk, go to contact"
-                className='group flex items-center gap-[6px] rounded-full bg-[#f4f4f5] p-[6px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f2024] motion-reduce:transition-none motion-reduce:hover:scale-100'
+                className='group flex items-center gap-[6px] rounded-full bg-[#fffaf3] p-[6px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2a1a10] motion-reduce:transition-none motion-reduce:hover:scale-100'
               >
                 <span
                   className='relative isolate flex h-[50px] w-[156px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full text-[20px] font-semibold leading-none tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]'
@@ -576,7 +574,7 @@ export function Header() {
                   className='relative isolate flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full'
                   style={{ backgroundColor: CTA_DARK }}
                 >
-                  {/* hover / focus: the purple gradient fades in behind the arrow */}
+                  {/* hover / focus: the orange gradient fades in behind the arrow */}
                   <span
                     aria-hidden='true'
                     className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
