@@ -54,22 +54,27 @@ const CTA_CLIP = 'inset(-48px -48px 0px -48px)';
 /**
  * Brand colours, taken from the brand reference: a soft grey-beige paper
  * (#e5e3dd) and a vermilion orange (#e24a28). The accent runs from a light
- * coral-orange (#f59a6c) to that vermilion. There is no brown, purple or
- * pink anywhere in the hero: the dark ink is a neutral charcoal (#1f1b18).
+ * coral-orange (#f59a6c) to that vermilion.
+ *
+ * RULE: the hero never goes brown. Brown is what you get when orange is made
+ * darker (dark stops, multiply blends, dark overlays). So every orange here
+ * stays a bright, saturated orange from end to end, no stop darker than
+ * #d63f20, no mix-blend-mode, and all dark text is a pure neutral charcoal
+ * (#1f1b18), never a tinted brown or maroon.
  */
 
 /**
  * "seen." marker: a highlighter swipe. Light coral-orange melts into the
- * brand vermilion. It is fairly opaque but drawn with mix-blend-mode:
- * multiply, so the paper (and the dark letters) show through it like real
- * marker ink.
+ * brand vermilion. Plain opaque colour, no multiply blend (multiply darkens
+ * orange into brown). Dark letters sit on top and stay crisp.
  */
 const MARKER_GRADIENT =
-  'linear-gradient(95deg, rgba(250,160,110,0.85) 0%, rgba(240,106,58,0.88) 45%, rgba(226,74,40,0.92) 100%)';
-/** a thinner, deeper streak under the main swipe: a second marker pass */
+  'linear-gradient(95deg, rgba(250,160,110,0.92) 0%, rgba(243,112,60,0.94) 45%, rgba(226,74,40,0.96) 100%)';
+/** a thinner streak under the main swipe: a second marker pass, in a lighter
+ *  coral so it brightens the edge instead of darkening it */
 const MARKER_STREAK_GRADIENT =
-  'linear-gradient(95deg, rgba(226,74,40,0.0) 0%, rgba(226,74,40,0.75) 40%, rgba(176,48,22,0.85) 100%)';
-const MARKER_GLOW = 'drop-shadow(0 4px 10px rgba(226,74,40,0.35))';
+  'linear-gradient(95deg, rgba(250,140,90,0.0) 0%, rgba(244,106,58,0.85) 40%, rgba(240,96,50,0.95) 100%)';
+const MARKER_GLOW = 'drop-shadow(0 4px 10px rgba(226,74,40,0.3))';
 
 /**
  * "design" selection: a light, soft selection fill only. Warm coral on the
@@ -79,39 +84,38 @@ const MARKER_GLOW = 'drop-shadow(0 4px 10px rgba(226,74,40,0.35))';
 const SELECTION_GRADIENT =
   'linear-gradient(100deg, rgba(250,160,110,0.22) 0%, rgba(240,106,58,0.26) 50%, rgba(226,74,40,0.30) 100%)';
 const HANDLE_TOP = '#e24a28';
-const HANDLE_BOTTOM = '#b8361a';
-/** selection text: deep charcoal-red melting into the brand red, still dark enough to read */
-const SELECTION_INK = '#3a1208';
-const SELECTION_INK_GRADIENT =
-  'linear-gradient(95deg, #2a0f0a 0%, #6e1f10 50%, #a82e14 100%)';
+const HANDLE_BOTTOM = '#e24a28';
+/** selection text: the same neutral charcoal as the other words, so the
+ *  selected word reads like normal selected text and never turns brown */
+const SELECTION_INK = '#1f1b18';
 
 /**
  * Headline accent: the word "build" is filled with a vermilion gradient
- * that slowly flows through the letters: deep red-orange -> bright coral
- * glint -> deep red-orange. The gradient is twice as wide as the word
- * and its stops repeat every half, so sliding it by one half loops forever
- * without a visible seam. The darkest stops stay readable on the paper;
- * the bright peak is only a passing glint.
+ * that slowly flows through the letters: vermilion -> bright orange glint ->
+ * vermilion. The gradient is twice as wide as the word and its stops repeat
+ * every half, so sliding it by one half loops forever without a visible
+ * seam. Every stop is a bright orange (none darker than #d63f20), so it never
+ * turns brown.
  *
  * BUILD_SOLID is the fallback: it is the text colour, so a browser that can't
  * clip a gradient to text still shows the word in solid orange.
  */
 const BUILD_SOLID = '#e24a28';
 const BUILD_GRADIENT =
-  'linear-gradient(100deg, #bf3318 0%, #e24a28 18%, #f2703a 25%, #e24a28 32%, #bf3318 50%, #e24a28 68%, #f2703a 75%, #e24a28 82%, #bf3318 100%)';
+  'linear-gradient(100deg, #d63f20 0%, #e24a28 18%, #f57c3c 25%, #e24a28 32%, #d63f20 50%, #e24a28 68%, #f57c3c 75%, #e24a28 82%, #d63f20 100%)';
 const BUILD_GLOW = 'drop-shadow(0 6px 14px rgba(226,74,40,0.22))';
 
 /**
  * CTA colours: a diagonal vermilion gradient, deep enough for white text.
  * The label is 20px semibold, which reads as large text, and the stops stay
- * at about 3.8:1 or better with white.
+ * at about 4:1 or better with white.
  *
  * CTA_SOLID is the fallback: it paints first, so a browser that can't draw
  * the gradient still shows a solid orange pill with white text.
  */
 const CTA_SOLID = '#e24a28';
 const CTA_GRADIENT =
-  'linear-gradient(135deg, #e24a28 0%, #d63f20 50%, #bf3016 100%)';
+  'linear-gradient(135deg, #e84e2a 0%, #e24a28 50%, #d63f20 100%)';
 const CTA_DARK = '#1f1b18';
 
 /**
@@ -302,10 +306,10 @@ function Emphasis({ children }) {
  * 1. the main swipe: tilted up to the right, an uneven quadrilateral that
  *    starts at the first letter and trails past the last one, filled with the
  *    coral -> orange -> vermilion gradient, with a soft orange glow
- * 2. a thin, deeper streak along the bottom edge (the pen's second pass)
- * Both use mix-blend-mode: multiply, so the paper and the dark letters show
- * through like ink. Text stays dark and crisp on top. The swipe sweeps in
- * from the left after the line settles, and the streak follows it.
+ * 2. a thin, bright streak along the bottom edge (the pen's second pass)
+ * Both are plain colour (no blend mode), so they stay a clean orange and
+ * never muddy into brown. Text stays dark and crisp on top. The swipe sweeps
+ * in from the left after the line settles, and the streak follows it.
  */
 function Marker({ children }) {
   const reduceMotion = useReducedMotion();
@@ -324,7 +328,6 @@ function Marker({ children }) {
             backgroundImage: MARKER_GRADIENT,
             rotate: -1.8,
             clipPath: 'polygon(0% 20%, 100% 0%, 94% 100%, 3% 84%)',
-            mixBlendMode: 'multiply',
           }}
           initial={reduceMotion ? false : { scaleX: 0 }}
           animate={{ scaleX: 1 }}
@@ -334,14 +337,13 @@ function Marker({ children }) {
             ease: EASE_OUT_EXPO,
           }}
         />
-        {/* second pass: thin deeper streak */}
+        {/* second pass: thin bright streak */}
         <motion.span
           className='absolute -left-[0.02em] -right-[0.22em] -bottom-[0.04em] h-[0.14em] origin-left'
           style={{
             backgroundImage: MARKER_STREAK_GRADIENT,
             rotate: -1.8,
             clipPath: 'polygon(0% 40%, 100% 0%, 96% 100%, 6% 90%)',
-            mixBlendMode: 'multiply',
           }}
           initial={reduceMotion ? false : { scaleX: 0 }}
           animate={{ scaleX: 1 }}
@@ -452,9 +454,10 @@ function IosCallout() {
 
 /**
  * The "text selection" effect from the reference:
- * a light coral-to-vermilion selection fill (no outline, no glow), gradient
- * ExtraBold Italic ink, the two selection handles (a thin line with an arrow:
- * top-left ▼ / bottom-right ▲) and the iPhone-style callout menu above it.
+ * a light coral-to-vermilion selection fill (no outline, no glow), charcoal
+ * ExtraBold Italic text, the two selection handles (a thin line with an
+ * arrow: top-left ▼ / bottom-right ▲, both in the brand orange) and the
+ * iPhone-style callout menu above it.
  */
 function Selection({ children }) {
   const reduceMotion = useReducedMotion();
@@ -509,15 +512,7 @@ function Selection({ children }) {
 
       <em
         className='relative font-extrabold italic'
-        style={{
-          color: SELECTION_INK,
-          backgroundImage: SELECTION_INK_GRADIENT,
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          paddingRight: '0.1em',
-          marginRight: '-0.1em',
-        }}
+        style={{ color: SELECTION_INK }}
       >
         {children}
       </em>
@@ -528,7 +523,7 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='relative min-h-[100svh] overflow-hidden text-[#1f1b18] selection:bg-[#f7c9b8] selection:text-[#3a1208]'
+      className='relative min-h-[100svh] overflow-hidden text-[#1f1b18] selection:bg-[#f7c9b8] selection:text-[#1f1b18]'
       variants={slideUp}
       initial='initial'
       animate='enter'

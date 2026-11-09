@@ -3,25 +3,25 @@ import plugin from 'tailwindcss/plugin';
 /** @type {import('tailwindcss').Config} */
 export const tailwindPlugin = plugin(
   //? Add CSS variable definitions to the base layer
-  //? Palette: soft grey-beige paper, vermilion orange (#e24a28), neutral
-  //? charcoal ink. No brown anywhere: every neutral is a low-saturation warm grey.
+  //? Palette: soft grey-beige paper, vermilion orange (#e24a28), pure neutral
+  //? charcoal / grey ink. No brown anywhere: every neutral has a near-zero hue.
   function ({ addBase }) {
     addBase({
       ':root': {
         '--background': '0 0% 100%',
-        '--foreground': '30 8% 10%',
+        '--foreground': '20 4% 10%',
         '--card': '0 0% 100%',
-        '--card-foreground': '30 8% 10%',
+        '--card-foreground': '20 4% 10%',
         '--popover': '0 0% 100%',
-        '--popover-foreground': '30 8% 10%',
+        '--popover-foreground': '20 4% 10%',
         '--primary': '10 77% 52%',
         '--primary-foreground': '14 85% 58%',
         '--secondary': '45 9% 86%',
-        '--secondary-foreground': '30 5% 46%',
+        '--secondary-foreground': '0 0% 45%',
         '--muted': '45 12% 92%',
-        '--muted-foreground': '30 5% 34%',
+        '--muted-foreground': '0 0% 30%',
         '--accent': '45 12% 92%',
-        '--accent-foreground': '30 5% 46%',
+        '--accent-foreground': '0 0% 45%',
         '--destructive': '0 84.2% 60.2%',
         '--destructive-foreground': '0 0% 98%',
         '--border': '40 8% 80%',
