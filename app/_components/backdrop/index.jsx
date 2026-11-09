@@ -5,14 +5,15 @@ import { memo, useEffect, useRef, useState } from 'react';
 /**
  * Site-wide background, painted ONTO THE PAGE (it scrolls with the content).
  *
- * Art direction: an asymmetric, art-directed wash of soft blooms. Nothing
- * mirrors or repeats screen to screen. For every screen-height "band" of the
- * page the layout is generated from a fixed seed with rules, so it varies the
- * way a designer would vary it by hand:
+ * The landing screen (the first screen of the page) has NO blobs at all: it
+ * is plain paper plus the graph-paper grid. From the second screen down, a
+ * very light wash of soft blooms appears. For every screen-height "band" of
+ * the page the layout is generated from a fixed seed with rules, so it varies
+ * the way a designer would vary it by hand:
  *   - the big bloom swaps sides from band to band (left, right, left ...)
  *   - the smaller counter-bloom sits on the opposite side, tilted the other way
  *   - an elongated accent drifts near the middle on two bands out of three
- *   - a strong brand glow bleeds off one edge, alternating orange top-right / coral lower-left
+ *   - a brand glow bleeds off one edge, alternating orange top-right / coral lower-left
  *   - faint neutral folds and white highlights keep the "paper" feel
  *   - every band has its own intensity, so the page breathes: loud, quiet,
  *     medium, quiet, ...
@@ -41,13 +42,11 @@ export const PAPER_RGB = '229,227,221';
 
 /**
  * How strong ALL the background blobs are, as a share of their designed
- * opacity: 1 = as designed, 0.05 = 95% less opacity (5% visible). It is
- * applied once, to the whole blob layer (see SiteBackdrop), so every blob,
- * fold, highlight and glow is reduced by the same amount and the relative
- * balance between them stays the way it was designed. The graph-paper grid is
- * NOT affected. Valid range: 0 (no blobs) to 1.
- *
- * Preview setting: it was 0.2 before the 5% landing-page preview.
+ * opacity: 1 = as designed, 0.05 = 95% less opacity (5% visible), i.e. a very
+ * light tint. It is applied once, to the whole blob layer (see SiteBackdrop),
+ * so every blob, fold, highlight and glow is reduced by the same amount and
+ * the relative balance between them stays the way it was designed. The
+ * graph-paper grid is NOT affected. Valid range: 0 (no blobs) to 1.
  */
 const BLOB_STRENGTH = 0.05;
 
@@ -80,7 +79,6 @@ const COLOR = {
   glowAmber: '240,118,66',
   softPeach: '238,196,176',
   softBeige: '236,230,218',
-  cream: '240,226,212',
   sand: '224,217,204',
   white: '255,255,255',
   fold: '96,86,76',
@@ -104,83 +102,6 @@ function seeded(seed) {
 
 const between = (rand, min, max) => min + rand() * (max - min);
 const pick = (rand, list) => list[Math.floor(rand() * list.length)];
-
-/**
- * The landing screen (band 0) is the ORIGINAL hero look, ported 1:1: same
- * folds, blooms, glows and intensity. Every shape is an unclipped
- * element (radii in % of the page width / screens), so a glow that touches
- * the bottom edge of the first screen keeps fading out into the next one
- * instead of being cut off by a hero edge. The layer opacities the old hero
- * used (paper 0.6, blooms 0.7) are folded into the alphas.
- */
-const LANDING_PAPER = 0.6;
-const LANDING_BLOOM = 0.7;
-const LANDING_BLOBS = [
-  // paper folds (radial)
-  { cx: 30, cy: 0.22, rx: 38, ry: 0.26, rgb: COLOR.fold, a: 0.07 * LANDING_PAPER },
-  { cx: 78, cy: 0.58, rx: 34, ry: 0.24, rgb: COLOR.fold, a: 0.055 * LANDING_PAPER },
-  { cx: 22, cy: 0.84, rx: 40, ry: 0.22, rgb: COLOR.fold, a: 0.06 * LANDING_PAPER },
-  { cx: 85, cy: 0.12, rx: 60, ry: 0.4, rgb: COLOR.white, a: 0.8 * LANDING_PAPER },
-  // soft blooms
-  { cx: 14, cy: 0.18, rx: 34, ry: 0.3, rgb: COLOR.softPeach, a: 0.5 * LANDING_BLOOM },
-  { cx: 52, cy: 0.08, rx: 30, ry: 0.28, rgb: COLOR.softPeach, a: 0.45 * LANDING_BLOOM },
-  {
-    cx: 84,
-    cy: 0.4,
-    rx: 32,
-    ry: 0.3,
-    rgb: COLOR.cream,
-    a: 0.4 * LANDING_BLOOM,
-  },
-  { cx: 40, cy: 0.62, rx: 30, ry: 0.28, rgb: COLOR.softBeige, a: 0.45 * LANDING_BLOOM },
-  { cx: 70, cy: 0.9, rx: 34, ry: 0.3, rgb: COLOR.sand, a: 0.5 * LANDING_BLOOM },
-  { cx: 6, cy: 0.66, rx: 28, ry: 0.26, rgb: '244,224,208', a: 0.5 * LANDING_BLOOM },
-  // brand corner glows (fade out at 70% of the radius)
-  { cx: 100, cy: 0, rx: 55, ry: 0.42, rgb: COLOR.glowOrange, a: 0.66, fade: 70 },
-  { cx: 0, cy: 1, rx: 50, ry: 0.38, rgb: COLOR.glowAmber, a: 0.6, fade: 70 },
-];
-
-/** Diagonal paper folds of the old hero: one screen-sized layer, fully
- *  transparent well before its bottom edge, so there is no seam. The folds
- *  are a neutral warm grey (96,86,76), never a tan or brown. */
-const LANDING_FOLDS = [
-  'linear-gradient(118deg, rgba(0,0,0,0) 14%, rgba(96,86,76,0.06) 24%, rgba(255,255,255,0) 36%)',
-  'linear-gradient(62deg, rgba(0,0,0,0) 38%, rgba(96,86,76,0.05) 48%, rgba(255,255,255,0) 60%)',
-  'linear-gradient(155deg, rgba(255,255,255,0) 52%, rgba(96,86,76,0.04) 64%, rgba(255,255,255,0) 78%)',
-].join(', ');
-
-function landingStyle({ cx, cy, rx, ry, rgb, a, fade = 100 }) {
-  return {
-    left: `${cx}%`,
-    top: `calc(var(--screen) * ${cy})`,
-    width: `${rx * 2}%`,
-    height: `calc(var(--screen) * ${ry * 2})`,
-    transform: 'translate(-50%, -50%)',
-    backgroundImage: `radial-gradient(ellipse closest-side, rgba(${rgb},${a.toFixed(3)}) 0%, rgba(${rgb},0) ${fade}%)`,
-  };
-}
-
-function LandingBand() {
-  return (
-    <>
-      <span
-        className='absolute left-0 top-0 block w-full'
-        style={{
-          height: 'var(--screen)',
-          opacity: LANDING_PAPER,
-          backgroundImage: LANDING_FOLDS,
-        }}
-      />
-      {LANDING_BLOBS.map((blob, index) => (
-        <span
-          key={index}
-          className='absolute block'
-          style={landingStyle(blob)}
-        />
-      ))}
-    </>
-  );
-}
 
 /**
  * The blobs of one band.
@@ -298,7 +219,8 @@ function blobStyle({ x, y, w, h, rot, rgb, a }) {
 }
 
 const Band = memo(function Band({ band }) {
-  if (band === 0) return <LandingBand />;
+  // band 0 is the landing screen: no blobs there
+  if (band === 0) return null;
 
   return bandBlobs(band).map((blob, index) => (
     <span
