@@ -7,12 +7,12 @@ import { Center, MagneticButton } from '@/components';
 import { navItems } from '@/data';
 import { useHashNav } from '@/hooks';
 
-//? The theme's `foreground` is near-black (#1c1d21), which felt too heavy for
-//? bold 15px links on the light paper. On light pages the links use a softened
-//? charcoal instead (#44464d, about 8.6:1 on the paper, so it still clears
-//? WCAG AAA). On dark heroes (`tone='light'`) nothing is overridden and the
-//? links keep inheriting the white text colour from the navbar.
-const SOFT_INK = 'text-[#44464d]';
+//? The theme's `foreground` is a very dark warm brown, which felt too heavy
+//? for bold 15px links on the light paper. On light pages the links use a
+//? softened brown instead (#5a4636, about 8.6:1 on the paper, so it still
+//? clears WCAG AAA). On dark heroes (`tone='light'`) nothing is overridden and
+//? the links keep inheriting the white text colour from the navbar.
+const SOFT_INK = 'text-[#5a4636]';
 
 /**
  * @param {{ tone?: 'light' | 'dark' }} props

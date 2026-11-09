@@ -14,23 +14,20 @@ import { fade, slideUp } from './variants';
 const MotionComponent = motion(Center);
 
 /**
- * Deep plum (#2b1233, hue about 287): the dark partner of the site's
- * violet-pink theme. The old navy-violet (#160a33) read as dark blue on most
- * screens; this one sits on the magenta side of violet, so it reads as warm
- * plum next to the purple-to-pink logo and buttons. Keep the container
- * background and the curve fill on the SAME value, the curved bottom edge is
- * drawn in the fill colour. The browser theme colour (app/layout.jsx) and the
- * web app manifest (app/manifest.js) use the same value.
+ * Brand orange (#ec6426): the loud opening of the site's orange, beige and
+ * white theme. Keep the container background and the curve fill on the SAME
+ * value, the curved bottom edge is drawn in the fill colour. The browser
+ * theme colour (app/layout.jsx) and the web app manifest (app/manifest.js)
+ * use the same value.
  */
-const BG = 'bg-[#2b1233]';
-const CURVE_FILL = 'fill-[#2b1233]';
+const BG = 'bg-[#ec6426]';
+const CURVE_FILL = 'fill-[#ec6426]';
 
 /**
- * Greeting colour: ONE flat, soft pink-lilac, no gradient. It reads clearly
- * on the plum (about 14:1) and picks up the pink end of the brand gradient
- * instead of the old bluish lavender.
+ * Greeting colour: ONE flat, warm cream, no gradient. It reads clearly on
+ * the orange and matches the beige paper of the page that follows.
  */
-const TEXT_COLOR = 'text-[#f6e6fb]';
+const TEXT_COLOR = 'text-[#fff4e8]';
 
 /**
  * Timing: every greeting gets PRELOADER_GREETING_MS (0.4 s), including the

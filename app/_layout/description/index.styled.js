@@ -6,17 +6,17 @@ import { styled } from 'styled-components';
 /*
  * Intro paragraph: one extra mark, a brand-gradient strike on "AI slop."
  * The four D's in the side note get light, hand-placed marker swatches, one
- * per word, each in its own step of the logo's purple-to-pink gradient.
+ * per word, each in its own step of the logo's orange gradient.
  */
 const STRIKE_GRADIENT =
-  'linear-gradient(90deg, #f0546b 0%, #bb54b8 50%, #8a52e8 100%)';
+  'linear-gradient(90deg, #f9a35a 0%, #f38034 50%, #ec6426 100%)';
 /* Marker swatches behind the four D's: one step of the gradient per word,
    lightened so the dark text stays crisp on top */
 const SWATCH_COLOR = {
-  data: 'rgba(138, 82, 232, 0.24)',
-  design: 'rgba(162, 83, 208, 0.26)',
-  development: 'rgba(187, 84, 184, 0.26)',
-  distribution: 'rgba(240, 84, 107, 0.26)',
+  data: 'rgba(236, 100, 38, 0.24)',
+  design: 'rgba(241, 114, 45, 0.26)',
+  development: 'rgba(244, 138, 60, 0.26)',
+  distribution: 'rgba(249, 163, 90, 0.28)',
 };
 
 /* Row / column behaviour (wrap on small screens, two columns from lg up) is set
