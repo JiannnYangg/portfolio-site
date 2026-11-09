@@ -53,31 +53,56 @@ const CTA_CLIP = 'inset(-48px -48px 0px -48px)';
 
 /**
  * Brand colours: the orange, beige and white theme. The brand orange is
- * #ec6426; the accent runs from amber (#f9a35a) through tangerine (#f38034)
- * to that orange. There is no purple or pink anywhere in the hero.
- *
- * BRAND_GRADIENT is the amber-to-orange gradient. It is used translucent
- * (marker, selection box) where dark text sits on top of it.
+ * #ec6426; the accent runs from honey-amber (#ffb45e) through tangerine
+ * (#f38034) to that orange. There is no purple or pink anywhere in the hero.
  */
-const BRAND_GRADIENT =
-  'linear-gradient(95deg, rgba(250,170,90,0.55) 0%, rgba(243,128,52,0.6) 50%, rgba(236,100,38,0.65) 100%)';
-const SELECTION_GRADIENT =
-  'linear-gradient(100deg, rgba(250,170,90,0.24) 0%, rgba(243,128,52,0.28) 50%, rgba(236,100,38,0.32) 100%)';
-const HANDLE_TOP = '#ec6426';
-const HANDLE_BOTTOM = '#c2410c';
-const SELECTION_INK = '#5a2208';
 
 /**
- * Headline accent: the word "build" is filled with a deep-orange gradient
- * (the same family as the CTA), deep enough to stay readable on the beige
- * paper (every stop is about 3:1 or better, which is what large text needs).
+ * "seen." marker: a highlighter swipe. Honey-amber melts into tangerine and
+ * ends in the brand orange. It is fairly opaque but drawn with
+ * mix-blend-mode: multiply, so the beige paper (and the dark letters) show
+ * through it like real marker ink.
+ */
+const MARKER_GRADIENT =
+  'linear-gradient(95deg, rgba(255,196,110,0.85) 0%, rgba(250,146,60,0.88) 45%, rgba(236,100,38,0.9) 100%)';
+/** a thinner, deeper streak under the main swipe: a second marker pass */
+const MARKER_STREAK_GRADIENT =
+  'linear-gradient(95deg, rgba(243,128,52,0.0) 0%, rgba(236,100,38,0.75) 40%, rgba(194,65,12,0.85) 100%)';
+const MARKER_GLOW = 'drop-shadow(0 4px 10px rgba(236,100,38,0.35))';
+
+/**
+ * "design" selection: a glass-like selection box. Warm amber on the left,
+ * deeper orange on the right, with a soft glow and a gradient hairline.
+ */
+const SELECTION_GRADIENT =
+  'linear-gradient(100deg, rgba(255,184,100,0.34) 0%, rgba(247,134,52,0.38) 50%, rgba(236,100,38,0.44) 100%)';
+const SELECTION_BORDER = 'inset 0 0 0 1.5px rgba(236,100,38,0.65)';
+const SELECTION_GLOW =
+  '0 6px 22px rgba(236,100,38,0.28), 0 0 0 5px rgba(249,163,90,0.14)';
+const HANDLE_TOP = 'linear-gradient(180deg, #ff9a45 0%, #ec6426 100%)';
+const HANDLE_BOTTOM = 'linear-gradient(180deg, #ec6426 0%, #b83a0a 100%)';
+const HANDLE_LINE_TOP = '#ec6426';
+const HANDLE_LINE_BOTTOM = '#c2410c';
+/** selection text: deep espresso melting into burnt orange, still dark enough to read */
+const SELECTION_INK = '#5a2208';
+const SELECTION_INK_GRADIENT =
+  'linear-gradient(95deg, #4a1a06 0%, #7a2c0a 50%, #a8380a 100%)';
+
+/**
+ * Headline accent: the word "build" is filled with a molten-orange gradient
+ * that slowly flows through the letters: deep burnt orange -> bright
+ * tangerine -> deep burnt orange. The gradient is twice as wide as the word
+ * and its stops repeat every half, so sliding it by one half loops forever
+ * without a visible seam. The darkest stops stay readable on the beige
+ * paper; the bright peak is only a passing glint.
  *
  * BUILD_SOLID is the fallback: it is the text colour, so a browser that can't
  * clip a gradient to text still shows the word in solid orange.
  */
 const BUILD_SOLID = '#d9531a';
 const BUILD_GRADIENT =
-  'linear-gradient(95deg, #d9531a 0%, #e05a1c 55%, #e0681c 100%)';
+  'linear-gradient(100deg, #b93a0a 0%, #e0561a 18%, #f58a2e 25%, #e0561a 32%, #b93a0a 50%, #e0561a 68%, #f58a2e 75%, #e0561a 82%, #b93a0a 100%)';
+const BUILD_GLOW = 'drop-shadow(0 6px 14px rgba(236,100,38,0.22))';
 
 /**
  * CTA colours: a diagonal orange gradient, deepened just enough for white
@@ -238,62 +263,99 @@ function CtaReveal({ children }) {
 }
 
 /**
- * Key word inside the headline: ExtraBold Italic, same weight as the
- * reference, filled with the orange gradient (text-clip, solid
- * orange fallback). The italic glyphs lean past their box on the right, so a
- * small padding (cancelled by an equal negative margin, so the layout does
- * not move) keeps the last letter from being clipped by the gradient box.
+ * Key word inside the headline: ExtraBold Italic, filled with the molten
+ * orange gradient (text-clip, solid orange fallback). The gradient flows
+ * slowly through the letters; with reduced motion it stays still.
+ * The italic glyphs lean past their box on the right, so a small padding
+ * (cancelled by an equal negative margin, so the layout does not move) keeps
+ * the last letter from being clipped by the gradient box.
  */
 function Emphasis({ children }) {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <em
+    <motion.em
       className='font-extrabold italic'
       style={{
         color: BUILD_SOLID,
         backgroundImage: BUILD_GRADIENT,
+        backgroundSize: '200% 100%',
+        backgroundPosition: '0% 50%',
         WebkitBackgroundClip: 'text',
         backgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
+        filter: BUILD_GLOW,
         paddingRight: '0.12em',
         marginRight: '-0.12em',
       }}
+      animate={reduceMotion ? undefined : { backgroundPosition: '100% 50%' }}
+      transition={{
+        delay: introDelay(HERO_START + 1.2),
+        duration: 6,
+        ease: 'linear',
+        repeat: Infinity,
+      }}
     >
       {children}
-    </em>
+    </motion.em>
   );
 }
 
 /**
- * Asymmetric marker highlight behind a word. Nothing about it is symmetric:
- * - it starts right at the first letter but trails far past the last one
- * - the whole bar is tilted up to the right, like a quick marker swipe
- * - the shape is cut as an uneven quadrilateral (left edge short and
- *   slanted, right edge tall, indented bottom-right corner)
- * - it sits low, under the lower half of the letters
- * The brand gradient (amber to tangerine to orange, translucent), text stays
- * dark and crisp on top. It sweeps in from the left after the line settles.
+ * Highlighter marker behind a word, built from two passes like a real pen:
+ * 1. the main swipe: tilted up to the right, an uneven quadrilateral that
+ *    starts at the first letter and trails past the last one, filled with the
+ *    amber -> tangerine -> orange gradient, with a soft orange glow
+ * 2. a thin, deeper streak along the bottom edge (the pen's second pass)
+ * Both use mix-blend-mode: multiply, so the paper and the dark letters show
+ * through like ink. Text stays dark and crisp on top. The swipe sweeps in
+ * from the left after the line settles, and the streak follows it.
  */
 function Marker({ children }) {
   const reduceMotion = useReducedMotion();
 
   return (
     <span className='relative inline-block'>
-      <motion.span
+      <span
         aria-hidden='true'
-        className='absolute -left-[0.04em] -right-[0.3em] bottom-[0.02em] h-[0.5em] origin-left'
-        style={{
-          backgroundImage: BRAND_GRADIENT,
-          rotate: -1.8,
-          clipPath: 'polygon(0% 22%, 100% 0%, 94% 100%, 4% 82%)',
-        }}
-        initial={reduceMotion ? false : { scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{
-          delay: introDelay(MARKER_DELAY),
-          duration: 0.7,
-          ease: EASE_OUT_EXPO,
-        }}
-      />
+        className='absolute inset-0'
+        style={{ filter: MARKER_GLOW }}
+      >
+        {/* main swipe */}
+        <motion.span
+          className='absolute -left-[0.06em] -right-[0.32em] bottom-[0.0em] h-[0.56em] origin-left'
+          style={{
+            backgroundImage: MARKER_GRADIENT,
+            rotate: -1.8,
+            clipPath: 'polygon(0% 20%, 100% 0%, 94% 100%, 3% 84%)',
+            mixBlendMode: 'multiply',
+          }}
+          initial={reduceMotion ? false : { scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{
+            delay: introDelay(MARKER_DELAY),
+            duration: 0.7,
+            ease: EASE_OUT_EXPO,
+          }}
+        />
+        {/* second pass: thin deeper streak */}
+        <motion.span
+          className='absolute -left-[0.02em] -right-[0.22em] -bottom-[0.04em] h-[0.14em] origin-left'
+          style={{
+            backgroundImage: MARKER_STREAK_GRADIENT,
+            rotate: -1.8,
+            clipPath: 'polygon(0% 40%, 100% 0%, 96% 100%, 6% 90%)',
+            mixBlendMode: 'multiply',
+          }}
+          initial={reduceMotion ? false : { scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{
+            delay: introDelay(MARKER_DELAY + 0.25),
+            duration: 0.6,
+            ease: EASE_OUT_EXPO,
+          }}
+        />
+      </span>
       <em className='relative font-extrabold italic'>{children}</em>
     </span>
   );
@@ -394,9 +456,10 @@ function IosCallout() {
 
 /**
  * The "text selection" effect from the reference:
- * brand-gradient highlight box, deep-orange ExtraBold Italic text,
- * the two selection handles (top-left ▼ / bottom-right ▲)
- * and the iPhone-style callout menu above it.
+ * a glowing amber-to-orange selection box, gradient ExtraBold Italic ink,
+ * the two iOS-style selection handles (a line with a round knob: top-left
+ * knob above, bottom-right knob below) and the iPhone-style callout menu
+ * above it.
  */
 function Selection({ children }) {
   const reduceMotion = useReducedMotion();
@@ -406,10 +469,10 @@ function Selection({ children }) {
       {/* highlight box */}
       <motion.span
         aria-hidden='true'
-        className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px]'
+        className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[4px]'
         style={{
           backgroundImage: SELECTION_GRADIENT,
-          boxShadow: 'inset 0 0 0 1px rgba(236,100,38,0.55)',
+          boxShadow: `${SELECTION_BORDER}, ${SELECTION_GLOW}`,
         }}
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
@@ -432,21 +495,26 @@ function Selection({ children }) {
           ease: EASE_OUT_EXPO,
         }}
       >
+        {/* start handle: line + round knob on top */}
         <span
           className='absolute inset-y-[0.06em] left-0 w-[0.035em]'
-          style={{ backgroundColor: HANDLE_TOP }}
+          style={{ backgroundColor: HANDLE_LINE_TOP }}
         />
         <span
-          className='absolute -left-[0.135em] -top-[0.1em] h-[0.26em] w-[0.3em] [clip-path:polygon(0_0,100%_0,50%_100%)]'
-          style={{ backgroundColor: HANDLE_TOP }}
+          className='absolute -left-[0.0825em] -top-[0.1em] h-[0.2em] w-[0.2em] rounded-full border-[0.025em] border-[#fffaf3] shadow-[0_2px_6px_rgba(236,100,38,0.45)]'
+          style={{ backgroundImage: HANDLE_TOP, backgroundColor: '#ec6426' }}
         />
+        {/* end handle: line + round knob below */}
         <span
           className='absolute inset-y-[0.06em] right-0 w-[0.035em]'
-          style={{ backgroundColor: HANDLE_BOTTOM }}
+          style={{ backgroundColor: HANDLE_LINE_BOTTOM }}
         />
         <span
-          className='absolute -bottom-[0.1em] -right-[0.135em] h-[0.26em] w-[0.3em] [clip-path:polygon(50%_0,100%_100%,0_100%)]'
-          style={{ backgroundColor: HANDLE_BOTTOM }}
+          className='absolute -bottom-[0.1em] -right-[0.0825em] h-[0.2em] w-[0.2em] rounded-full border-[0.025em] border-[#fffaf3] shadow-[0_2px_6px_rgba(194,65,12,0.45)]'
+          style={{
+            backgroundImage: HANDLE_BOTTOM,
+            backgroundColor: '#c2410c',
+          }}
         />
       </motion.span>
 
@@ -454,7 +522,15 @@ function Selection({ children }) {
 
       <em
         className='relative font-extrabold italic'
-        style={{ color: SELECTION_INK }}
+        style={{
+          color: SELECTION_INK,
+          backgroundImage: SELECTION_INK_GRADIENT,
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          paddingRight: '0.1em',
+          marginRight: '-0.1em',
+        }}
       >
         {children}
       </em>
