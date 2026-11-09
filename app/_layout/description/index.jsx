@@ -6,6 +6,11 @@ import Link from 'next/link';
 import { MagneticButton, ParallaxFade } from '@/components';
 
 import {
+  CIRCLE_HOVER,
+  CIRCLE_SHAPE_BASE,
+  CIRCLE_SIZE_LARGE,
+} from '../circle-button';
+import {
   Frame,
   Highlight,
   Mark,
@@ -44,22 +49,8 @@ const segments = [
 const NOTE_TEXT =
   'leading-relaxed [text-wrap:balance] [font-size:clamp(1.25rem,1.7vw,2rem)]';
 
-/**
- * Hover colour of the circle: the brand pink (the end of the logo's gradient)
- * with dark text on top (about 6:1), instead of the default fill.
- */
-const CIRCLE_HOVER =
-  'before:bg-[#f0546b] after:bg-[#f0546b] hover:text-[#1f2024]';
-
-/**
- * Shape of the circle. The default "xl" button size is padding-driven, which
- * made the box ~204x184px (an oval). A fixed square with no padding is a true
- * circle. isolate + the radial mask make the rounded clip anti-alias cleanly
- * while the hover layers animate inside it (the usual jagged-edge fix for
- * overflow-hidden + border-radius + transforms).
- */
-const CIRCLE_SHAPE =
-  'h-[12.5rem] w-[12.5rem] p-0 isolate will-change-transform [-webkit-mask-image:-webkit-radial-gradient(white,black)]';
+/** The circle's shape, size and hover colour are shared (see ../circle-button) */
+const CIRCLE = `${CIRCLE_SHAPE_BASE} ${CIRCLE_SIZE_LARGE} ${CIRCLE_HOVER}`;
 
 function Words({ text, start, inMark }) {
   const words = text.split(' ');
@@ -149,7 +140,7 @@ export function Description() {
               <MagneticButton
                 variant='ghost'
                 size='xl'
-                className={`${CIRCLE_SHAPE} ${CIRCLE_HOVER}`}
+                className={CIRCLE}
               >
                 About us
               </MagneticButton>
