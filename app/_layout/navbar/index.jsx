@@ -28,7 +28,7 @@ export function Navbar({ tone = 'light', partition }) {
         style={{ paddingInline: `calc(${GUIDE_X} + var(--nav-inset))` }}
       >
         <NavbarBrand tone={tone} />
-        <NavbarList />
+        <NavbarList tone={tone} />
       </div>
 
       {partition ? (
