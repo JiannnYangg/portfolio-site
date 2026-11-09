@@ -7,10 +7,10 @@ import { MagneticButton, ParallaxFade } from '@/components';
 import { useHashNav } from '@/hooks';
 
 import {
+  CIRCLE_GUARD,
   CIRCLE_HOVER,
   CIRCLE_SHAPE_BASE,
-  CIRCLE_SMALL_CLASS,
-  CIRCLE_SMALL_STYLE,
+  CIRCLE_SIZE,
 } from '../circle-button';
 import { PAGE_INSET, PageHero } from '../page-hero';
 
@@ -177,11 +177,11 @@ function Label({ children }) {
 const WORKS_HREF = '/#works';
 
 /**
- * The home page's round "About us" button, as "Works": same colours and
- * magnetic hover, smaller, and a true circle (see ../circle-button). It goes
- * to the Works section of the home page. The navbar uses the same href: the
- * home page loads first, then (once its intro is done) the Transition layout
- * scrolls to #works, so the visitor lands on the showcase animation.
+ * The home page's round "About us" button, as "Works": the very same circle
+ * (size, shape, colours, magnetic hover), shared through ../circle-button. It
+ * goes to the Works section of the home page. The navbar uses the same href:
+ * the home page loads first, then (once its intro is done) the Transition
+ * layout scrolls to #works, so the visitor lands on the showcase animation.
  */
 function WorksButton() {
   const handleHashNav = useHashNav();
@@ -203,8 +203,7 @@ function WorksButton() {
         <MagneticButton
           variant='ghost'
           size='xl'
-          style={CIRCLE_SMALL_STYLE}
-          className={`${CIRCLE_SHAPE_BASE} ${CIRCLE_SMALL_CLASS} ${CIRCLE_HOVER}`}
+          className={`${CIRCLE_SHAPE_BASE} ${CIRCLE_SIZE} ${CIRCLE_GUARD} ${CIRCLE_HOVER}`}
         >
           Works
         </MagneticButton>
