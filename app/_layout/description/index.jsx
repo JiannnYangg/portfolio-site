@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { MagneticButton, ParallaxFade } from '@/components';
 
 import {
+  CIRCLE_GUARD,
   CIRCLE_HOVER,
   CIRCLE_SHAPE_BASE,
-  CIRCLE_SIZE_LARGE,
+  CIRCLE_SIZE,
 } from '../circle-button';
 import {
   Frame,
@@ -49,8 +50,11 @@ const segments = [
 const NOTE_TEXT =
   'leading-relaxed [text-wrap:balance] [font-size:clamp(1.25rem,1.7vw,2rem)]';
 
-/** The circle's shape, size and hover colour are shared (see ../circle-button) */
-const CIRCLE = `${CIRCLE_SHAPE_BASE} ${CIRCLE_SIZE_LARGE} ${CIRCLE_HOVER}`;
+/**
+ * The circle's size, shape and hover colour are shared with the About page's
+ * "Works" circle (see ../circle-button), so the two always match.
+ */
+const CIRCLE = `${CIRCLE_SHAPE_BASE} ${CIRCLE_SIZE} ${CIRCLE_GUARD} ${CIRCLE_HOVER}`;
 
 function Words({ text, start, inMark }) {
   const words = text.split(' ');
@@ -137,11 +141,7 @@ export function Description() {
             transition={{ duration: 0.6 }}
           >
             <Link href='/about' passHref>
-              <MagneticButton
-                variant='ghost'
-                size='xl'
-                className={CIRCLE}
-              >
+              <MagneticButton variant='ghost' size='xl' className={CIRCLE}>
                 About us
               </MagneticButton>
             </Link>
