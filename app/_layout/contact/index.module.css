@@ -2,24 +2,31 @@
  * Contact footer (see index.jsx).
  *
  * The footer sits on solid paper, which is what ends the site's dashed
- * vertical guides cleanly at its top edge. The background is one layer behind
- * the content (.bg), made of two things:
+ * vertical guides cleanly at its top edge. Behind its content there are three
+ * layers, built so that the page above does not stop at a hard edge but
+ * dissolves into the footer, like a notebook page soaking up colour:
  *
- *   1. Soft clouds of light orange, peach and beige on a pale warm base, built
- *      only from radial gradients (the .bg background).
- *   2. The tile picture (public/images/footer-bg.webp, 1632x912, a field of
- *      rounded "ice cube" tiles, originally blue and dark at the bottom) on
- *      top of the clouds, see .bgImage.
+ *   1. .bg      soft clouds of light orange, peach and beige on a pale warm
+ *               base (radial gradients only), with the tile picture
+ *               (public/images/footer-bg.webp, 1632x912, rounded "ice cube"
+ *               tiles) screened on top, see .bgImage. The whole layer is
+ *               masked with a long, eased fade (see --ft-fade-mask), so it
+ *               starts completely see-through at the footer's top (the page's
+ *               own paper shows) and only reaches full strength about half
+ *               way down. That slow fade is what removes the visible "seam".
+ *   2. .grid    the same graph-paper grid as the page, lined up with it (see
+ *               components/footer-grid.jsx), fading out going down. The
+ *               notebook lines carry on into the footer, and the orange slowly
+ *               takes over from them.
  *
  * The picture is never shown as it is. Its filter turns it into plain tile
  * lightness (grayscale) and lifts it so even its darkest tile is 0, and then
  * `mix-blend-mode: screen` adds that on top of the clouds. Screen can only
  * lighten: the darkest tiles leave the orange as it is, and the lighter tiles
  * lift it towards cream. So the tiles show up as light cream cubes over the
- * orange gradient, and nothing is ever darker than the clouds, which is how
- * the old dark and brown tiles are gone. The picture is also faded in from
- * the top (a mask), so the upper footer keeps its beige clouds and the cubes
- * grow out of them.
+ * orange gradient, and nothing is ever darker than the clouds. The picture is
+ * also faded in from the top (a mask), so the upper footer keeps its beige
+ * clouds and the cubes grow out of them.
  *
  * The clouds are uneven on purpose (different sizes, positions and
  * strengths): a big orange one low on the left, a smaller one low on the
@@ -54,6 +61,21 @@
   --ft-icon-bg: #1f1b18;
   --ft-icon-fg: #fff;
   --ft-live: #1f9d55;
+
+  /* The long, eased fade that melts the page into the footer. Opacity of the
+     background layer from the footer's top edge downwards. It rises slowly at
+     first (so there is no visible line where the footer begins) and is solid
+     from about 56% down. */
+  --ft-fade-mask: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(0 0 0 / 8%) 8%,
+    rgb(0 0 0 / 22%) 18%,
+    rgb(0 0 0 / 45%) 30%,
+    rgb(0 0 0 / 72%) 43%,
+    rgb(0 0 0 / 92%) 52%,
+    #000 58%
+  );
 
   /* Same colours as the hero CTA (header/index.jsx: CTA_SOLID, CTA_GRADIENT,
      CTA_DARK), so the footer and the landing page match exactly. */
@@ -95,14 +117,12 @@
   font-synthesis: none;
 }
 
-/* The background layer. Fully see-through at the very top (paper shows), solid
-   from --ft-fade down. The gradients are listed top to bottom: beige first,
-   then the orange clouds, then the pale warm base. Every cloud fades to
-   transparent at its edge, so there are no hard lines. The tile picture
-   (.bgImage) is blended on top of all of this. */
+/* The background layer. Fully see-through at the very top (the paper shows),
+   then fading in slowly (see --ft-fade-mask). The gradients are listed top to
+   bottom: beige first, then the orange clouds, then the pale warm base. Every
+   cloud fades to transparent at its edge, so there are no hard lines. The tile
+   picture (.bgImage) is blended on top of all of this. */
 .bg {
-  --ft-fade: clamp(2rem, 6vw, 5rem);
-
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -150,7 +170,7 @@
     ),
     /* the warm base: beige at the top, through peach, to light orange */
     linear-gradient(180deg, #fbf4ea 0%, #f9d2b4 52%, #f6a273 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft-fade));
+  mask-image: var(--ft-fade-mask);
 }
 
 /* The ice cubes. grayscale(1) keeps only each tile's lightness; brightness and
@@ -165,6 +185,26 @@
   filter: grayscale(1) brightness(0.717) contrast(2.006);
   mix-blend-mode: screen;
   mask-image: linear-gradient(to bottom, transparent 22%, #000 62%);
+}
+
+/* The page's graph-paper grid, carried on into the footer (the grid itself is
+   drawn by FooterGrid, lined up with the page's). It is at full strength at
+   the footer's top, where it simply continues the page, stays for the first
+   third, and then fades out as the orange clouds and tiles take over. It sits
+   above .bg, so its lines also cross the pale upper clouds, the way the page's
+   lines cross the page's blobs. */
+.grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 30%,
+    rgb(0 0 0 / 50%) 52%,
+    transparent 80%
+  );
 }
 
 /* Phones: line up with the site's dashed guides (32px from each edge) */
@@ -755,7 +795,8 @@
 
 /* Print: the background is hidden, so everything is plain black on paper. */
 @media print {
-  .bg {
+  .bg,
+  .grid {
     display: none;
   }
 

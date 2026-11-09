@@ -7,7 +7,7 @@ import { memo, useEffect, useRef, useState } from 'react';
  *
  * The landing screen (the first screen of the page) has NO blobs at all: it
  * is plain paper plus the graph-paper grid (the hero brings its own violet and
- * pink lights, see header/hero-logos.jsx). From the second screen down, a very
+ * pink lights, see header/hero-logos.jsx). From the second screen down, a
  * light wash of soft blooms appears. For every screen-height "band" of the
  * page the layout is generated from a fixed seed with rules, so it varies the
  * way a designer would vary it by hand:
@@ -31,7 +31,10 @@ import { memo, useEffect, useRef, useState } from 'react';
  * - The generator is seeded (integer hash, no Math.random / Math.sin), so the
  *   server and client render identical markup: no hydration mismatch.
  * - The graph-paper grid is ONE layer over the whole page, so its lines are
- *   continuous and the same on every page.
+ *   continuous and the same on every page. The footer draws the same grid on
+ *   its own top half (see layout/contact/components/footer-grid.jsx), lined up
+ *   with this one, so the notebook paper runs on into the footer instead of
+ *   stopping at its edge.
  * - The number of bands follows the document height (ResizeObserver).
  *
  * Sections on top of it must stay transparent (the footer is the one
@@ -44,17 +47,19 @@ export const PAPER_RGB = '229,227,221';
 
 /**
  * How strong ALL the background blobs are, as a share of their designed
- * opacity: 1 = as designed, 0.4 = 40% of it, i.e. a very light tint. It is
- * applied once, to the whole blob layer (see SiteBackdrop), so every blob,
- * fold, highlight and glow is scaled by the same amount and the relative
- * balance between them stays the way it was designed. The graph-paper grid is
- * NOT affected. Valid range: 0 (no blobs) to 1.
+ * opacity: 1 = as designed, 0.9 = 90% of it. It is applied once, to the whole
+ * blob layer (see SiteBackdrop), so every blob, fold, highlight and glow is
+ * scaled by the same amount and the relative balance between them stays the
+ * way it was designed. The graph-paper grid is NOT affected. Valid range: 0
+ * (no blobs) to 1.
  *
- * It was 0.05 (so faint it could not be seen). 0.4 is the "visible, but you
- * only notice it when you look for it" level: the strongest blob core ends up
- * at roughly 20% opacity. Turn this one number up or down to taste.
+ * History: 0.05 was invisible, and 0.4 with pale colours was still too faint
+ * to see on the grey-beige paper. 0.9 with the clearer colours below gives
+ * soft, clearly visible washes (the strongest cores are about 45% opacity,
+ * most are 20 to 35%) that still sit behind the text. Turn this one number up
+ * or down to taste.
  */
-const BLOB_STRENGTH = 0.4;
+const BLOB_STRENGTH = 0.9;
 
 /** Enough bands to cover a tall first paint before the measurement runs */
 const INITIAL_BANDS = 8;
@@ -63,11 +68,16 @@ const INITIAL_BANDS = 8;
  * Graph-paper grid, drawn on TOP of the blooms in the brand orange so the
  * lines stay readable on both the paper and the coloured areas.
  * Alpha is low so the grid sits quietly behind the text.
+ *
+ * Exported (GRID_LINES, GRID_CELL_W, GRID_CELL_H, GRID_CELL) so the footer can
+ * draw the very same grid and line it up with this one.
  */
 const GRID_COLOR = '226,74,40';
 const GRID_ALPHA = 0.075;
-const GRID_CELL = '62px 57px';
-const GRID = [
+export const GRID_CELL_W = 62;
+export const GRID_CELL_H = 57;
+export const GRID_CELL = `${GRID_CELL_W}px ${GRID_CELL_H}px`;
+export const GRID_LINES = [
   `linear-gradient(to right, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
   `linear-gradient(to bottom, rgba(${GRID_COLOR},${GRID_ALPHA}) 2px, transparent 2px)`,
 ].join(', ');
@@ -75,22 +85,24 @@ const GRID = [
 /**
  * Warm "apricot and cream" palette, a lighter cousin of the footer's orange,
  * peach and beige, so the page and the footer belong together. Every colour
- * is a pale, clean warm tone: apricot, peach, blush rose, butter cream and
- * soft sand. Nothing here leans brown or dirty: the sand is a light honey, not
- * a tan, and the "fold" shading is a neutral warm grey.
+ * is a clean warm tone: apricot, peach, blush rose, butter cream and honey
+ * sand. Nothing here leans brown or dirty: the sand is a light honey, not a
+ * tan, and the "fold" shading is a neutral warm grey.
  *
- * The two glows (which bleed off the page edges) use the most saturated steps
- * (apricot and coral); the blooms use the paler peach, blush, cream and sand.
- * The brand vermilion #e24a28 is no longer used for glows: it is too strong
- * for a wash, and stays on the buttons and the grid.
+ * These are a step more saturated than a pastel would be, on purpose: the
+ * paper is a grey-beige, and a very pale peach on it simply disappears. The
+ * glows (which bleed off the page edges) use the strongest steps (apricot and
+ * coral); the blooms use the peach, blush, cream and sand.
+ * The brand vermilion #e24a28 is not used for blobs: it is too strong for a
+ * wash, and stays on the buttons and the grid.
  */
 const COLOR = {
-  glowOrange: '255,156,92', // apricot
-  glowAmber: '250,134,104', // soft coral
-  softPeach: '250,190,150', // peach
-  blush: '248,184,172', // blush rose, a whisper of pink to warm the peach
-  softBeige: '246,232,208', // butter cream
-  sand: '240,214,172', // light honey sand
+  glowOrange: '255,142,70', // apricot
+  glowAmber: '250,122,92', // soft coral
+  softPeach: '252,176,124', // peach
+  blush: '248,166,154', // blush rose, a whisper of pink to warm the peach
+  softBeige: '250,234,204', // butter cream
+  sand: '242,208,150', // honey sand
   white: '255,255,255',
   fold: '96,86,76',
 };
@@ -291,7 +303,7 @@ export function SiteBackdrop() {
       </div>
       <div
         className='absolute inset-0'
-        style={{ backgroundImage: GRID, backgroundSize: GRID_CELL }}
+        style={{ backgroundImage: GRID_LINES, backgroundSize: GRID_CELL }}
       />
     </div>
   );

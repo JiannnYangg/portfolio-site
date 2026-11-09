@@ -1,16 +1,22 @@
 import Image from 'next/image';
 
 import { FooterBase, Headline } from './components';
+import { FooterGrid } from './components/footer-grid';
 import styles from './index.module.css';
 
 /**
- * Site footer (#contact-footer). Two layers behind everything (see .bg in
- * index.module.css):
- *   1. soft, asymmetric clouds of light orange, peach and beige (pure CSS)
+ * Site footer (#contact-footer). Three layers behind everything (see .bg and
+ * .grid in index.module.css):
+ *   1. soft, asymmetric clouds of light orange, peach and beige (pure CSS),
+ *      which fade in slowly from the page's paper, so the page does not end
+ *      in an edge
  *   2. the tile picture (public/images/footer-bg.webp, 1632x912): a field of
  *      rounded "ice cube" tiles. It is turned into a light tile pattern and
  *      screened over the clouds, so the tiles show up as lighter cream cubes
  *      on the orange and never darken it.
+ *   3. the site's graph-paper grid, carried on from the page into the top of
+ *      the footer and fading out as the orange takes over (FooterGrid), so
+ *      the notebook paper dissolves into the tiles instead of stopping.
  * The picture goes through next/image, so visitors get a right-sized
  * AVIF/WebP (see next.config.js). The top 150px of the picture are plain
  * white, so they are not shown and the footer is about one screen tall. The
@@ -36,6 +42,7 @@ export function Contact() {
           className={styles.bgImage}
         />
       </div>
+      <FooterGrid className={styles.grid} />
       <Headline />
       <FooterBase />
     </footer>
