@@ -39,6 +39,16 @@ import { memo, useEffect, useRef, useState } from 'react';
  *  grey-beige of the brand reference (#e5e3dd) */
 export const PAPER_RGB = '229,227,221';
 
+/**
+ * How strong ALL the background blobs are, as a share of their designed
+ * opacity: 1 = as designed, 0.2 = 80% less opacity. It is applied once, to the
+ * whole blob layer (see SiteBackdrop), so every blob, fold, highlight and glow
+ * is reduced by the same amount and the relative balance between them stays
+ * the way it was designed. The graph-paper grid is NOT affected. Valid range:
+ * 0 (no blobs) to 1.
+ */
+const BLOB_STRENGTH = 0.2;
+
 /** Enough bands to cover a tall first paint before the measurement runs */
 const INITIAL_BANDS = 8;
 
@@ -333,9 +343,17 @@ export function SiteBackdrop() {
         className='absolute left-0 top-0 w-px opacity-0'
         style={{ height: 'var(--screen)' }}
       />
-      {Array.from({ length: bands }, (_, band) => (
-        <Band key={band} band={band} />
-      ))}
+      {/* all the blobs in ONE layer, so a single opacity (BLOB_STRENGTH)
+          scales them together. Same box as the container, so the blobs'
+          percentage positions are unchanged. */}
+      <div
+        className='pointer-events-none absolute inset-0'
+        style={{ opacity: BLOB_STRENGTH }}
+      >
+        {Array.from({ length: bands }, (_, band) => (
+          <Band key={band} band={band} />
+        ))}
+      </div>
       <div
         className='absolute inset-0'
         style={{ backgroundImage: GRID, backgroundSize: GRID_CELL }}
