@@ -10,11 +10,13 @@
  * the rest of the site. The solid purple is the fallback colour under the
  * gradient. Both hover layers (before = the growing disc, after = the final
  * fill) get the same gradient, so the colour never jumps.
+ *
+ * Written out as complete class names on purpose: Tailwind only generates
+ * classes it can read as whole strings in the source, so these must not be
+ * built by joining pieces.
  */
-const HOVER_GRADIENT =
-  '[background-image:linear-gradient(135deg,#8a52e8_0%,#a14fc9_50%,#c2437f_100%)]';
-
-export const CIRCLE_HOVER = `before:bg-[#8a52e8] after:bg-[#8a52e8] before:${HOVER_GRADIENT} after:${HOVER_GRADIENT} hover:text-white`;
+export const CIRCLE_HOVER =
+  'before:bg-[#8a52e8] after:bg-[#8a52e8] before:[background-image:linear-gradient(135deg,#8a52e8_0%,#a14fc9_50%,#c2437f_100%)] after:[background-image:linear-gradient(135deg,#8a52e8_0%,#a14fc9_50%,#c2437f_100%)] hover:text-white';
 
 /**
  * Shape of the circle. The default "xl" button size is padding-driven, which
