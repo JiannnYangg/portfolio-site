@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    /* Same sheet colour as the site backdrop (PAPER_RGB 243,243,245) */
-    --paper: #f3f3f5;
+    /* Same sheet colour as the site backdrop (PAPER_RGB 250,243,232) */
+    --paper: #faf3e8;
     /* Slightly stronger than the default so dividers and pill outlines stay
        readable on the paper + grid background */
-    --border: 220 4% 82%;
+    --border: 30 28% 80%;
   }
 
   * {

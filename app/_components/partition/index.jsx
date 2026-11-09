@@ -11,27 +11,27 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
  *   left and right edge of the content column.
  * - <Partition />   a full-width horizontal dashed line that marks where one
  *   section ends and the next begins. It crosses the guides, and a small
- *   pink-to-purple label sits on each crossing: the section name on the
+ *   orange label sits on each crossing: the section name on the
  *   left, its number on the right, like a drawing sheet.
  *
  * Both are decorative (aria-hidden, no pointer events).
  */
 /**
- * Label fill: the logo's pink-to-purple gradient, deepened just enough for
+ * Label fill: the logo's orange gradient, deepened just enough for
  * white text. LABEL_SOLID paints first, as the fallback for a browser that
  * can't draw the gradient.
  */
-const LABEL_SOLID = '#a845a5';
+const LABEL_SOLID = '#e05a1c';
 const LABEL_GRADIENT =
-  'linear-gradient(135deg, #c93f63 0%, #a845a5 50%, #7d45e0 100%)';
+  'linear-gradient(135deg, #e8731f 0%, #e05a1c 50%, #c2410c 100%)';
 /**
- * The dashed lines are a dark slate that leans violet-black, so they read as
+ * The dashed lines are a dark slate that leans orange-black, so they read as
  * quiet structure and the gradient labels on the crossings stay the accent.
  * Exported so every dashed line on the site (e.g. the dividers in Skills)
- * shares one colour instead of a copy. Contrast on the paper sheet (#f3f3f5)
+ * shares one colour instead of a copy. Contrast on the paper sheet (#faf3e8)
  * is about 11:1, so the dashes stay visible on every screen.
  */
-export const PARTITION_LINE = '#2e2a4a';
+export const PARTITION_LINE = '#4a2f1c';
 /**
  * White label text: at least 4.7:1 on every stop of the gradient above, which
  * clears the 4.5:1 bar for 10-11px bold text.
@@ -87,7 +87,7 @@ const randomGlyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
 
 /** Thin colour split used while the label is scrambling */
 const GLITCH_SHADOW =
-  '1px 0 rgba(240, 84, 107, 0.85), -1px 0 rgba(138, 82, 232, 0.85)';
+  '1px 0 rgba(249, 163, 90, 0.85), -1px 0 rgba(236, 100, 38, 0.85)';
 
 /** Speed knobs (ms). Bigger = slower. */
 const PAUSE_MS = 1000; // readable hold between two decodes
@@ -182,7 +182,7 @@ function Tag({ side, delay, text }) {
         color: LABEL_TEXT,
         textShadow: glitching ? GLITCH_SHADOW : 'none',
         // paper-coloured ring so the label cuts cleanly through the dashes
-        boxShadow: '0 0 0 3px rgba(243, 243, 245, 0.95)',
+        boxShadow: '0 0 0 3px rgba(250, 243, 232, 0.95)',
       }}
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
