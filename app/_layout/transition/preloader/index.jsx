@@ -14,20 +14,21 @@ import { fade, slideUp } from './variants';
 const MotionComponent = motion(Center);
 
 /**
- * Near-black (#0b0b0d). The modern UI convention for a dark opening screen is
- * NOT pure #000: a soft, very slightly cool black looks richer, avoids harsh
- * contrast against the light text, and feels premium. The warm off-white
- * greeting and the orange dot then pop against it.
+ * Soft charcoal, a true "near black" (#18181b, zinc-900). It is clearly dark
+ * but NOT black: it keeps a little lightness so it reads as a rich, premium
+ * dark surface instead of a void. This is the common modern UI/UX dark
+ * convention (never pure #000). The warm off-white greeting and the orange dot
+ * pop against it.
  *
  * Keep the container background and the curve fill on the SAME value, the
  * curved bottom edge is drawn in the fill colour. The browser theme colour
  * (app/layout.jsx) uses the same value.
  */
-const BG = 'bg-[#0b0b0d]';
-const CURVE_FILL = 'fill-[#0b0b0d]';
+const BG = 'bg-[#18181b]';
+const CURVE_FILL = 'fill-[#18181b]';
 
 /**
- * Greeting colour: a warm off-white (#f3eee8), about 17:1 on the near-black
+ * Greeting colour: a warm off-white (#f3eee8), about 14:1 on the charcoal
  * background. One flat colour, no gradient.
  */
 const TEXT_COLOR = 'text-[#f3eee8]';
