@@ -14,18 +14,23 @@ import { fade, slideUp } from './variants';
 const MotionComponent = motion(Center);
 
 /**
- * Deep midnight violet: the dark partner of the site's violet-pink theme.
- * Keep the container background and the curve fill on the SAME value, the
- * curved bottom edge is drawn in the fill colour.
+ * Deep plum (#2b1233, hue about 287): the dark partner of the site's
+ * violet-pink theme. The old navy-violet (#160a33) read as dark blue on most
+ * screens; this one sits on the magenta side of violet, so it reads as warm
+ * plum next to the purple-to-pink logo and buttons. Keep the container
+ * background and the curve fill on the SAME value, the curved bottom edge is
+ * drawn in the fill colour. The browser theme colour (app/layout.jsx) and the
+ * web app manifest (app/manifest.js) use the same value.
  */
-const BG = 'bg-[#160a33]';
-const CURVE_FILL = 'fill-[#160a33]';
+const BG = 'bg-[#2b1233]';
+const CURVE_FILL = 'fill-[#2b1233]';
 
 /**
- * Greeting colour: ONE flat, light lilac (the same as the text selection in
- * the hero), no gradient. It reads softly on the deep violet.
+ * Greeting colour: ONE flat, soft pink-lilac, no gradient. It reads clearly
+ * on the plum (about 14:1) and picks up the pink end of the brand gradient
+ * instead of the old bluish lavender.
  */
-const TEXT_COLOR = 'text-[#e4defc]';
+const TEXT_COLOR = 'text-[#f6e6fb]';
 
 /**
  * Timing: every greeting gets PRELOADER_GREETING_MS (0.4 s), including the
