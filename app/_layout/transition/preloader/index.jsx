@@ -14,31 +14,30 @@ import { fade, slideUp } from './variants';
 const MotionComponent = motion(Center);
 
 /**
- * Deep burnt orange (#9a3412). The flat bright orange (#ec6426) was too loud
- * for a full screen: it fought the greeting and felt like a warning banner.
- * A deeper, richer burnt orange keeps the brand hue but is calm enough to
- * read as a premium opening, and it makes the light text pop.
+ * Near-black (#0b0b0d). The modern UI convention for a dark opening screen is
+ * NOT pure #000: a soft, very slightly cool black looks richer, avoids harsh
+ * contrast against the light text, and feels premium. The warm off-white
+ * greeting and the orange dot then pop against it.
  *
  * Keep the container background and the curve fill on the SAME value, the
  * curved bottom edge is drawn in the fill colour. The browser theme colour
  * (app/layout.jsx) uses the same value.
  */
-const BG = 'bg-[#9a3412]';
-const CURVE_FILL = 'fill-[#9a3412]';
+const BG = 'bg-[#0b0b0d]';
+const CURVE_FILL = 'fill-[#0b0b0d]';
 
 /**
- * Greeting colour: a light peach-orange (#ffd9b3), the pale end of the brand
- * orange, about 5.7:1 on the burnt orange background. One flat colour, no
- * gradient.
+ * Greeting colour: a warm off-white (#f3eee8), about 17:1 on the near-black
+ * background. One flat colour, no gradient.
  */
-const TEXT_COLOR = 'text-[#ffd9b3]';
+const TEXT_COLOR = 'text-[#f3eee8]';
 
 /**
- * The dot before each greeting: a brighter, more saturated orange (#ff9a52)
- * than the text, as a small accent so the greeting reads in two tones.
- * Decorative only (aria-hidden by the icon), so contrast does not apply.
+ * The dot before each greeting: the brand orange (#ff7a3d) as a small accent
+ * so the greeting reads in two tones. Decorative only (aria-hidden by the
+ * icon), so contrast does not apply.
  */
-const DOT_COLOR = 'text-[#ff9a52]';
+const DOT_COLOR = 'text-[#ff7a3d]';
 
 /**
  * Timing: every greeting gets PRELOADER_GREETING_MS (0.4 s), including the

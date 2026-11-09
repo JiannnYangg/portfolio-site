@@ -9,10 +9,10 @@ import './globals.css';
 /** @type {import('next').Metadata} */
 export const metadata = rootMetadata;
 
-//? Same deep burnt orange as the preloader (layout/transition/preloader), so
-//? the mobile browser bar matches the intro screen
+//? Same near-black as the preloader (layout/transition/preloader), so the
+//? mobile browser bar matches the intro screen
 /** @type {import('next').Viewport} */
-export const viewport = { themeColor: '#9a3412' };
+export const viewport = { themeColor: '#0b0b0d' };
 
 /** @param {import('react').PropsWithChildren<unknown>} */
 export default function RootLayout({ children }) {
