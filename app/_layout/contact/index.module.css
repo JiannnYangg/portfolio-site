@@ -24,7 +24,9 @@
  * part and switches to white text on translucent glass.
  *
  * Palette (from the brand reference): vermilion orange #e24a28, neutral
- * charcoal ink #1f1b18, soft grey-beige paper. No brown.
+ * charcoal ink #1f1b18, soft grey-beige paper. NO BROWN: orange is never
+ * darkened below #d63f20 (darker orange reads as brown), so the deep end of
+ * every gradient stays a saturated orange.
  *
  * `--ft-cols` only sets the side gutters, so the text lines up with the rest
  * of the page at every breakpoint.
@@ -47,21 +49,21 @@
   --ft-cta-solid: #e24a28;
   --ft-cta-gradient: linear-gradient(
     135deg,
-    #e24a28 0%,
-    #d63f20 50%,
-    #bf3016 100%
+    #e84e2a 0%,
+    #e24a28 50%,
+    #d63f20 100%
   );
   --ft-cta-dark: #1f1b18;
   --ft-cta-ring: #f6f4f0;
 
-  /* The "together!" pill: the CTA gradient, one notch darker so it holds its
-     own against the orange picture. White on every stop is 4.5:1 or better. */
-  --ft-pill-solid: #c63d1c;
+  /* The "together!" pill: the CTA gradient, one notch deeper so it holds its
+     own against the orange picture. White on every stop is 4:1 or better. */
+  --ft-pill-solid: #d63f20;
   --ft-pill-gradient: linear-gradient(
     135deg,
-    #d9452a 0%,
-    #c63d1c 48%,
-    #ad3217 100%
+    #e04626 0%,
+    #d63f20 50%,
+    #cc391b 100%
   );
 
   /* The headline's ink: the same neutral charcoal as the rest of the page, so
@@ -96,9 +98,10 @@
 }
 
 /* Recolours the blue picture: hue and saturation come from this gradient (a
-   light coral, the brand vermilion, then a deeper red-orange at the very
-   bottom), lightness stays the picture's own. White stays white, so the faded
-   top is unchanged. */
+   light coral, then the brand vermilion all the way down), lightness stays
+   the picture's own. The deep end stays a bright orange, never a dark one,
+   so the dark parts of the picture read as rich orange and not brown. White
+   stays white, so the faded top is unchanged. */
 .bg::after {
   content: '';
   position: absolute;
@@ -106,9 +109,9 @@
   background-image: linear-gradient(
     180deg,
     #f59a6c 0%,
-    #e24a28 42%,
-    #d6401f 72%,
-    #b0301a 100%
+    #ee5a30 40%,
+    #e24a28 70%,
+    #e8481f 100%
   );
   mix-blend-mode: color;
   pointer-events: none;
@@ -197,7 +200,7 @@
 }
 
 /* The key word: a glossy orange sticker pill, the CTA's gradient one notch
-   darker (--ft-pill-*). The light ring and the inner top highlight are what
+   deeper (--ft-pill-*). The light ring and the inner top highlight are what
    keep it crisp against the orange picture.
    Slightly tilted like a sticker; it straightens and catches a shine on
    hover. The right padding keeps the italic "!" off the edge, and nowrap
@@ -214,9 +217,9 @@
   background-image: var(--ft-pill-gradient);
   box-shadow:
     inset 0 0.03em 0 rgb(255 255 255 / 30%),
-    inset 0 -0.05em 0.1em rgb(0 0 0 / 26%),
+    inset 0 -0.04em 0.08em rgb(226 74 40 / 40%),
     0 0 0 0.055em var(--ft-cta-ring),
-    0 0.14em 0.45em rgb(160 40 20 / 42%);
+    0 0.14em 0.45em rgb(226 74 40 / 38%);
   color: #fff;
   font-weight: 800;
   font-style: italic;
