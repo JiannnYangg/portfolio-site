@@ -25,12 +25,6 @@ import { useLoopDelay } from '@/hooks';
 const LOGOS_START = 3.0;
 const LOGO_STAGGER = 0.13;
 
-/** The soft colour blobs melt in just after the first logos pop */
-const BLOBS_START = 3.2;
-
-/** The coloured lights switch on once the logos have settled */
-const LIGHTS_START = 3.9;
-
 /** Scroll: logos fade out and drift up at different speeds (depth) */
 const SCROLL_FADE_START = 30;
 const SCROLL_FADE_DISTANCE = 300;
@@ -38,18 +32,6 @@ const SCROLL_FADE_DISTANCE = 300;
 /** Mouse parallax travel in px at depth 1 */
 const MOUSE_X = 16;
 const MOUSE_Y = 11;
-
-/** Mouse travel of the lights in px at shift 1 (they slide against the logos) */
-const LIGHT_SHIFT = 26;
-
-/**
- * The three warm colours of the theme, as "r,g,b": amber (#f9a35a),
- * tangerine (#f38034) and orange (#ec6426). Orange leads, amber is the
- * accent, and there is no purple or pink anywhere in the hero.
- */
-const ORANGE = '236,100,38';
-const TANGERINE = '243,128,52';
-const AMBER = '250,170,90';
 
 /**
  * How strong the logo drop shadows are, as a share of their designed opacity:
@@ -60,25 +42,11 @@ const AMBER = '250,170,90';
 const SHADOW_STRENGTH = 0.2;
 
 /**
- * How strong the hero's soft colour blobs (BLOBS below) are, as a share of
- * their designed opacity: 1 = as designed, 0.05 = 95% less opacity (5%
- * visible). The site-wide background blobs have their own setting
- * (BLOB_STRENGTH in components/backdrop). Valid range: 0 (no blobs) to 1.
- *
- * Preview setting: it was 0.2 before the 5% landing-page preview.
+ * The landing screen carries no colour blobs, scene lights, glow halos or
+ * lights on the logos any more: only the logos themselves, over plain paper.
+ * (The site-wide background starts its very light wash below the landing
+ * screen, see components/backdrop.)
  */
-const BLOB_STRENGTH = 0.05;
-
-/**
- * How strong the hero's coloured lights are, as a share of their designed
- * opacity: 1 = as designed, 0.05 = 5% visible. It scales the scene lights
- * (LIGHTS), the lights that land on a logo (`lit` in LOGOS) and the glow
- * halos behind the logos (HALOS), all in one place. The logos' drop shadows
- * are NOT affected. Valid range: 0 (no lights) to 1.
- *
- * Preview setting: before the 5% landing-page preview this was effectively 1.
- */
-const LIGHT_STRENGTH = 0.05;
 
 /**
  * Lighting, matched to the artwork: the key light sits top-left, so every
@@ -93,223 +61,6 @@ const shadowFor = depth =>
     `drop-shadow(${(3 * depth).toFixed(1)}px ${(5 * depth).toFixed(1)}px ${(4 * depth).toFixed(1)}px rgba(90,40,10,${(0.22 * SHADOW_STRENGTH).toFixed(3)}))`,
     `drop-shadow(${(14 * depth).toFixed(1)}px ${(24 * depth).toFixed(1)}px ${(20 * depth).toFixed(1)}px rgba(90,40,10,${(0.16 * SHADOW_STRENGTH).toFixed(3)}))`,
   ].join(' ');
-
-/**
- * Gradient halos: every logo gets a soft glow behind it, drawn from the
- * theme's colours (orange, tangerine, amber). They are indexed like LOGOS (same
- * order), and cycle if a logo is ever added.
- * Each entry is [centre colour, edge colour] as "r,g,b", plus a strength.
- *
- * HALO_STRENGTH scales every halo at once: 1 was the first version, 0.5 is
- * half as strong (the halos are now a gentle tint, not a glow). On top of
- * that, LIGHT_STRENGTH scales them for the 5% landing-page preview.
- *
- * The claude and squiggle (Higgsfield) halos were halved again (alpha 0.42 ->
- * 0.21 and 0.38 -> 0.19): 50% less opacity on those two only.
- */
-const HALO_STRENGTH = 0.5;
-const HALOS = [
-  { from: ORANGE, to: AMBER, alpha: 0.21 }, // claude: orange -> amber (50% less)
-  { from: AMBER, to: ORANGE, alpha: 0.4 }, // comfy: amber -> orange
-  { from: TANGERINE, to: AMBER, alpha: 0.19 }, // squiggle: tangerine -> amber (50% less)
-  { from: ORANGE, to: TANGERINE, alpha: 0.34 }, // n8n: orange -> tangerine
-  { from: AMBER, to: TANGERINE, alpha: 0.34 }, // github: amber -> tangerine
-  { from: TANGERINE, to: ORANGE, alpha: 0.34 }, // elevenlabs: tangerine -> orange
-  { from: ORANGE, to: AMBER, alpha: 0.36 }, // codex: orange -> amber
-  { from: AMBER, to: TANGERINE, alpha: 0.34 }, // runway: amber -> tangerine
-];
-
-const haloBackground = ({ from, to, alpha }) => {
-  const strength = alpha * HALO_STRENGTH * LIGHT_STRENGTH;
-  return `radial-gradient(closest-side, rgba(${from},${strength.toFixed(4)}) 0%, rgba(${to},${(strength * 0.55).toFixed(4)}) 55%, rgba(${to},0) 100%)`;
-};
-
-/**
- * Colour blobs: big, very soft, mesh-gradient style washes that sit behind the
- * logos in a few places only (top-left, right edge, lower-left, plus one tiny
- * one top-right). They are deliberately NOT symmetrical: different sizes,
- * different distances from the edges, different colour pairs, and the two
- * biggest ones bleed off the edge of the screen so they read as light spilling
- * in, not as circles.
- *
- * Each blob is two overlapping radial gradients ("a" and "b", offset from each
- * other) so the colour shifts inside it like a mesh gradient. The stops fall
- * off in three steps (no hard edge, no banding), and the strongest designed
- * alpha is 0.2 (then scaled by BLOB_STRENGTH), so the headline text on top
- * stays fully readable.
- *
- * Cost: no blur filter (the gradient itself is soft), no extra images. The slow
- * drift is transform-only, runs only while the hero is on screen, and is off
- * with reduced motion. They fade out with the scroll, like the logos.
- *
- * position: Tailwind classes (mobile first, md: for desktop)
- * width   : clamp(phone, fluid vw, large screen); height follows from `aspect`
- * drift   : [x px, y px, duration s, phase s]
- */
-const BLOBS = [
-  {
-    // top-left: the largest, orange leaning to tangerine, behind "claude"
-    id: 'top-left',
-    position: '-left-[14%] -top-[9%] md:-left-[7%] md:top-[0%]',
-    width: 'clamp(250px, 42vw, 760px)',
-    aspect: 1.25,
-    a: ORANGE,
-    b: TANGERINE,
-    alpha: 0.2,
-    drift: [16, 12, 24, 0],
-  },
-  {
-    // right edge, a little below the middle: amber into orange, behind the
-    // big "comfy" / "squiggle" pair
-    id: 'right',
-    position: '-right-[16%] top-[36%] md:-right-[8%] md:top-[33%]',
-    width: 'clamp(220px, 34vw, 620px)',
-    aspect: 0.95,
-    a: AMBER,
-    b: ORANGE,
-    alpha: 0.17,
-    drift: [-14, 14, 29, 2.5],
-  },
-  {
-    // lower left: tangerine into orange, smaller and lighter, near "github"
-    id: 'bottom-left',
-    position: '-bottom-[2%] -left-[8%] md:bottom-[3%] md:left-[6%]',
-    width: 'clamp(200px, 26vw, 460px)',
-    aspect: 1.5,
-    a: TANGERINE,
-    b: ORANGE,
-    alpha: 0.14,
-    drift: [12, -10, 33, 5],
-  },
-  {
-    // a small amber accent, top-right of the headline, desktop only
-    id: 'top-right',
-    position: 'hidden md:block md:right-[21%] md:top-[3%]',
-    width: 'clamp(140px, 15vw, 280px)',
-    aspect: 1.1,
-    a: AMBER,
-    b: TANGERINE,
-    alpha: 0.1,
-    drift: [-8, 9, 26, 7],
-  },
-];
-
-const blobBackground = ({ a, b, alpha: designed }) => {
-  const alpha = designed * BLOB_STRENGTH;
-  return [
-    `radial-gradient(closest-side at 38% 40%, rgba(${a},${alpha.toFixed(4)}) 0%, rgba(${a},${(alpha * 0.45).toFixed(4)}) 50%, rgba(${a},0) 100%)`,
-    `radial-gradient(closest-side at 66% 62%, rgba(${b},${(alpha * 0.8).toFixed(4)}) 0%, rgba(${b},${(alpha * 0.3).toFixed(4)}) 55%, rgba(${b},0) 100%)`,
-  ].join(', ');
-};
-
-/**
- * Coloured lights, in the theme's own orange / tangerine / amber (the same
- * colours as the CTA, the marker and the halos). Two kinds, both drawn above
- * the logos and below the headline:
- *
- * 1. Scene lights (this list): big soft washes that fall across the hero and
- *    over some of the logos, like stage light. Uneven on purpose:
- *  - key: a long, slanted orange streak from the top-left, the same
- *    direction as the key light and the shadows, aimed so its centre line
- *    runs through "claude".
- *  - amber-pool: a wide pool of amber in the lower right, over "squiggle" and
- *    "elevenlabs", bleeding off the edge.
- *  - orange: a small orange spot at the middle left, over "n8n".
- *  - peach: a thin tilted sliver near the top right, over "comfy" (desktop).
- *
- * 2. Logo lights (`lit` on a logo, see LOGOS): a light that lands on the logo
- *    itself. The gradient is masked with the logo's own artwork, so it paints
- *    only the logo's pixels, never the paper around it, which is what makes a
- *    logo look lit from one side. Only some logos have one.
- *
- * Each scene light is two stacked radial gradients (a main colour and a
- * warmer core pushed to one side), so the colour shifts inside it. No blur
- * filter and no blend mode (both are costly on low-spec devices).
- *
- * The hero background is already a pale beige-orange, so a pale light of the
- * same hue simply disappears into it. The designed alphas are therefore strong
- * enough to register (0.2 to 0.26), while the soft falloff keeps them from
- * looking like a flat overlay. They are then scaled by LIGHT_STRENGTH.
- *
- * Motion: a slow breathing scale and drift, and the scene lights slide against
- * the mouse (opposite to the logos), so the light seems to move over the
- * objects instead of being painted on them. All transform-only, running only
- * while the hero is on screen, and all off with reduced motion. They fade out
- * on scroll.
- *
- * rotate: degrees; shift: how far it follows the mouse (x LIGHT_SHIFT px)
- * drift : [x px, y px, duration s, phase s]
- */
-const LIGHTS = [
-  {
-    id: 'key',
-    position: '-left-[10%] top-[17%] md:-left-[8%] md:top-[19%]',
-    width: 'clamp(300px, 60vw, 1040px)',
-    aspect: 4,
-    rotate: 26,
-    a: ORANGE,
-    b: AMBER,
-    alpha: 0.26,
-    shift: 1,
-    drift: [22, 10, 28, 0],
-  },
-  {
-    id: 'amber-pool',
-    position: '-right-[10%] bottom-[2%] md:-right-[5%] md:bottom-[5%]',
-    width: 'clamp(220px, 38vw, 680px)',
-    aspect: 1.15,
-    rotate: 0,
-    a: AMBER,
-    b: TANGERINE,
-    alpha: 0.24,
-    shift: 0.7,
-    drift: [-16, -12, 31, 2],
-  },
-  {
-    id: 'orange',
-    position: '-left-[4%] top-[46%] md:left-[1%] md:top-[44%]',
-    width: 'clamp(150px, 20vw, 360px)',
-    aspect: 1.6,
-    rotate: -18,
-    a: ORANGE,
-    b: TANGERINE,
-    alpha: 0.2,
-    shift: 1.3,
-    drift: [10, 14, 25, 4],
-  },
-  {
-    id: 'peach',
-    position: 'hidden md:block md:right-[3%] md:top-[12%]',
-    width: 'clamp(170px, 24vw, 420px)',
-    aspect: 2.8,
-    rotate: -20,
-    a: TANGERINE,
-    b: AMBER,
-    alpha: 0.2,
-    shift: 0.9,
-    drift: [-10, 8, 27, 6],
-  },
-];
-
-const lightBackground = ({ a, b, alpha: designed }) => {
-  const alpha = designed * LIGHT_STRENGTH;
-  return [
-    `radial-gradient(closest-side at 28% 50%, rgba(${b},${(alpha * 0.9).toFixed(4)}) 0%, rgba(${b},0) 100%)`,
-    `radial-gradient(closest-side, rgba(${a},${alpha.toFixed(4)}) 0%, rgba(${a},${(alpha * 0.5).toFixed(4)}) 45%, rgba(${a},0) 100%)`,
-  ].join(', ');
-};
-
-/**
- * A light that lands on one logo: a linear gradient from one side (`angle` is
- * the CSS gradient angle, so 135 = from the top-left, 225 = from the top-right
- * is 225 = from the bottom-left of the logo, and so on) fading out across the
- * logo. It is masked with the logo's own artwork in Logo, so only the logo
- * is tinted. Scaled by LIGHT_STRENGTH.
- */
-const litBackground = ({ angle, from, to, alpha: designed }) => {
-  const alpha = designed * LIGHT_STRENGTH;
-  return `linear-gradient(${angle}deg, rgba(${from},${alpha.toFixed(4)}) 0%, rgba(${to},${(alpha * 0.55).toFixed(4)}) 45%, rgba(${to},0) 80%)`;
-};
 
 /**
  * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
@@ -344,9 +95,6 @@ const litBackground = ({ angle, from, to, alpha: designed }) => {
  * depth  : parallax strength + shadow length (big/close logos move more)
  * rotate : resting tilt in degrees
  * float  : [amplitude px, duration s, tilt deg, phase s]
- * lit    : optional light on the logo itself, see litBackground. Only four
- *          logos have one, each from a different side and in a different
- *          colour pair, so the lighting is uneven.
  */
 const LOGOS = [
   {
@@ -359,9 +107,6 @@ const LOGOS = [
     rotate: -9,
     depth: 1.3,
     float: [10, 6.2, 1.6, 0],
-    // from the top-left, orange into amber (the key light); alpha halved
-    // (0.5 -> 0.25)
-    lit: { angle: 135, from: ORANGE, to: AMBER, alpha: 0.25 },
   },
   {
     id: 'comfy',
@@ -373,8 +118,6 @@ const LOGOS = [
     rotate: 5,
     depth: 1.5,
     float: [12, 7.4, 1.2, 0.8],
-    // from the top-right, amber into orange
-    lit: { angle: 215, from: AMBER, to: ORANGE, alpha: 0.42 },
   },
   {
     id: 'squiggle',
@@ -387,8 +130,6 @@ const LOGOS = [
     rotate: -8,
     depth: 1.25,
     float: [9, 6.6, 1.5, 2],
-    // from the bottom-right, amber into tangerine; alpha halved (0.46 -> 0.23)
-    lit: { angle: 315, from: AMBER, to: TANGERINE, alpha: 0.23 },
   },
   {
     id: 'n8n',
@@ -415,8 +156,6 @@ const LOGOS = [
     rotate: 7,
     depth: 0.5,
     float: [5, 5.2, 1.8, 1.1],
-    // from the top, orange into tangerine
-    lit: { angle: 160, from: ORANGE, to: TANGERINE, alpha: 0.5 },
   },
   {
     id: 'elevenlabs',
@@ -460,143 +199,6 @@ const LOGOS = [
   },
 ];
 
-/**
- * One soft colour blob (see BLOBS). The outer box carries the position and
- * the scroll fade, the inner one the intro fade-in and the slow drift, so the
- * two never fight over the same property.
- */
-function Blob({ blob, active }) {
-  const reduceMotion = useReducedMotion();
-  const { scrollY } = useScroll();
-  const scrollOpacity = useTransform(scrollY, [0, 420], [1, 0]);
-
-  const [driftX, driftY, duration, phase] = blob.drift;
-  //? the drift repeats forever: it only runs while the hero is near the
-  //? screen, and only waits its intro delay the very first time
-  const drifting = !reduceMotion && active;
-  const introAt = introDelay(BLOBS_START);
-  const driftDelay = useLoopDelay(drifting, introAt + 1.6 + phase);
-
-  const loop = {
-    duration,
-    ease: 'easeInOut',
-    repeat: Infinity,
-    delay: driftDelay,
-  };
-
-  return (
-    <motion.div
-      className={`pointer-events-none absolute z-0 ${blob.position}`}
-      style={{
-        width: blob.width,
-        aspectRatio: blob.aspect,
-        ...(reduceMotion ? {} : { opacity: scrollOpacity }),
-      }}
-    >
-      <motion.span
-        aria-hidden='true'
-        className='block h-full w-full rounded-full'
-        style={{ backgroundImage: blobBackground(blob) }}
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
-        animate={
-          reduceMotion
-            ? { opacity: 1, scale: 1 }
-            : drifting
-              ? {
-                  opacity: 1,
-                  scale: 1,
-                  x: [0, driftX, 0],
-                  y: [0, driftY, 0],
-                }
-              : { opacity: 1, scale: 1, x: 0, y: 0 }
-        }
-        transition={{
-          opacity: { duration: 1.8, ease: 'easeOut', delay: introAt },
-          scale: { duration: 2.2, ease: 'easeOut', delay: introAt },
-          x: drifting ? loop : { duration: 0 },
-          y: drifting ? loop : { duration: 0 },
-        }}
-      />
-    </motion.div>
-  );
-}
-
-/**
- * One coloured scene light (see LIGHTS). Three layers, so no two animations
- * fight over a property: the outer box carries the position, the scroll fade
- * and the mouse slide; the middle one the fade-in, the breathing scale and the
- * drift; the inner one the fixed tilt and the gradient.
- */
-function Light({ light, mouseX, mouseY, active }) {
-  const reduceMotion = useReducedMotion();
-  const { scrollY } = useScroll();
-  const scrollOpacity = useTransform(scrollY, [0, 360], [1, 0]);
-
-  // slide against the mouse (logos travel the other way), by their own amount
-  const travel = LIGHT_SHIFT * light.shift;
-  const slideX = useTransform(mouseX, [-1, 1], [travel, -travel]);
-  const slideY = useTransform(mouseY, [-1, 1], [travel * 0.7, -travel * 0.7]);
-
-  const [driftX, driftY, duration, phase] = light.drift;
-  //? same rule as the blobs: the loop only runs while the hero is near the
-  //? screen, and only waits its intro delay the very first time
-  const breathing = !reduceMotion && active;
-  const introAt = introDelay(LIGHTS_START);
-  const loopDelay = useLoopDelay(breathing, introAt + 1.4 + phase);
-
-  const loop = {
-    duration,
-    ease: 'easeInOut',
-    repeat: Infinity,
-    delay: loopDelay,
-  };
-
-  return (
-    <motion.div
-      className={`pointer-events-none absolute z-0 ${light.position}`}
-      style={{
-        width: light.width,
-        aspectRatio: light.aspect,
-        ...(reduceMotion
-          ? {}
-          : { opacity: scrollOpacity, x: slideX, y: slideY }),
-      }}
-    >
-      <motion.div
-        className='h-full w-full'
-        initial={reduceMotion ? false : { opacity: 0 }}
-        animate={
-          reduceMotion
-            ? { opacity: 1 }
-            : breathing
-              ? {
-                  opacity: 1,
-                  scale: [1, 1.07, 1],
-                  x: [0, driftX, 0],
-                  y: [0, driftY, 0],
-                }
-              : { opacity: 1, scale: 1, x: 0, y: 0 }
-        }
-        transition={{
-          opacity: { duration: 1.6, ease: 'easeOut', delay: introAt },
-          scale: breathing ? loop : { duration: 0 },
-          x: breathing ? loop : { duration: 0 },
-          y: breathing ? loop : { duration: 0 },
-        }}
-      >
-        <span
-          aria-hidden='true'
-          className='block h-full w-full rounded-full'
-          style={{
-            backgroundImage: lightBackground(light),
-            transform: `rotate(${light.rotate}deg)`,
-          }}
-        />
-      </motion.div>
-    </motion.div>
-  );
-}
-
 function Logo({ logo, index, mouseX, mouseY, active }) {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
@@ -631,11 +233,8 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
   );
   const y = useTransform([scrollLift, parallaxY], ([lift, par]) => lift + par);
 
-  const halo = HALOS[index % HALOS.length];
-
   return (
-    // the outer box carries position, scroll fade and parallax, so the halo
-    // and the logo move and fade together
+    // the outer box carries position, scroll fade and parallax
     <motion.div
       className={`pointer-events-none absolute z-0 ${logo.position}`}
       style={{
@@ -643,22 +242,6 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
         ...(reduceMotion ? {} : { opacity: scrollOpacity, x: parallaxX, y }),
       }}
     >
-      {/* gradient halo: sits behind the logo and is not part of the filtered
-          box below, so it casts no shadow of its own. It fades in right after
-          the logo has popped. */}
-      <motion.span
-        aria-hidden='true'
-        className='absolute -inset-[42%] block rounded-full'
-        style={{ backgroundImage: haloBackground(halo) }}
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.9,
-          ease: 'easeOut',
-          delay: enterDelay + 0.2,
-        }}
-      />
-
       {/* filter lives on this box so the shadow is cast in screen space: it
           keeps pointing down-right whatever the logo tilt or float is */}
       <div className='relative' style={{ filter: shadowFor(depth) }}>
@@ -721,34 +304,6 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
                 draggable={false}
                 className='h-auto w-full select-none'
               />
-
-              {/* light on the logo itself: a gradient masked with the logo's
-                  own artwork, so it tints only the logo's pixels (never the
-                  paper around it). It sits inside the tilt box, so it turns
-                  and floats with the logo, and fades in once the logo has
-                  landed. */}
-              {logo.lit ? (
-                <motion.span
-                  aria-hidden='true'
-                  className='pointer-events-none absolute inset-0 block'
-                  style={{
-                    backgroundImage: litBackground(logo.lit),
-                    WebkitMaskImage: `url(${logo.src})`,
-                    maskImage: `url(${logo.src})`,
-                    WebkitMaskSize: '100% 100%',
-                    maskSize: '100% 100%',
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskRepeat: 'no-repeat',
-                  }}
-                  initial={reduceMotion ? false : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{
-                    duration: 1.2,
-                    ease: 'easeOut',
-                    delay: enterDelay + 0.7,
-                  }}
-                />
-              ) : null}
             </motion.div>
           </motion.div>
         </motion.div>
@@ -758,8 +313,7 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
 }
 
 /**
- * Floating 3D logos scattered around the headline: over soft colour blobs,
- * and under a few coloured lights.
+ * Floating 3D logos scattered around the headline, over plain paper.
  */
 export function HeroLogos() {
   const reduceMotion = useReducedMotion();
@@ -790,28 +344,11 @@ export function HeroLogos() {
       aria-hidden='true'
       className='pointer-events-none absolute inset-0'
     >
-      {/* blobs first, so every logo is painted on top of them */}
-      {BLOBS.map(blob => (
-        <Blob key={blob.id} blob={blob} active={onScreen} />
-      ))}
-
       {LOGOS.map((logo, index) => (
         <Logo
           key={logo.id}
           logo={logo}
           index={index}
-          mouseX={mouseX}
-          mouseY={mouseY}
-          active={onScreen}
-        />
-      ))}
-
-      {/* scene lights last, so they fall on top of the logos (the headline is
-          a later sibling in index.jsx, so the text still sits above them) */}
-      {LIGHTS.map(light => (
-        <Light
-          key={light.id}
-          light={light}
           mouseX={mouseX}
           mouseY={mouseY}
           active={onScreen}
