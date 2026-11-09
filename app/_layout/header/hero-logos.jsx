@@ -61,11 +61,24 @@ const SHADOW_STRENGTH = 0.2;
 
 /**
  * How strong the hero's soft colour blobs (BLOBS below) are, as a share of
- * their designed opacity: 1 = as designed, 0.2 = 80% less opacity. The
- * site-wide background blobs have their own setting (BLOB_STRENGTH in
- * components/backdrop). Valid range: 0 (no blobs) to 1.
+ * their designed opacity: 1 = as designed, 0.05 = 95% less opacity (5%
+ * visible). The site-wide background blobs have their own setting
+ * (BLOB_STRENGTH in components/backdrop). Valid range: 0 (no blobs) to 1.
+ *
+ * Preview setting: it was 0.2 before the 5% landing-page preview.
  */
-const BLOB_STRENGTH = 0.2;
+const BLOB_STRENGTH = 0.05;
+
+/**
+ * How strong the hero's coloured lights are, as a share of their designed
+ * opacity: 1 = as designed, 0.05 = 5% visible. It scales the scene lights
+ * (LIGHTS), the lights that land on a logo (`lit` in LOGOS) and the glow
+ * halos behind the logos (HALOS), all in one place. The logos' drop shadows
+ * are NOT affected. Valid range: 0 (no lights) to 1.
+ *
+ * Preview setting: before the 5% landing-page preview this was effectively 1.
+ */
+const LIGHT_STRENGTH = 0.05;
 
 /**
  * Lighting, matched to the artwork: the key light sits top-left, so every
@@ -88,7 +101,8 @@ const shadowFor = depth =>
  * Each entry is [centre colour, edge colour] as "r,g,b", plus a strength.
  *
  * HALO_STRENGTH scales every halo at once: 1 was the first version, 0.5 is
- * half as strong (the halos are now a gentle tint, not a glow).
+ * half as strong (the halos are now a gentle tint, not a glow). On top of
+ * that, LIGHT_STRENGTH scales them for the 5% landing-page preview.
  *
  * The claude and squiggle (Higgsfield) halos were halved again (alpha 0.42 ->
  * 0.21 and 0.38 -> 0.19): 50% less opacity on those two only.
@@ -106,8 +120,8 @@ const HALOS = [
 ];
 
 const haloBackground = ({ from, to, alpha }) => {
-  const strength = alpha * HALO_STRENGTH;
-  return `radial-gradient(closest-side, rgba(${from},${strength.toFixed(3)}) 0%, rgba(${to},${(strength * 0.55).toFixed(3)}) 55%, rgba(${to},0) 100%)`;
+  const strength = alpha * HALO_STRENGTH * LIGHT_STRENGTH;
+  return `radial-gradient(closest-side, rgba(${from},${strength.toFixed(4)}) 0%, rgba(${to},${(strength * 0.55).toFixed(4)}) 55%, rgba(${to},0) 100%)`;
 };
 
 /**
@@ -183,8 +197,8 @@ const BLOBS = [
 const blobBackground = ({ a, b, alpha: designed }) => {
   const alpha = designed * BLOB_STRENGTH;
   return [
-    `radial-gradient(closest-side at 38% 40%, rgba(${a},${alpha.toFixed(3)}) 0%, rgba(${a},${(alpha * 0.45).toFixed(3)}) 50%, rgba(${a},0) 100%)`,
-    `radial-gradient(closest-side at 66% 62%, rgba(${b},${(alpha * 0.8).toFixed(3)}) 0%, rgba(${b},${(alpha * 0.3).toFixed(3)}) 55%, rgba(${b},0) 100%)`,
+    `radial-gradient(closest-side at 38% 40%, rgba(${a},${alpha.toFixed(4)}) 0%, rgba(${a},${(alpha * 0.45).toFixed(4)}) 50%, rgba(${a},0) 100%)`,
+    `radial-gradient(closest-side at 66% 62%, rgba(${b},${(alpha * 0.8).toFixed(4)}) 0%, rgba(${b},${(alpha * 0.3).toFixed(4)}) 55%, rgba(${b},0) 100%)`,
   ].join(', ');
 };
 
@@ -213,9 +227,9 @@ const blobBackground = ({ a, b, alpha: designed }) => {
  * filter and no blend mode (both are costly on low-spec devices).
  *
  * The hero background is already a pale beige-orange, so a pale light of the
- * same hue simply disappears into it. The alphas are therefore strong enough to
- * register (0.2 to 0.26), while the soft falloff keeps them from looking like
- * a flat overlay.
+ * same hue simply disappears into it. The designed alphas are therefore strong
+ * enough to register (0.2 to 0.26), while the soft falloff keeps them from
+ * looking like a flat overlay. They are then scaled by LIGHT_STRENGTH.
  *
  * Motion: a slow breathing scale and drift, and the scene lights slide against
  * the mouse (opposite to the logos), so the light seems to move over the
@@ -277,21 +291,25 @@ const LIGHTS = [
   },
 ];
 
-const lightBackground = ({ a, b, alpha }) =>
-  [
-    `radial-gradient(closest-side at 28% 50%, rgba(${b},${(alpha * 0.9).toFixed(3)}) 0%, rgba(${b},0) 100%)`,
-    `radial-gradient(closest-side, rgba(${a},${alpha}) 0%, rgba(${a},${(alpha * 0.5).toFixed(3)}) 45%, rgba(${a},0) 100%)`,
+const lightBackground = ({ a, b, alpha: designed }) => {
+  const alpha = designed * LIGHT_STRENGTH;
+  return [
+    `radial-gradient(closest-side at 28% 50%, rgba(${b},${(alpha * 0.9).toFixed(4)}) 0%, rgba(${b},0) 100%)`,
+    `radial-gradient(closest-side, rgba(${a},${alpha.toFixed(4)}) 0%, rgba(${a},${(alpha * 0.5).toFixed(4)}) 45%, rgba(${a},0) 100%)`,
   ].join(', ');
+};
 
 /**
  * A light that lands on one logo: a linear gradient from one side (`angle` is
  * the CSS gradient angle, so 135 = from the top-left, 225 = from the top-right
  * is 225 = from the bottom-left of the logo, and so on) fading out across the
  * logo. It is masked with the logo's own artwork in Logo, so only the logo
- * is tinted.
+ * is tinted. Scaled by LIGHT_STRENGTH.
  */
-const litBackground = ({ angle, from, to, alpha }) =>
-  `linear-gradient(${angle}deg, rgba(${from},${alpha}) 0%, rgba(${to},${(alpha * 0.55).toFixed(3)}) 45%, rgba(${to},0) 80%)`;
+const litBackground = ({ angle, from, to, alpha: designed }) => {
+  const alpha = designed * LIGHT_STRENGTH;
+  return `linear-gradient(${angle}deg, rgba(${from},${alpha.toFixed(4)}) 0%, rgba(${to},${(alpha * 0.55).toFixed(4)}) 45%, rgba(${to},0) 80%)`;
+};
 
 /**
  * Hierarchy layout. Three hero logos (claude, comfy, squiggle/Higgsfield) are
