@@ -52,79 +52,79 @@ const CTA_DELAY = WORD_DELAY + CTA_INDEX * WORD_STAGGER;
 const CTA_CLIP = 'inset(-48px -48px 0px -48px)';
 
 /**
- * Brand colours: the orange, beige and white theme. The brand orange is
- * #ec6426; the accent runs from honey-amber (#ffb45e) through tangerine
- * (#f38034) to that orange. There is no purple or pink anywhere in the hero.
+ * Brand colours, taken from the brand reference: a soft grey-beige paper
+ * (#e5e3dd) and a vermilion orange (#e24a28). The accent runs from a light
+ * coral-orange (#f59a6c) to that vermilion. There is no brown, purple or
+ * pink anywhere in the hero: the dark ink is a neutral charcoal (#1f1b18).
  */
 
 /**
- * "seen." marker: a highlighter swipe. Honey-amber melts into tangerine and
- * ends in the brand orange. It is fairly opaque but drawn with
- * mix-blend-mode: multiply, so the beige paper (and the dark letters) show
- * through it like real marker ink.
+ * "seen." marker: a highlighter swipe. Light coral-orange melts into the
+ * brand vermilion. It is fairly opaque but drawn with mix-blend-mode:
+ * multiply, so the paper (and the dark letters) show through it like real
+ * marker ink.
  */
 const MARKER_GRADIENT =
-  'linear-gradient(95deg, rgba(255,196,110,0.85) 0%, rgba(250,146,60,0.88) 45%, rgba(236,100,38,0.9) 100%)';
+  'linear-gradient(95deg, rgba(250,160,110,0.85) 0%, rgba(240,106,58,0.88) 45%, rgba(226,74,40,0.92) 100%)';
 /** a thinner, deeper streak under the main swipe: a second marker pass */
 const MARKER_STREAK_GRADIENT =
-  'linear-gradient(95deg, rgba(243,128,52,0.0) 0%, rgba(236,100,38,0.75) 40%, rgba(194,65,12,0.85) 100%)';
-const MARKER_GLOW = 'drop-shadow(0 4px 10px rgba(236,100,38,0.35))';
+  'linear-gradient(95deg, rgba(226,74,40,0.0) 0%, rgba(226,74,40,0.75) 40%, rgba(176,48,22,0.85) 100%)';
+const MARKER_GLOW = 'drop-shadow(0 4px 10px rgba(226,74,40,0.35))';
 
 /**
- * "design" selection: a light, soft selection fill only. Warm amber on the
- * left, a touch deeper orange on the right. No outline, no glow, so there are
- * no lines along the top and bottom of the word.
+ * "design" selection: a light, soft selection fill only. Warm coral on the
+ * left, a touch deeper vermilion on the right. No outline, no glow, so there
+ * are no lines along the top and bottom of the word.
  */
 const SELECTION_GRADIENT =
-  'linear-gradient(100deg, rgba(255,196,120,0.22) 0%, rgba(247,140,60,0.26) 50%, rgba(236,100,38,0.30) 100%)';
-const HANDLE_TOP = '#ec6426';
-const HANDLE_BOTTOM = '#c2410c';
-/** selection text: deep espresso melting into burnt orange, still dark enough to read */
-const SELECTION_INK = '#5a2208';
+  'linear-gradient(100deg, rgba(250,160,110,0.22) 0%, rgba(240,106,58,0.26) 50%, rgba(226,74,40,0.30) 100%)';
+const HANDLE_TOP = '#e24a28';
+const HANDLE_BOTTOM = '#b8361a';
+/** selection text: deep charcoal-red melting into the brand red, still dark enough to read */
+const SELECTION_INK = '#3a1208';
 const SELECTION_INK_GRADIENT =
-  'linear-gradient(95deg, #4a1a06 0%, #7a2c0a 50%, #a8380a 100%)';
+  'linear-gradient(95deg, #2a0f0a 0%, #6e1f10 50%, #a82e14 100%)';
 
 /**
- * Headline accent: the word "build" is filled with a molten-orange gradient
- * that slowly flows through the letters: deep burnt orange -> bright
- * tangerine -> deep burnt orange. The gradient is twice as wide as the word
+ * Headline accent: the word "build" is filled with a vermilion gradient
+ * that slowly flows through the letters: deep red-orange -> bright coral
+ * glint -> deep red-orange. The gradient is twice as wide as the word
  * and its stops repeat every half, so sliding it by one half loops forever
- * without a visible seam. The darkest stops stay readable on the beige
- * paper; the bright peak is only a passing glint.
+ * without a visible seam. The darkest stops stay readable on the paper;
+ * the bright peak is only a passing glint.
  *
  * BUILD_SOLID is the fallback: it is the text colour, so a browser that can't
  * clip a gradient to text still shows the word in solid orange.
  */
-const BUILD_SOLID = '#d9531a';
+const BUILD_SOLID = '#e24a28';
 const BUILD_GRADIENT =
-  'linear-gradient(100deg, #b93a0a 0%, #e0561a 18%, #f58a2e 25%, #e0561a 32%, #b93a0a 50%, #e0561a 68%, #f58a2e 75%, #e0561a 82%, #b93a0a 100%)';
-const BUILD_GLOW = 'drop-shadow(0 6px 14px rgba(236,100,38,0.22))';
+  'linear-gradient(100deg, #bf3318 0%, #e24a28 18%, #f2703a 25%, #e24a28 32%, #bf3318 50%, #e24a28 68%, #f2703a 75%, #e24a28 82%, #bf3318 100%)';
+const BUILD_GLOW = 'drop-shadow(0 6px 14px rgba(226,74,40,0.22))';
 
 /**
- * CTA colours: a diagonal orange gradient, deepened just enough for white
- * text. The label is 20px semibold, which reads as large text, and the
- * stops stay at about 3.6:1 or better with white.
+ * CTA colours: a diagonal vermilion gradient, deep enough for white text.
+ * The label is 20px semibold, which reads as large text, and the stops stay
+ * at about 3.8:1 or better with white.
  *
  * CTA_SOLID is the fallback: it paints first, so a browser that can't draw
  * the gradient still shows a solid orange pill with white text.
  */
-const CTA_SOLID = '#e05a1c';
+const CTA_SOLID = '#e24a28';
 const CTA_GRADIENT =
-  'linear-gradient(135deg, #e05a1c 0%, #d4501a 50%, #bf400c 100%)';
-const CTA_DARK = '#2a1a10';
+  'linear-gradient(135deg, #e24a28 0%, #d63f20 50%, #bf3016 100%)';
+const CTA_DARK = '#1f1b18';
 
 /**
- * The iOS edit menu is a neutral dark bubble, here a warm dark brown so it
- * belongs to the orange theme: (rgb 58,36,22) at 94% opacity, with the same
- * frosted blur behind it. White on it is well above 12:1. Because it is
- * nearly opaque, it still reads as a solid bubble in a browser without
- * backdrop-filter support.
+ * The iOS edit menu is a neutral dark bubble, here a charcoal so it belongs
+ * to the palette: (rgb 31,27,24) at 94% opacity, with the same frosted blur
+ * behind it. White on it is well above 12:1. Because it is nearly opaque, it
+ * still reads as a solid bubble in a browser without backdrop-filter support.
  */
-const MENU_BG = 'rgba(58, 36, 22, 0.94)';
+const MENU_BG = 'rgba(31, 27, 24, 0.94)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
 /**
- * "Calm zones": the site backdrop (paper folds, grid, blooms, orange/amber glows) is
+ * "Calm zones": the site backdrop (paper folds, grid, blooms, orange glows) is
  * washed back toward the paper colour behind the headline and behind the
  * CTA, and nowhere else. The backdrop itself is now one fixed layer shared by
  * every page, so the calm zones are a soft paper-coloured wash that belongs
@@ -135,10 +135,10 @@ const MENU_FILTER = 'blur(20px) saturate(180%)';
  * 55%, i.e. a 45% wash of paper on top, flat to 65% of the ellipse and
  * fading to nothing at its edge.
  *
- * The CTA zone is the exception: the pill is now a near-white, so a paper
- * (near-white) wash behind it made it vanish. Its wash uses a slightly darker
- * warm sand, and a bit stronger, so the pill reads clearly while the area
- * still looks calm.
+ * The CTA zone is the exception: the pill is a near-white, so a paper
+ * wash behind it made it vanish. Its wash uses a slightly darker stone grey,
+ * and a bit stronger, so the pill reads clearly while the area still looks
+ * calm.
  *
  * The zones follow the content: the headline + CTA are one block centered in
  * the hero, so the zone centers are offsets from the vertical middle
@@ -146,7 +146,7 @@ const MENU_FILTER = 'blur(20px) saturate(180%)';
  */
 const CALM_OPACITY = 0.55;
 const CALM_WASH = 1 - CALM_OPACITY;
-const CTA_WASH_RGB = '240,222,196';
+const CTA_WASH_RGB = '212,208,200';
 const CTA_WASH = 0.75;
 const calmZone = (size, centerY, rgb = PAPER_RGB, wash = CALM_WASH) =>
   `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(${rgb},${wash}) 0%, rgba(${rgb},${wash}) 65%, rgba(${rgb},0) 100%)`;
@@ -259,8 +259,8 @@ function CtaReveal({ children }) {
 }
 
 /**
- * Key word inside the headline: ExtraBold Italic, filled with the molten
- * orange gradient (text-clip, solid orange fallback). The gradient flows
+ * Key word inside the headline: ExtraBold Italic, filled with the vermilion
+ * gradient (text-clip, solid orange fallback). The gradient flows
  * slowly through the letters; with reduced motion it stays still.
  * The italic glyphs lean past their box on the right, so a small padding
  * (cancelled by an equal negative margin, so the layout does not move) keeps
@@ -301,7 +301,7 @@ function Emphasis({ children }) {
  * Highlighter marker behind a word, built from two passes like a real pen:
  * 1. the main swipe: tilted up to the right, an uneven quadrilateral that
  *    starts at the first letter and trails past the last one, filled with the
- *    amber -> tangerine -> orange gradient, with a soft orange glow
+ *    coral -> orange -> vermilion gradient, with a soft orange glow
  * 2. a thin, deeper streak along the bottom edge (the pen's second pass)
  * Both use mix-blend-mode: multiply, so the paper and the dark letters show
  * through like ink. Text stays dark and crisp on top. The swipe sweeps in
@@ -359,7 +359,7 @@ function Marker({ children }) {
 
 /**
  * iOS edit menu (the bubble shown when text is selected on iPhone):
- * frosted warm-brown glass (see MENU_BG) with a soft blur, small radius,
+ * frosted charcoal glass (see MENU_BG) with a soft blur, small radius,
  * hairline dividers, a trailing chevron and a pointer arrow.
  * A slim, soft sheen sweeps slowly across it, like light catching glass.
  */
@@ -452,7 +452,7 @@ function IosCallout() {
 
 /**
  * The "text selection" effect from the reference:
- * a light amber-to-orange selection fill (no outline, no glow), gradient
+ * a light coral-to-vermilion selection fill (no outline, no glow), gradient
  * ExtraBold Italic ink, the two selection handles (a thin line with an arrow:
  * top-left ▼ / bottom-right ▲) and the iPhone-style callout menu above it.
  */
@@ -528,7 +528,7 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='relative min-h-[100svh] overflow-hidden text-[#2a1a10] selection:bg-[#fdddc2] selection:text-[#5a2208]'
+      className='relative min-h-[100svh] overflow-hidden text-[#1f1b18] selection:bg-[#f7c9b8] selection:text-[#3a1208]'
       variants={slideUp}
       initial='initial'
       animate='enter'
@@ -537,8 +537,7 @@ export function Header() {
           <SiteBackdrop /> (root layout), so the hero is transparent and shares
           the exact same background as every other page. Only the two calm
           zones live here: a soft paper wash behind the headline and a slightly
-          darker, warmer wash behind the CTA (so the near-white pill stands
-          out).
+          darker wash behind the CTA (so the near-white pill stands out).
           The zone centers (offsets from the vertical middle) differ per
           breakpoint because the headline scales with the viewport.
           The offsets follow the block's bottom padding: when it was cut
@@ -616,7 +615,7 @@ export function Header() {
                 type='button'
                 onClick={() => scrollToId('contact-footer')}
                 aria-label="Let's talk, go to contact"
-                className='group flex items-center gap-[6px] rounded-full bg-[#fffaf3] p-[6px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2a1a10] motion-reduce:transition-none motion-reduce:hover:scale-100'
+                className='group flex items-center gap-[6px] rounded-full bg-[#f6f4f0] p-[6px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f1b18] motion-reduce:transition-none motion-reduce:hover:scale-100'
               >
                 <span
                   className='relative isolate flex h-[50px] w-[156px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full text-[20px] font-semibold leading-none tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]'
