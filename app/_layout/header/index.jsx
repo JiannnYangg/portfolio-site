@@ -71,18 +71,14 @@ const MARKER_STREAK_GRADIENT =
 const MARKER_GLOW = 'drop-shadow(0 4px 10px rgba(236,100,38,0.35))';
 
 /**
- * "design" selection: a glass-like selection box. Warm amber on the left,
- * deeper orange on the right, with a soft glow and a gradient hairline.
+ * "design" selection: a light, soft selection fill only. Warm amber on the
+ * left, a touch deeper orange on the right. No outline, no glow, so there are
+ * no lines along the top and bottom of the word.
  */
 const SELECTION_GRADIENT =
-  'linear-gradient(100deg, rgba(255,184,100,0.34) 0%, rgba(247,134,52,0.38) 50%, rgba(236,100,38,0.44) 100%)';
-const SELECTION_BORDER = 'inset 0 0 0 1.5px rgba(236,100,38,0.65)';
-const SELECTION_GLOW =
-  '0 6px 22px rgba(236,100,38,0.28), 0 0 0 5px rgba(249,163,90,0.14)';
-const HANDLE_TOP = 'linear-gradient(180deg, #ff9a45 0%, #ec6426 100%)';
-const HANDLE_BOTTOM = 'linear-gradient(180deg, #ec6426 0%, #b83a0a 100%)';
-const HANDLE_LINE_TOP = '#ec6426';
-const HANDLE_LINE_BOTTOM = '#c2410c';
+  'linear-gradient(100deg, rgba(255,196,120,0.22) 0%, rgba(247,140,60,0.26) 50%, rgba(236,100,38,0.30) 100%)';
+const HANDLE_TOP = '#ec6426';
+const HANDLE_BOTTOM = '#c2410c';
 /** selection text: deep espresso melting into burnt orange, still dark enough to read */
 const SELECTION_INK = '#5a2208';
 const SELECTION_INK_GRADIENT =
@@ -456,24 +452,20 @@ function IosCallout() {
 
 /**
  * The "text selection" effect from the reference:
- * a glowing amber-to-orange selection box, gradient ExtraBold Italic ink,
- * the two iOS-style selection handles (a line with a round knob: top-left
- * knob above, bottom-right knob below) and the iPhone-style callout menu
- * above it.
+ * a light amber-to-orange selection fill (no outline, no glow), gradient
+ * ExtraBold Italic ink, the two selection handles (a thin line with an arrow:
+ * top-left ▼ / bottom-right ▲) and the iPhone-style callout menu above it.
  */
 function Selection({ children }) {
   const reduceMotion = useReducedMotion();
 
   return (
     <span className='relative inline-block px-[0.14em]'>
-      {/* highlight box */}
+      {/* highlight box: light colour fill only */}
       <motion.span
         aria-hidden='true'
-        className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[4px]'
-        style={{
-          backgroundImage: SELECTION_GRADIENT,
-          boxShadow: `${SELECTION_BORDER}, ${SELECTION_GLOW}`,
-        }}
+        className='absolute inset-x-0 inset-y-[0.06em] origin-left rounded-[3px]'
+        style={{ backgroundImage: SELECTION_GRADIENT }}
         initial={reduceMotion ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{
@@ -495,26 +487,21 @@ function Selection({ children }) {
           ease: EASE_OUT_EXPO,
         }}
       >
-        {/* start handle: line + round knob on top */}
         <span
           className='absolute inset-y-[0.06em] left-0 w-[0.035em]'
-          style={{ backgroundColor: HANDLE_LINE_TOP }}
+          style={{ backgroundColor: HANDLE_TOP }}
         />
         <span
-          className='absolute -left-[0.0825em] -top-[0.1em] h-[0.2em] w-[0.2em] rounded-full border-[0.025em] border-[#fffaf3] shadow-[0_2px_6px_rgba(236,100,38,0.45)]'
-          style={{ backgroundImage: HANDLE_TOP, backgroundColor: '#ec6426' }}
+          className='absolute -left-[0.135em] -top-[0.1em] h-[0.26em] w-[0.3em] [clip-path:polygon(0_0,100%_0,50%_100%)]'
+          style={{ backgroundColor: HANDLE_TOP }}
         />
-        {/* end handle: line + round knob below */}
         <span
           className='absolute inset-y-[0.06em] right-0 w-[0.035em]'
-          style={{ backgroundColor: HANDLE_LINE_BOTTOM }}
+          style={{ backgroundColor: HANDLE_BOTTOM }}
         />
         <span
-          className='absolute -bottom-[0.1em] -right-[0.0825em] h-[0.2em] w-[0.2em] rounded-full border-[0.025em] border-[#fffaf3] shadow-[0_2px_6px_rgba(194,65,12,0.45)]'
-          style={{
-            backgroundImage: HANDLE_BOTTOM,
-            backgroundColor: '#c2410c',
-          }}
+          className='absolute -bottom-[0.1em] -right-[0.135em] h-[0.26em] w-[0.3em] [clip-path:polygon(50%_0,100%_100%,0_100%)]'
+          style={{ backgroundColor: HANDLE_BOTTOM }}
         />
       </motion.span>
 
