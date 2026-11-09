@@ -2,27 +2,42 @@
  * Contact footer (see index.jsx).
  *
  * The footer sits on solid paper, which is what ends the site's dashed
- * vertical guides cleanly at its top edge. The background is one CSS layer
- * behind the content (.bg): soft clouds of light orange, peach and beige on a
- * pale warm base, built only from radial gradients (no picture, no blur
- * filter, nothing to download). The layer is masked so its top edge fades into
- * the paper, so the footer and the section above it read as one surface.
+ * vertical guides cleanly at its top edge. The background is one layer behind
+ * the content (.bg), made of two things:
  *
- * The clouds are uneven on purpose (different sizes, positions and strengths):
- * a big orange one low on the left, a smaller one low on the right, a peach
- * band along the bottom, and beige in the upper half, so the colour moves
- * across the footer instead of sitting in a grid.
+ *   1. Soft clouds of light orange, peach and beige on a pale warm base, built
+ *      only from radial gradients (the .bg background).
+ *   2. The tile picture (public/images/footer-bg.webp, 1632x912, a field of
+ *      rounded "ice cube" tiles, originally blue and dark at the bottom) on
+ *      top of the clouds, see .bgImage.
+ *
+ * The picture is never shown as it is. Its filter turns it into plain tile
+ * lightness (grayscale) and lifts it so even its darkest tile is 0, and then
+ * `mix-blend-mode: screen` adds that on top of the clouds. Screen can only
+ * lighten: the darkest tiles leave the orange as it is, and the lighter tiles
+ * lift it towards cream. So the tiles show up as light cream cubes over the
+ * orange gradient, and nothing is ever darker than the clouds, which is how
+ * the old dark and brown tiles are gone. The picture is also faded in from
+ * the top (a mask), so the upper footer keeps its beige clouds and the cubes
+ * grow out of them.
+ *
+ * The clouds are uneven on purpose (different sizes, positions and
+ * strengths): a big orange one low on the left, a smaller one low on the
+ * right, a peach band along the bottom, and beige in the upper half.
  *
  * LIGHT ONLY: the deepest colour anywhere is a light orange (about #f48054).
- * There is no dark orange, no brown and no black in the background, which is
- * why the bottom row (socials, back to top, version, local time) uses dark ink
- * on translucent white glass instead of white text.
+ * That is why the bottom row (socials, back to top, version, local time) uses
+ * dark ink on translucent white glass instead of white text.
  *
  * The "together!" pill and the CTA keep the brand vermilion, so they stay the
  * strongest thing on the page.
  *
  * Palette: vermilion orange #e24a28 (buttons only), light orange #f48054,
  * peach #f9c6a0, beige #f6e9d8, neutral charcoal ink #1f1b18.
+ *
+ * The picture is 1632 wide and its lower 762px are kept (912 - 150), so from
+ * 768px up the footer is only as tall as that part (min-height below). On
+ * phones the height simply follows the content.
  *
  * `--ft-cols` only sets the side gutters, so the text lines up with the rest
  * of the page at every breakpoint.
@@ -80,10 +95,11 @@
   font-synthesis: none;
 }
 
-/* The cloud layer. Fully see-through at the very top (paper shows), solid from
-   --ft-fade down. Layers are listed top to bottom: beige first, then the
-   orange clouds, then the pale warm base. Every cloud fades to transparent
-   at its edge, so there are no hard lines. */
+/* The background layer. Fully see-through at the very top (paper shows), solid
+   from --ft-fade down. The gradients are listed top to bottom: beige first,
+   then the orange clouds, then the pale warm base. Every cloud fades to
+   transparent at its edge, so there are no hard lines. The tile picture
+   (.bgImage) is blended on top of all of this. */
 .bg {
   --ft-fade: clamp(2rem, 6vw, 5rem);
 
@@ -103,15 +119,15 @@
     /* big light-orange cloud, low left */
     radial-gradient(
       ellipse 58% 62% at 10% 92%,
-      rgb(246 140 94 / 78%) 0%,
-      rgb(246 150 106 / 38%) 48%,
+      rgb(246 140 94 / 90%) 0%,
+      rgb(246 150 106 / 42%) 48%,
       rgb(246 150 106 / 0%) 78%
     ),
     /* smaller light-orange cloud, low right */
     radial-gradient(
       ellipse 40% 52% at 88% 84%,
-      rgb(244 128 84 / 66%) 0%,
-      rgb(244 140 98 / 30%) 52%,
+      rgb(244 128 84 / 85%) 0%,
+      rgb(244 140 98 / 36%) 52%,
       rgb(244 140 98 / 0%) 80%
     ),
     /* peach band along the bottom, a little right of centre */
@@ -132,9 +148,23 @@
       rgb(248 170 124 / 34%) 0%,
       rgb(248 170 124 / 0%) 78%
     ),
-    /* the pale warm base, beige at the top to peach at the bottom */
-    linear-gradient(180deg, #fbf4ea 0%, #f9e6d2 52%, #f8d9bf 100%);
+    /* the warm base: beige at the top, through peach, to light orange */
+    linear-gradient(180deg, #fbf4ea 0%, #f9d2b4 52%, #f6a273 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft-fade));
+}
+
+/* The ice cubes. grayscale(1) keeps only each tile's lightness; brightness and
+   contrast then lift it so the darkest tile is 0 and the lightest ends near
+   white (a straight line from the picture's own range, about 0.35 to 1, onto
+   0 to 1, and a little more). `screen` adds that on top of the clouds: dark
+   tiles change nothing, light tiles lift the orange towards cream. The mask
+   fades the cubes in from the top third, so the beige up there stays beige. */
+.bgImage {
+  object-fit: cover;
+  object-position: center bottom;
+  filter: grayscale(1) brightness(0.717) contrast(2.006);
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(to bottom, transparent 22%, #000 62%);
 }
 
 /* Phones: line up with the site's dashed guides (32px from each edge) */
@@ -154,8 +184,7 @@
   .root {
     --ft-cols: 12;
 
-    /* about one screen tall (this was the old picture's ratio, kept so the
-       footer keeps the same height) */
+    /* the picture is 1632 wide and its lower 762px are kept (912 - 150) */
     min-height: calc(100vw * 762 / 1632);
   }
 }
@@ -724,7 +753,7 @@
   }
 }
 
-/* Print: the clouds are hidden, so everything is plain black on paper. */
+/* Print: the background is hidden, so everything is plain black on paper. */
 @media print {
   .bg {
     display: none;
