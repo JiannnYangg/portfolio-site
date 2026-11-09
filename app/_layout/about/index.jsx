@@ -9,7 +9,8 @@ import { useHashNav } from '@/hooks';
 import {
   CIRCLE_HOVER,
   CIRCLE_SHAPE_BASE,
-  CIRCLE_SIZE_SMALL,
+  CIRCLE_SMALL_CLASS,
+  CIRCLE_SMALL_STYLE,
 } from '../circle-button';
 import { PAGE_INSET, PageHero } from '../page-hero';
 
@@ -176,11 +177,11 @@ function Label({ children }) {
 const WORKS_HREF = '/#works';
 
 /**
- * The home page's round "About us" button, as "Works": same shape, colours and
- * magnetic hover, but smaller (see ../circle-button). It goes to the Works
- * section of the home page. Both pages' navbars use the same href: the home
- * page is loaded first, then (once its intro is done) scrolled to #works by
- * the Transition layout, so the visitor lands on the showcase animation.
+ * The home page's round "About us" button, as "Works": same colours and
+ * magnetic hover, smaller, and a true circle (see ../circle-button). It goes
+ * to the Works section of the home page. The navbar uses the same href: the
+ * home page loads first, then (once its intro is done) the Transition layout
+ * scrolls to #works, so the visitor lands on the showcase animation.
  */
 function WorksButton() {
   const handleHashNav = useHashNav();
@@ -196,12 +197,14 @@ function WorksButton() {
       <Link
         href={WORKS_HREF}
         passHref
+        className='shrink-0'
         onClick={event => handleHashNav(event, WORKS_HREF)}
       >
         <MagneticButton
           variant='ghost'
           size='xl'
-          className={`${CIRCLE_SHAPE_BASE} ${CIRCLE_SIZE_SMALL} ${CIRCLE_HOVER}`}
+          style={CIRCLE_SMALL_STYLE}
+          className={`${CIRCLE_SHAPE_BASE} ${CIRCLE_SMALL_CLASS} ${CIRCLE_HOVER}`}
         >
           Works
         </MagneticButton>
@@ -222,12 +225,15 @@ export function AboutBody() {
           <div className='lg:col-span-3'>
             <Label>Overview</Label>
           </div>
-          <h2
-            className='lg:col-span-9'
-            style={{ fontSize: 'clamp(1.5em, 2.2vw, 3em)', lineHeight: 1.45 }}
-          >
-            <MarkedReveal segments={intro} />
-          </h2>
+          {/* The paragraph, and the Works circle on the free space under it,
+              pushed to the right edge of the column (in the normal flow, so
+              it can never overlap the text). */}
+          <div className='flex flex-col gap-10 lg:col-span-9 lg:gap-14'>
+            <h2 style={{ fontSize: 'clamp(1.5em, 2.2vw, 3em)', lineHeight: 1.45 }}>
+              <MarkedReveal segments={intro} />
+            </h2>
+            <WorksButton />
+          </div>
         </div>
       </section>
 
@@ -268,11 +274,6 @@ export function AboutBody() {
                 </p>
               </blockquote>
             </ParallaxFade>
-
-            {/* In the normal flow under the quote, pushed to the right edge of
-                the column like the landing page's circle. The section's own
-                bottom padding keeps it clear of the Contact partition. */}
-            <WorksButton />
           </div>
         </div>
       </section>
