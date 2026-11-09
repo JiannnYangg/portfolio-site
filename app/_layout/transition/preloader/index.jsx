@@ -14,20 +14,31 @@ import { fade, slideUp } from './variants';
 const MotionComponent = motion(Center);
 
 /**
- * Brand orange (#ec6426): the loud opening of the site's orange, beige and
- * white theme. Keep the container background and the curve fill on the SAME
- * value, the curved bottom edge is drawn in the fill colour. The browser
- * theme colour (app/layout.jsx) and the web app manifest (app/manifest.js)
- * use the same value.
+ * Deep burnt orange (#9a3412). The flat bright orange (#ec6426) was too loud
+ * for a full screen: it fought the greeting and felt like a warning banner.
+ * A deeper, richer burnt orange keeps the brand hue but is calm enough to
+ * read as a premium opening, and it makes the light text pop.
+ *
+ * Keep the container background and the curve fill on the SAME value, the
+ * curved bottom edge is drawn in the fill colour. The browser theme colour
+ * (app/layout.jsx) uses the same value.
  */
-const BG = 'bg-[#ec6426]';
-const CURVE_FILL = 'fill-[#ec6426]';
+const BG = 'bg-[#9a3412]';
+const CURVE_FILL = 'fill-[#9a3412]';
 
 /**
- * Greeting colour: ONE flat, warm cream, no gradient. It reads clearly on
- * the orange and matches the beige paper of the page that follows.
+ * Greeting colour: a light peach-orange (#ffd9b3), the pale end of the brand
+ * orange, about 5.7:1 on the burnt orange background. One flat colour, no
+ * gradient.
  */
-const TEXT_COLOR = 'text-[#fff4e8]';
+const TEXT_COLOR = 'text-[#ffd9b3]';
+
+/**
+ * The dot before each greeting: a brighter, more saturated orange (#ff9a52)
+ * than the text, as a small accent so the greeting reads in two tones.
+ * Decorative only (aria-hidden by the icon), so contrast does not apply.
+ */
+const DOT_COLOR = 'text-[#ff9a52]';
 
 /**
  * Timing: every greeting gets PRELOADER_GREETING_MS (0.4 s), including the
@@ -79,13 +90,21 @@ export function Preloader() {
     >
       {width > 0 ? (
         <>
+          {/* A little larger than before (2xl -> 4xl on desktop) with a touch
+              of letter-spacing: the greeting is the only thing on the screen,
+              so it can carry more presence. */}
           <MotionComponent
-            className={`relative text-lg font-medium md:text-2xl ${TEXT_COLOR}`}
+            className={`relative text-xl font-medium tracking-wide md:text-4xl ${TEXT_COLOR}`}
             variants={fade}
             initial='initial'
             animate='enter'
           >
-            <Dot size={28} className='me-1' strokeWidth={3.5} />
+            <Dot
+              size={32}
+              className={`me-1 ${DOT_COLOR}`}
+              strokeWidth={3.5}
+              aria-hidden='true'
+            />
             <p
               lang={greeting.lang}
               className='inline-block py-1 leading-[1.6]'
