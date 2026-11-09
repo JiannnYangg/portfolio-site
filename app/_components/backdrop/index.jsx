@@ -6,14 +6,16 @@ import { memo, useEffect, useRef, useState } from 'react';
  * Site-wide background, painted ONTO THE PAGE (it scrolls with the content).
  *
  * The landing screen (the first screen of the page) has NO blobs at all: it
- * is plain paper plus the graph-paper grid. From the second screen down, a
- * very light wash of soft blooms appears. For every screen-height "band" of
- * the page the layout is generated from a fixed seed with rules, so it varies
- * the way a designer would vary it by hand:
+ * is plain paper plus the graph-paper grid (the hero brings its own violet and
+ * pink lights, see header/hero-logos.jsx). From the second screen down, a very
+ * light wash of soft blooms appears. For every screen-height "band" of the
+ * page the layout is generated from a fixed seed with rules, so it varies the
+ * way a designer would vary it by hand:
  *   - the big bloom swaps sides from band to band (left, right, left ...)
  *   - the smaller counter-bloom sits on the opposite side, tilted the other way
  *   - an elongated accent drifts near the middle on two bands out of three
- *   - a brand glow bleeds off one edge, alternating orange top-right / coral lower-left
+ *   - a warm glow bleeds off one edge, alternating apricot top-right / coral
+ *     lower-left
  *   - faint neutral folds and white highlights keep the "paper" feel
  *   - every band has its own intensity, so the page breathes: loud, quiet,
  *     medium, quiet, ...
@@ -42,13 +44,17 @@ export const PAPER_RGB = '229,227,221';
 
 /**
  * How strong ALL the background blobs are, as a share of their designed
- * opacity: 1 = as designed, 0.05 = 95% less opacity (5% visible), i.e. a very
- * light tint. It is applied once, to the whole blob layer (see SiteBackdrop),
- * so every blob, fold, highlight and glow is reduced by the same amount and
- * the relative balance between them stays the way it was designed. The
- * graph-paper grid is NOT affected. Valid range: 0 (no blobs) to 1.
+ * opacity: 1 = as designed, 0.4 = 40% of it, i.e. a very light tint. It is
+ * applied once, to the whole blob layer (see SiteBackdrop), so every blob,
+ * fold, highlight and glow is scaled by the same amount and the relative
+ * balance between them stays the way it was designed. The graph-paper grid is
+ * NOT affected. Valid range: 0 (no blobs) to 1.
+ *
+ * It was 0.05 (so faint it could not be seen). 0.4 is the "visible, but you
+ * only notice it when you look for it" level: the strongest blob core ends up
+ * at roughly 20% opacity. Turn this one number up or down to taste.
  */
-const BLOB_STRENGTH = 0.05;
+const BLOB_STRENGTH = 0.4;
 
 /** Enough bands to cover a tall first paint before the measurement runs */
 const INITIAL_BANDS = 8;
@@ -67,19 +73,24 @@ const GRID = [
 ].join(', ');
 
 /**
- * Orange and grey-beige palette. The brand orange is the vermilion #e24a28.
- * The big glows use the vivid steps (glowOrange = the brand orange, top-right;
- * glowAmber = a lighter coral-orange, lower-left); the blooms are soft blush,
- * stone and sand versions of the same warm hues, so the page reads as one
- * calm wash on grey-beige paper. Nothing here leans brown: the "fold" shading
- * is a neutral warm grey, not a tan.
+ * Warm "apricot and cream" palette, a lighter cousin of the footer's orange,
+ * peach and beige, so the page and the footer belong together. Every colour
+ * is a pale, clean warm tone: apricot, peach, blush rose, butter cream and
+ * soft sand. Nothing here leans brown or dirty: the sand is a light honey, not
+ * a tan, and the "fold" shading is a neutral warm grey.
+ *
+ * The two glows (which bleed off the page edges) use the most saturated steps
+ * (apricot and coral); the blooms use the paler peach, blush, cream and sand.
+ * The brand vermilion #e24a28 is no longer used for glows: it is too strong
+ * for a wash, and stays on the buttons and the grid.
  */
 const COLOR = {
-  glowOrange: '226,74,40',
-  glowAmber: '240,118,66',
-  softPeach: '238,196,176',
-  softBeige: '236,230,218',
-  sand: '224,217,204',
+  glowOrange: '255,156,92', // apricot
+  glowAmber: '250,134,104', // soft coral
+  softPeach: '250,190,150', // peach
+  blush: '248,184,172', // blush rose, a whisper of pink to warm the peach
+  softBeige: '246,232,208', // butter cream
+  sand: '240,214,172', // light honey sand
   white: '255,255,255',
   fold: '96,86,76',
 };
@@ -148,7 +159,7 @@ function bandBlobs(band) {
       w: between(rand, 55, 80),
       h: between(rand, 0.55, 0.8),
       rot: dir * between(rand, 10, 35),
-      rgb: pick(rand, [COLOR.softPeach, COLOR.softBeige, COLOR.softPeach]),
+      rgb: pick(rand, [COLOR.softPeach, COLOR.blush, COLOR.softPeach]),
       a: between(rand, 0.42, 0.56) * power,
     },
     {
@@ -170,12 +181,12 @@ function bandBlobs(band) {
       w: between(rand, 28, 42),
       h: between(rand, 0.22, 0.34),
       rot: between(rand, -20, 20),
-      rgb: pick(rand, [COLOR.softBeige, COLOR.sand]),
+      rgb: pick(rand, [COLOR.softBeige, COLOR.blush, COLOR.sand]),
       a: between(rand, 0.3, 0.42) * power,
     });
   }
 
-  // brand glow bleeding off an edge: orange top-right on even bands, coral lower-left on odd
+  // warm glow bleeding off an edge: apricot top-right on even bands, coral lower-left on odd
   const glows =
     band % 2 === 0
       ? [
