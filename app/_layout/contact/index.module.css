@@ -8,8 +8,8 @@
  * the details. That layer is masked so its top edge fades into the paper, so
  * the footer and the section above it read as one surface.
  *
- * The picture itself is blue, so a gradient layer in the brand orange and
- * amber is blended over it (`mix-blend-mode: color`, see .bg::after). That
+ * The picture itself is blue, so a gradient layer in the brand orange is
+ * blended over it (`mix-blend-mode: color`, see .bg::after). That
  * keeps every tile's lightness and swaps only the hue and saturation, so the
  * footer matches the theme without a new image and the white text on the
  * lower part keeps its contrast.
@@ -23,47 +23,50 @@
  * the picture and uses dark ink; the bottom (.base) sits on the deep orange
  * part and switches to white text on translucent glass.
  *
+ * Palette (from the brand reference): vermilion orange #e24a28, neutral
+ * charcoal ink #1f1b18, soft grey-beige paper. No brown.
+ *
  * `--ft-cols` only sets the side gutters, so the text lines up with the rest
  * of the page at every breakpoint.
  */
 .root {
   --ft-cols: 8;
-  --ft-ink: #2a1608;
-  --ft-muted: rgb(42 22 8 / 72%);
-  --ft-line: rgb(42 22 8 / 38%);
-  --ft-hair: rgb(42 22 8 / 22%);
+  --ft-ink: #1f1b18;
+  --ft-muted: rgb(31 27 24 / 72%);
+  --ft-line: rgb(31 27 24 / 38%);
+  --ft-hair: rgb(31 27 24 / 22%);
   --ft-glass: rgb(255 255 255 / 62%);
   --ft-glass-hover: rgb(255 255 255 / 88%);
   --ft-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ft-icon-bg: #2a1a10;
+  --ft-icon-bg: #1f1b18;
   --ft-icon-fg: #fff;
-  --ft-live: #f9a35a;
+  --ft-live: #f58a5a;
 
   /* Same colours as the hero CTA (header/index.jsx: CTA_SOLID, CTA_GRADIENT,
      CTA_DARK), so the footer and the landing page match exactly. */
-  --ft-cta-solid: #e05a1c;
+  --ft-cta-solid: #e24a28;
   --ft-cta-gradient: linear-gradient(
     135deg,
-    #e05a1c 0%,
-    #d4501a 50%,
-    #bf400c 100%
+    #e24a28 0%,
+    #d63f20 50%,
+    #bf3016 100%
   );
-  --ft-cta-dark: #2a1a10;
-  --ft-cta-ring: #fffaf3;
+  --ft-cta-dark: #1f1b18;
+  --ft-cta-ring: #f6f4f0;
 
   /* The "together!" pill: the CTA gradient, one notch darker so it holds its
      own against the orange picture. White on every stop is 4.5:1 or better. */
-  --ft-pill-solid: #c94d12;
+  --ft-pill-solid: #c63d1c;
   --ft-pill-gradient: linear-gradient(
     135deg,
-    #d9531a 0%,
-    #c94d12 48%,
-    #b3430c 100%
+    #d9452a 0%,
+    #c63d1c 48%,
+    #ad3217 100%
   );
 
-  /* The headline's ink: a near-black deep brown, the same family as the
-     pill's dark end, so the two halves of the phrase belong together. */
-  --ft-headline-ink: #2a1608;
+  /* The headline's ink: the same neutral charcoal as the rest of the page, so
+     the two halves of the phrase belong together. */
+  --ft-headline-ink: #1f1b18;
 
   position: relative;
   isolation: isolate;
@@ -93,19 +96,19 @@
 }
 
 /* Recolours the blue picture: hue and saturation come from this gradient (a
-   light amber, the brand orange, then deep orange at the very bottom),
-   lightness stays the picture's own. White stays white, so the faded top is
-   unchanged. */
+   light coral, the brand vermilion, then a deeper red-orange at the very
+   bottom), lightness stays the picture's own. White stays white, so the faded
+   top is unchanged. */
 .bg::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image: linear-gradient(
     180deg,
-    #f5a25d 0%,
-    #ec6426 42%,
-    #d9531a 72%,
-    #b8420c 100%
+    #f59a6c 0%,
+    #e24a28 42%,
+    #d6401f 72%,
+    #b0301a 100%
   );
   mix-blend-mode: color;
   pointer-events: none;
@@ -213,7 +216,7 @@
     inset 0 0.03em 0 rgb(255 255 255 / 30%),
     inset 0 -0.05em 0.1em rgb(0 0 0 / 26%),
     0 0 0 0.055em var(--ft-cta-ring),
-    0 0.14em 0.45em rgb(150 60 10 / 42%);
+    0 0.14em 0.45em rgb(160 40 20 / 42%);
   color: #fff;
   font-weight: 800;
   font-style: italic;
@@ -292,7 +295,7 @@
   left: calc(100% + 0.36em);
   width: 0.15em;
   height: 0.15em;
-  color: #ffb36b;
+  color: #ff9a72;
 }
 
 .headline:hover .starBig {
@@ -316,7 +319,7 @@
   padding: 6px;
   border-radius: 999px;
   background-color: var(--ft-cta-ring);
-  box-shadow: 0 0 0 1px rgb(42 22 8 / 8%);
+  box-shadow: 0 0 0 1px rgb(31 27 24 / 8%);
   color: #fff;
   text-decoration: none;
   transition: transform 0.3s var(--ft-ease);
@@ -480,7 +483,7 @@
   --ft-glass: rgb(255 255 255 / 14%);
   --ft-glass-hover: rgb(255 255 255 / 30%);
   --ft-icon-bg: #fff;
-  --ft-icon-fg: #2a1a10;
+  --ft-icon-fg: #1f1b18;
   --ft-live: #5eea8a;
 
   display: flex;
@@ -717,10 +720,10 @@
   }
 
   .base {
-    --ft-line: rgb(42 22 8 / 38%);
-    --ft-hair: rgb(42 22 8 / 22%);
-    --ft-muted: rgb(42 22 8 / 72%);
-    --ft-icon-bg: #2a1a10;
+    --ft-line: rgb(31 27 24 / 38%);
+    --ft-hair: rgb(31 27 24 / 22%);
+    --ft-muted: rgb(31 27 24 / 72%);
+    --ft-icon-bg: #1f1b18;
     --ft-icon-fg: #fff;
 
     color: #000;
