@@ -14,9 +14,16 @@
  *     <div .showcase-stage>      sticky, one screen: the carousel lives here
  * While the section scrolls through the viewport the stage stays pinned and
  * the page's scroll progress (0..1) is fed to the engine, which slides the row
- * from the first card to the last. The footer only comes once the last card
- * has been reached. Needs `overflow: clip` (not hidden) on the page shell,
- * otherwise `position: sticky` has nothing to stick to — see globals.css.
+ * from the first card to the last. The next section (About) only comes once
+ * the last card has been reached. Needs `overflow: clip` (not hidden) on the
+ * page shell, otherwise `position: sticky` has nothing to stick to — see
+ * globals.css.
+ *
+ * Placement: the section comes right after the hero (see app/page.jsx), so
+ * scrolling the landing page leads straight into it. Nothing in here depends
+ * on where the section is on the page: every measurement is relative to the
+ * section itself, and the "Works" links (#works) follow the anchor wherever it
+ * sits.
  *
  * The entry animation (cards rise, then grow) is NOT tied to loading or to a
  * scroll threshold any more. It starts the moment the stage begins to come
@@ -35,9 +42,13 @@
  *
  * Performance / robustness:
  * - three.js and the engine are fetched, and the shader compiled, in an idle
- *   moment shortly after the page loads (and at the latest when the section is
- *   about one screen away), so the cards are ready the instant it arrives and
- *   nothing hitches; the render loop runs only while the stage is on screen.
+ *   moment shortly after the page loads (or as soon as the visitor starts
+ *   scrolling, whichever comes first), so the cards are ready the instant the
+ *   section arrives and nothing hitches; the render loop runs only while the
+ *   stage is on screen. The section sits right under the hero, so it is within
+ *   a screen of the viewport from the very first frame: being near must NOT
+ *   start the boot (it would pile three.js and the shader compile on top of the
+ *   preloader and the hero intro), the idle timer and the first scroll do.
  * - The scroll listener only exists while the section is within a screen of
  *   the viewport, and reads the layout once per frame (heights are cached).
  * - Phones, tablets, small windows, reduced-motion, data-saver, low-memory /
@@ -60,6 +71,7 @@ import { createPortal } from 'react-dom';
 import { isNavScrolling, NAV_SCROLL_END } from '@/hooks';
 
 import { ENTRY, getScrollLength, PROJECTS, SCROLL, UI_ANIM } from './config';
+import { loadThree, warmThree } from './load-three';
 import { lockScroll, scrollToY } from './scroll-lock';
 import { ShowcaseStrip } from './strip';
 
@@ -67,7 +79,11 @@ import { ShowcaseStrip } from './strip';
 const MIN_VIEWPORT_WIDTH = 1025; // px
 /** The pinned stage is one screen tall (min 560px): shorter windows get the strip */
 const MIN_VIEWPORT_HEIGHT = 560; // px
-/** Start loading / compiling when the section is this close (viewport heights) */
+/**
+ * The scroll maths run while the section is this close (viewport heights).
+ * Being this close lets the visitor's scrolling boot the engine (see
+ * SCROLL_BOOT_PX), but it does not boot it by itself.
+ */
 const NEAR_MARGIN = '100% 0px 100% 0px';
 /**
  * The entry starts once this share of the stage is on screen. Small on purpose:
@@ -79,12 +95,17 @@ const ENTRY_VISIBILITY = 0.15;
 /**
  * Load three.js, the engine and the textures, and compile the shader, this
  * long after the page mounts, in an idle moment (so the hero intro is not
- * disturbed). The near-observer below still boots immediately if the visitor
- * gets close to the section before that.
+ * disturbed). A visitor who starts scrolling before that boots it right away.
  */
 const BOOT_DELAY_MS = 1500;
 /** An idle moment is waited for at most this long before booting anyway */
 const BOOT_IDLE_TIMEOUT_MS = 3000;
+/**
+ * Once the page has been scrolled this far (px) while the section is near, the
+ * visitor is on their way to it: boot now instead of waiting for the idle
+ * timer. Small, so the first wheel notch counts; the hero alone never does.
+ */
+const SCROLL_BOOT_PX = 24;
 /** The page is only held if at least this share of the stage is on screen */
 const LOCK_VISIBILITY = 0.5;
 
@@ -169,6 +190,9 @@ export function Showcase() {
           : 'fallback',
       );
     update();
+    // this visitor is about to get the WebGL version: open the connection to
+    // the CDN that serves three.js now, so the boot later does not wait for it
+    if (capable && wide.matches && !calm.matches) warmThree();
     wide.addEventListener('change', update);
     calm.addEventListener('change', update);
     return () => {
@@ -254,7 +278,12 @@ export function Showcase() {
 
     const syncProgress = () => {
       frame = 0;
-      if (!engine) return;
+      if (!engine) {
+        // not booted yet: the visitor's first scroll boots it (see
+        // bootIfScrolled), a page that only sits on the hero does not
+        bootIfScrolled();
+        return;
+      }
       engine.setProgress(measureProgress());
       checkEntry();
     };
@@ -309,7 +338,7 @@ export function Showcase() {
       booting = true;
       try {
         const [THREE, { createCarousel }] = await Promise.all([
-          import('./load-three').then(m => m.loadThree()),
+          loadThree(),
           import('./engine'),
         ]);
         if (cancelled || !mountRef.current) return;
@@ -335,6 +364,16 @@ export function Showcase() {
       }
     };
 
+    // The section is right under the hero, so it is "near" from the first
+    // frame: nearness alone must not boot (three.js, the engine and the shader
+    // compile would land on top of the preloader and the hero intro). It boots
+    // from the idle timer below, or here, once the page has really been
+    // scrolled (also covers a page that was already scrolled when this ran,
+    // e.g. restored from the back/forward cache or opened on a #hash).
+    const bootIfScrolled = () => {
+      if (window.scrollY > SCROLL_BOOT_PX) boot();
+    };
+
     // Scroll / resize listeners only exist while the section is within about
     // a screen of the viewport; far away there is nothing to measure.
     const listen = on => {
@@ -350,13 +389,14 @@ export function Showcase() {
       }
     };
 
-    // about a screen away: start loading, and keep the scroll maths running
+    // about a screen away: keep the scroll maths running (and boot, if the
+    // visitor is already scrolling)
     const nearObserver = new IntersectionObserver(
       entries => {
         const near = entries.some(e => e.isIntersecting);
         if (near) {
           listen(true);
-          boot();
+          bootIfScrolled();
         } else {
           listen(false);
           // left far behind: park the row at the end it was left on

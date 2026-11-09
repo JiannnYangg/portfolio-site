@@ -15,6 +15,30 @@ const THREE_URL =
 
 let pending = null;
 
+/**
+ * Opens the connection to the CDN ahead of time (DNS + TCP + TLS, no download),
+ * so the boot a moment later starts fetching three.js right away instead of
+ * first paying for the handshake. It costs next to nothing, can be called any
+ * number of times, and does nothing outside the browser. `crossorigin` matters:
+ * module imports are CORS requests, and a connection opened without it would
+ * not be reused for them.
+ */
+export function warmThree() {
+  if (typeof document === 'undefined') return;
+  try {
+    const origin = new URL(THREE_URL).origin;
+    if (document.head.querySelector(`link[rel="preconnect"][href="${origin}"]`))
+      return;
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = origin;
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  } catch {
+    // purely an optimisation: the boot works the same without it
+  }
+}
+
 export function loadThree() {
   if (!pending) {
     pending = import(/* webpackIgnore: true */ THREE_URL).catch(error => {
