@@ -5,17 +5,18 @@
  */
 
 /**
- * Hover fill: the same orange gradient as the hero CTA ("Let's talk"), with
- * white text on top. The solid orange is the fallback colour under the
- * gradient. Both hover layers (before = the growing disc, after = the final
- * fill) get the same gradient, so the colour never jumps.
+ * Hover fill: a LIGHT warm gradient (soft peach to coral, matching the .social
+ * logo's red-orange), with dark text on top so the label stays readable. The
+ * solid peach is the fallback colour under the gradient. Both hover layers
+ * (before = the growing disc, after = the final fill) get the same gradient,
+ * so the colour never jumps.
  *
  * Written out as complete class names on purpose: Tailwind only generates
  * classes it can read as whole strings in the source, so these must not be
  * built by joining pieces.
  */
 export const CIRCLE_HOVER =
-  'before:bg-[#e05a1c] after:bg-[#e05a1c] before:[background-image:linear-gradient(135deg,#e05a1c_0%,#d4501a_50%,#bf400c_100%)] after:[background-image:linear-gradient(135deg,#e05a1c_0%,#d4501a_50%,#bf400c_100%)] hover:text-white';
+  'before:bg-[#ffb594] after:bg-[#ffb594] before:[background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] after:[background-image:linear-gradient(135deg,#ffe3d4_0%,#ffc2a3_45%,#ff9e78_100%)] hover:text-[#1f1b18]';
 
 /**
  * Shape of the circle. The default "xl" button size is padding-driven, which
