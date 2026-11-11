@@ -106,16 +106,17 @@ const BUILD_GRADIENT =
 const BUILD_GLOW = 'drop-shadow(0 6px 14px rgba(226,74,40,0.22))';
 
 /**
- * CTA colours: a diagonal vermilion gradient, deep enough for white text.
- * The label is 20px semibold, which reads as large text, and the stops stay
- * at about 4:1 or better with white.
+ * CTA colours: a diagonal blue gradient sampled from the reference button,
+ * from a bright periwinkle blue (#4d65ee) at the top-left to a deeper
+ * royal blue (#2f40c1) at the bottom-right. White text stays well above 4:1
+ * on every stop.
  *
  * CTA_SOLID is the fallback: it paints first, so a browser that can't draw
- * the gradient still shows a solid orange pill with white text.
+ * the gradient still shows a solid blue pill with white text.
  */
-const CTA_SOLID = '#e24a28';
+const CTA_SOLID = '#4359e8';
 const CTA_GRADIENT =
-  'linear-gradient(135deg, #e84e2a 0%, #e24a28 50%, #d63f20 100%)';
+  'linear-gradient(135deg, #4d65ee 0%, #4359e8 50%, #2f40c1 100%)';
 const CTA_DARK = '#1f1b18';
 
 /**
@@ -593,14 +594,14 @@ export function Header() {
           {/* CTA: same shape and sizing as the reference (no border, no
               outer shadow). Near-white outer pill, 6px ring, 6px gap, 50px
               inner buttons. Only the colours are themed.
-              Resting state: an orange gradient label with white text, and a
+              Resting state: a blue gradient label with white text, and a
               dark circle with a white arrow. On hover the two swap (dark
               label, gradient circle). A CSS gradient can't be transitioned,
               so each button has its resting fill as the background and the
               other fill as an overlay that fades in on hover / keyboard
               focus. The overlay sits behind the text (-z-10 inside an
               `isolate` stacking context), so the label and arrow never
-              flicker. The solid theme orange is the fallback colour under the
+              flicker. The solid theme blue is the fallback colour under the
               gradient. A subtle top highlight gives the label some depth.
               Sits a deliberate, modest gap under the headline. It shares the
               headline's rise-from-mask intro and scroll fade (CtaReveal). */}
@@ -631,7 +632,7 @@ export function Header() {
                   className='relative isolate flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full'
                   style={{ backgroundColor: CTA_DARK }}
                 >
-                  {/* hover / focus: the orange gradient fades in behind the arrow */}
+                  {/* hover / focus: the blue gradient fades in behind the arrow */}
                   <span
                     aria-hidden='true'
                     className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
@@ -643,7 +644,7 @@ export function Header() {
                   <ArrowUpRight
                     size={20}
                     strokeWidth={2.25}
-                    className='text-white transition-transform duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0'
+                    className='text-white transition-transform duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0'
                   />
                 </span>
               </button>
