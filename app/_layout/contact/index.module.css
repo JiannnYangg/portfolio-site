@@ -138,36 +138,36 @@
     ),
     /* big light-orange cloud, low left */
     radial-gradient(
-      ellipse 58% 62% at 10% 92%,
-      rgb(246 140 94 / 90%) 0%,
-      rgb(246 150 106 / 42%) 48%,
-      rgb(246 150 106 / 0%) 78%
-    ),
+        ellipse 58% 62% at 10% 92%,
+        rgb(246 140 94 / 90%) 0%,
+        rgb(246 150 106 / 42%) 48%,
+        rgb(246 150 106 / 0%) 78%
+      ),
     /* smaller light-orange cloud, low right */
     radial-gradient(
-      ellipse 40% 52% at 88% 84%,
-      rgb(244 128 84 / 85%) 0%,
-      rgb(244 140 98 / 36%) 52%,
-      rgb(244 140 98 / 0%) 80%
-    ),
+        ellipse 40% 52% at 88% 84%,
+        rgb(244 128 84 / 85%) 0%,
+        rgb(244 140 98 / 36%) 52%,
+        rgb(244 140 98 / 0%) 80%
+      ),
     /* peach band along the bottom, a little right of centre */
     radial-gradient(
-      ellipse 52% 44% at 52% 104%,
-      rgb(250 188 146 / 85%) 0%,
-      rgb(250 188 146 / 0%) 74%
-    ),
+        ellipse 52% 44% at 52% 104%,
+        rgb(250 188 146 / 85%) 0%,
+        rgb(250 188 146 / 0%) 74%
+      ),
     /* soft peach, mid left, behind the headline and the CTA */
     radial-gradient(
-      ellipse 44% 50% at 18% 42%,
-      rgb(250 208 172 / 70%) 0%,
-      rgb(250 208 172 / 0%) 72%
-    ),
+        ellipse 44% 50% at 18% 42%,
+        rgb(250 208 172 / 70%) 0%,
+        rgb(250 208 172 / 0%) 72%
+      ),
     /* faint orange haze, upper left of centre */
     radial-gradient(
-      ellipse 30% 34% at 44% 14%,
-      rgb(248 170 124 / 34%) 0%,
-      rgb(248 170 124 / 0%) 78%
-    ),
+        ellipse 30% 34% at 44% 14%,
+        rgb(248 170 124 / 34%) 0%,
+        rgb(248 170 124 / 0%) 78%
+      ),
     /* the warm base: beige at the top, through peach, to light orange */
     linear-gradient(180deg, #fbf4ea 0%, #f9d2b4 52%, #f6a273 100%);
   mask-image: var(--ft-fade-mask);
@@ -207,10 +207,13 @@
   );
 }
 
-/* Phones: line up with the site's dashed guides (32px from each edge) */
+/* Phones: the text starts on the same edge as every other section's text
+   (guide inset + section inset, see globals.css), and the headline is sized
+   so "Let's work" and the "together!" pill fill the width the way the hero
+   headline does. */
 @media (width < 480px) {
   .root {
-    padding-inline: 2rem;
+    padding-inline: calc(var(--guide-inset) + var(--section-inset));
   }
 }
 
@@ -262,6 +265,14 @@
   font-weight: 600;
   line-height: 1.08;
   letter-spacing: -0.03em;
+}
+
+/* Phones: sized so "Let's work" and the "together!" pill fill the width the
+   way the hero headline does (continuous with the 6.4vw curve at 768px). */
+@media (width < 768px) {
+  .headline {
+    font-size: clamp(2.5rem, 13vw, 3.1rem);
+  }
 }
 
 /* One phrase on one baseline: "Let's work" then the pill. When there is not

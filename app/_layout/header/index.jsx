@@ -157,12 +157,7 @@ const calmZone = (size, centerY, rgb = PAPER_RGB, wash = CALM_WASH) =>
   `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(${rgb},${wash}) 0%, rgba(${rgb},${wash}) 65%, rgba(${rgb},0) 100%)`;
 const CALM_BACKGROUND = [
   calmZone('40% 26%', 'calc(50% + var(--head-y))'), // headline block
-  calmZone(
-    '200px 80px',
-    'calc(50% + var(--cta-y))',
-    CTA_WASH_RGB,
-    CTA_WASH
-  ), // CTA pill
+  calmZone('200px 80px', 'calc(50% + var(--cta-y))', CTA_WASH_RGB, CTA_WASH), // CTA pill
 ].join(', ');
 
 /** Clips only the bottom edge of a line, so text rises out of a mask
@@ -524,7 +519,7 @@ function Selection({ children }) {
 export function Header() {
   return (
     <motion.header
-      className='relative min-h-[100svh] overflow-hidden text-[#1f1b18] selection:bg-[#f7c9b8] selection:text-[#1f1b18]'
+      className='hero-scope relative min-h-[100svh] overflow-hidden text-[#1f1b18] selection:bg-[#f7c9b8] selection:text-[#1f1b18]'
       variants={slideUp}
       initial='initial'
       animate='enter'
@@ -534,16 +529,13 @@ export function Header() {
           the exact same background as every other page. Only the two calm
           zones live here: a soft paper wash behind the headline and a slightly
           darker wash behind the CTA (so the near-white pill stands out).
-          The zone centers (offsets from the vertical middle) differ per
-          breakpoint because the headline scales with the viewport.
-          The offsets follow the block's bottom padding: when it was cut
-          (pb-28 -> pb-20 mobile, pb-36 -> pb-24 desktop) the block moved
-          down by half of that cut relative to the hero's middle, so
-          --head-y / --cta-y grew by the same half (+16px mobile, +24px
-          desktop) and the calm light zones stay behind the text and the pill. */}
+          The zone centers (offsets from the vertical middle, --head-y and
+          --cta-y) are worked out in globals.css (.hero-scope) from the same
+          numbers the block below uses (headline size, gap, padding), so the
+          calm zones stay behind the text and the pill at every phone size. */}
       <div
         aria-hidden='true'
-        className='pointer-events-none absolute inset-0 [--cta-y:113px] [--head-y:-43px] md:[--cta-y:196px] md:[--head-y:-50px]'
+        className='pointer-events-none absolute inset-0'
         style={{ backgroundImage: CALM_BACKGROUND }}
       />
 
@@ -562,8 +554,13 @@ export function Header() {
           "About" line below it never starts above the fold: on landing it
           stays hidden and it shows up after a small scroll. */}
       <div className='relative flex min-h-[100svh] items-center'>
-        <div className='mx-auto w-full max-w-5xl px-6 pb-20 pt-[116px] md:px-10 md:pb-24 md:pt-36'>
-          <h1 className='mx-auto w-fit font-[family-name:var(--font-inter-tight)] text-[clamp(2.5rem,6.4vw,5.5rem)] font-semibold leading-[1.08] tracking-[-0.03em]'>
+        {/* Phones: the side padding is the guide inset plus the section inset,
+            the same edge every other section's text starts at, so a headline
+            line can never touch a dashed guide. The headline size and the
+            padding above / below come from the .hero-scope tokens (globals.css)
+            because the hero logos are placed against this block's edges. */}
+        <div className='mx-auto w-full max-w-5xl px-[calc(var(--guide-inset)+var(--section-inset))] pb-[var(--hero-pb)] pt-[var(--hero-pt)] md:px-10'>
+          <h1 className='mx-auto w-fit font-[family-name:var(--font-inter-tight)] text-[length:var(--hero-fs)] font-semibold leading-[1.08] tracking-[-0.03em]'>
             <Line>
               <Word index={0}>We</Word>{' '}
               <Word index={1}>
@@ -573,7 +570,7 @@ export function Header() {
                 it.
               </Word>
             </Line>
-            <Line className='md:pl-[1em]'>
+            <Line className='wide:pl-[1em]'>
               <Word index={3}>We</Word>{' '}
               <Word index={4}>
                 <Emphasis>build</Emphasis>
@@ -582,7 +579,7 @@ export function Header() {
                 it.
               </Word>
             </Line>
-            <Line className='md:pl-[2em]'>
+            <Line className='wide:pl-[2em]'>
               <Word index={6}>We</Word> <Word index={7}>get</Word>{' '}
               <Word index={8}>it</Word>{' '}
               <Word index={9} last>
@@ -605,7 +602,7 @@ export function Header() {
               gradient. A subtle top highlight gives the label some depth.
               Sits a deliberate, modest gap under the headline. It shares the
               headline's rise-from-mask intro and scroll fade (CtaReveal). */}
-          <div className='mt-[60px] flex justify-center md:mt-[88px]'>
+          <div className='mt-[var(--hero-gap)] flex justify-center'>
             <CtaReveal>
               <button
                 type='button'
