@@ -198,6 +198,7 @@
      --hero-ch      block height: 3 lines at 1.08 + gap + the 62px CTA
      --hero-top     block top edge, --hero-bottom its bottom edge
      --hero-travel  spare room in the band under the CTA (0 on short phones)
+     --hero-top-room  spare room in the band above the headline (0 on short phones)
      --head-y/--cta-y  centres of the two calm zones, from the hero middle */
 @layer components {
   .hero-scope {
@@ -211,6 +212,7 @@
     );
     --hero-bottom: calc(var(--hero-top) + var(--hero-ch));
     --hero-travel: max(0px, calc(100% - var(--hero-bottom) - 120px));
+    --hero-top-room: max(0px, calc(var(--hero-top) - var(--band) - 170px));
 
     /* centres of the two calm zones, measured from the hero's middle */
     --head-y-calc: calc(

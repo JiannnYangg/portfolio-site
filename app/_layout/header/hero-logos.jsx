@@ -79,17 +79,27 @@ const shadowFor = depth =>
  *    (.hero-scope) works out its top and bottom edge as --hero-top and
  *    --hero-bottom from the headline size, gap and padding. On a phone the
  *    logos are placed against those two edges, not against percentages of the
- *    screen, so they can never land on the text whatever the screen height:
- *      above the block   claude (just under the navbar) and comfy (just above
- *                        the headline's selection callout, which needs 56px)
- *      beside line 2     codex, in the blank space after "We build it."
- *      below the CTA     squiggle, n8n, elevenlabs, runway and github, spread
- *                        over the free band. --hero-travel is how much room
- *                        that band has to spare (0 on the shortest phones),
- *                        and each logo takes its own share of it.
+ *    screen, so they can never land on the text whatever the screen height.
+ *  - 3 above, 1 beside, 4 below, so the weight is spread over the whole
+ *    screen instead of piling up in one corner. Each band is a gentle zig-zag
+ *    (different heights, different sizes, different tilts), and the two bands
+ *    do not mirror each other:
+ *      above the headline  claude (top left, the biggest), n8n (a little
+ *                          right of centre, lower), comfy (right, sitting
+ *                          just above the headline's selection callout,
+ *                          which needs 56px of clear air)
+ *      beside line 2       codex, in the blank space after "We build it."
+ *      below the CTA       runway (left, right under the pill), squiggle
+ *                          (right, the bottom band's big one), elevenlabs
+ *                          (middle, lower) and github (left of centre, the
+ *                          lowest one). --hero-top-room / --hero-travel are
+ *                          the spare height of the top / bottom band
+ *                          (0 on the shortest phones, where the logos
+ *                          collapse into one row, still side by side); each
+ *                          logo takes its own share of it.
  *  - Sizes are clamps of the smaller of screen width and screen height
- *    (min(vw, svh)), so on a short phone the logos shrink instead of
- *    crowding the text.
+ *    (min(vw, svh)): bigger on a tall phone that has room, smaller on a short
+ *    one so the logos never crowd the text.
  *
  * Order matters: hero logos come first so they pop in first.
  *
@@ -107,10 +117,10 @@ const LOGOS = [
     src: '/hero-logos/hero-claude-4827.webp',
     width: 300,
     height: 261,
-    size: 'w-[clamp(44px,min(16vw,7.5svh),68px)] wide:w-[clamp(62px,8.4vw,152px)]',
-    imgSizes: '(min-width: 768px) 152px, 68px',
+    size: 'w-[clamp(48px,min(19vw,8.5svh),84px)] wide:w-[clamp(62px,8.4vw,152px)]',
+    imgSizes: '(min-width: 768px) 152px, 84px',
     position:
-      'left-[5%] top-[calc(var(--band)_+_24px)] wide:left-[7%] wide:top-[max(15%,calc(var(--band)_+_20px))]',
+      'left-[5%] top-[calc(var(--band)_+_22px_+_var(--hero-top-room)_*_0.1)] wide:left-[7%] wide:top-[max(15%,calc(var(--band)_+_20px))]',
     rotate: -9,
     depth: 1.3,
     float: [10, 6.2, 1.6, 0],
@@ -120,8 +130,8 @@ const LOGOS = [
     src: '/hero-logos/hero-comfy-9153.webp',
     width: 420,
     height: 172,
-    size: 'w-[clamp(60px,min(22.5vw,13svh),96px)] wide:w-[clamp(84px,12vw,224px)]',
-    imgSizes: '(min-width: 768px) 224px, 96px',
+    size: 'w-[clamp(64px,min(26vw,14svh),118px)] wide:w-[clamp(84px,12vw,224px)]',
+    imgSizes: '(min-width: 768px) 224px, 118px',
     position:
       'right-[5%] bottom-[calc(100%_-_var(--hero-top)_+_56px)] wide:bottom-auto wide:right-[8%] wide:top-[24%]',
     rotate: 5,
@@ -133,10 +143,10 @@ const LOGOS = [
     src: '/hero-logos/hero-squiggle-1084.webp',
     width: 224,
     height: 196,
-    size: 'w-[clamp(46px,min(14.5vw,8.5svh),64px)] wide:w-[clamp(54px,8vw,148px)]',
-    imgSizes: '(min-width: 768px) 148px, 64px',
+    size: 'w-[clamp(48px,min(18vw,9.5svh),80px)] wide:w-[clamp(54px,8vw,148px)]',
+    imgSizes: '(min-width: 768px) 148px, 80px',
     position:
-      'right-[6%] top-[calc(var(--hero-bottom)_+_14px)] wide:right-[6%] wide:top-[50%]',
+      'right-[6%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.18)] wide:right-[6%] wide:top-[50%]',
     rotate: -8,
     depth: 1.25,
     float: [9, 6.6, 1.5, 2],
@@ -146,10 +156,10 @@ const LOGOS = [
     src: '/hero-logos/hero-n8n-2606.webp',
     width: 320,
     height: 200,
-    size: 'w-[clamp(40px,min(12vw,7svh),58px)] wide:w-[clamp(48px,6vw,100px)]',
-    imgSizes: '(min-width: 768px) 100px, 58px',
+    size: 'w-[clamp(40px,min(14vw,7.5svh),66px)] wide:w-[clamp(48px,6vw,100px)]',
+    imgSizes: '(min-width: 768px) 100px, 66px',
     position:
-      'left-[6%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.28)] wide:left-[4%] wide:top-[49%]',
+      'left-[44%] top-[calc(var(--band)_+_16px_+_var(--hero-top-room)_*_0.55)] wide:left-[4%] wide:top-[49%]',
     rotate: -14,
     depth: 0.7,
     float: [6, 6.8, 2, 1.6],
@@ -161,10 +171,10 @@ const LOGOS = [
     src: '/hero-logos/hero-gitcat-4719.webp',
     width: 190,
     height: 200,
-    size: 'w-[clamp(30px,min(9.5vw,5.5svh),42px)] wide:w-[clamp(34px,4.2vw,68px)]',
-    imgSizes: '(min-width: 768px) 68px, 42px',
+    size: 'w-[clamp(32px,min(11.5vw,6.2svh),52px)] wide:w-[clamp(34px,4.2vw,68px)]',
+    imgSizes: '(min-width: 768px) 68px, 52px',
     position:
-      'left-[46%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel))] wide:top-auto wide:bottom-[16%] wide:left-[17%]',
+      'left-[30%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel))] wide:top-auto wide:bottom-[16%] wide:left-[17%]',
     rotate: 7,
     depth: 0.5,
     float: [5, 5.2, 1.8, 1.1],
@@ -174,10 +184,10 @@ const LOGOS = [
     src: '/hero-logos/hero-elevenlabs-7342.webp',
     width: 240,
     height: 234,
-    size: 'w-[clamp(32px,min(10vw,5.8svh),46px)] wide:w-[clamp(38px,4.8vw,78px)]',
-    imgSizes: '(min-width: 768px) 78px, 46px',
+    size: 'w-[clamp(34px,min(12.5vw,6.6svh),56px)] wide:w-[clamp(38px,4.8vw,78px)]',
+    imgSizes: '(min-width: 768px) 78px, 56px',
     position:
-      'right-[22%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.55)] wide:top-auto wide:bottom-[13%] wide:right-[27%]',
+      'right-[34%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.5)] wide:top-auto wide:bottom-[13%] wide:right-[27%]',
     rotate: 11,
     depth: 0.6,
     float: [5, 5.6, 1.4, 0.4],
@@ -190,10 +200,10 @@ const LOGOS = [
     src: '/hero-logos/hero-mylogo-6382.webp',
     width: 193,
     height: 200,
-    size: 'w-[clamp(30px,9vw,40px)] wide:w-[clamp(34px,4.2vw,68px)]',
-    imgSizes: '(min-width: 768px) 68px, 40px',
+    size: 'w-[clamp(32px,10vw,46px)] wide:w-[clamp(34px,4.2vw,68px)]',
+    imgSizes: '(min-width: 768px) 68px, 46px',
     position:
-      'right-[6%] top-[calc(var(--hero-top)_+_var(--hero-fs)_*_1.62_-_17px)] wide:right-[27%] wide:top-[calc(50%_-_112px)]',
+      'right-[11%] top-[calc(var(--hero-top)_+_var(--hero-fs)_*_1.62_-_20px)] wide:right-[27%] wide:top-[calc(50%_-_112px)]',
     rotate: 8,
     depth: 0.6,
     float: [5, 5.4, 1.7, 0.9],
@@ -204,10 +214,10 @@ const LOGOS = [
     src: '/hero-logos/hero-letter-r-8156.webp',
     width: 200,
     height: 200,
-    size: 'w-[clamp(28px,min(9vw,5.2svh),40px)] wide:w-[clamp(30px,3.6vw,58px)]',
-    imgSizes: '(min-width: 768px) 58px, 40px',
+    size: 'w-[clamp(30px,min(10.5vw,5.8svh),48px)] wide:w-[clamp(30px,3.6vw,58px)]',
+    imgSizes: '(min-width: 768px) 58px, 48px',
     position:
-      'left-[26%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.8)] wide:top-auto wide:bottom-[41%] wide:left-[24%]',
+      'left-[7%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.1)] wide:top-auto wide:bottom-[41%] wide:left-[24%]',
     rotate: -8,
     depth: 0.55,
     float: [5, 6.1, 1.5, 1.9],
