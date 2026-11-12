@@ -68,30 +68,35 @@ const shadowFor = depth =>
  * elevenlabs, codex, runway) are small and sit further back, so they add
  * texture without competing.
  * Nothing mirrors: sizes, edges and tilts all differ, but the visual weight is
- * balanced: big top-left vs big top-right, big mid-right vs small mid-left.
+ * balanced.
  *
- * The original six positions are untouched. The two newer logos fill empty
- * pockets:
- *  - codex: in the blank space to the right of the "We build it." line (the
- *    line is indented 1em and ends well before the line below it). The
- *    headline block is always centered in the hero and its line 2 sits ~51px
- *    above the hero's vertical middle, so top is calc(50% - offset). On
- *    desktop the offset is larger than the line's own centre, so the logo
- *    floats a little above the line. Nudged inwards (toward the headline) so
- *    it sits well clear of the right page guide.
- *  - runway: left side, below n8n and above GitHub, in the open space beside
- *    the "We build it." / "We get it" lines, clear of the left page guide.
- *    Smaller than the other supporting logos on desktop.
- *  - github: lower left, a little lower than before and nudged left, away
- *    from the runway logo.
+ * TWO ARRANGEMENTS, picked with the `wide:` variant (tailwind plugin): a
+ * tablet or desktop, or a phone held sideways, uses the original scatter in
+ * percentages of the hero (the `wide:` classes below, unchanged from before).
+ * A phone held upright uses the base classes:
  *
- * Mobile positions are the base classes, md: classes take over on desktop.
- * Everything stays in the empty bands above and below the headline and in
- * the side margins, and clear of the top nav, so nothing collides with text.
+ *  - The headline + CTA block is centred in the hero, and globals.css
+ *    (.hero-scope) works out its top and bottom edge as --hero-top and
+ *    --hero-bottom from the headline size, gap and padding. On a phone the
+ *    logos are placed against those two edges, not against percentages of the
+ *    screen, so they can never land on the text whatever the screen height:
+ *      above the block   claude (just under the navbar) and comfy (just above
+ *                        the headline's selection callout, which needs 56px)
+ *      beside line 2     codex, in the blank space after "We build it."
+ *      below the CTA     squiggle, n8n, elevenlabs, runway and github, spread
+ *                        over the free band. --hero-travel is how much room
+ *                        that band has to spare (0 on the shortest phones),
+ *                        and each logo takes its own share of it.
+ *  - Sizes are clamps of the smaller of screen width and screen height
+ *    (min(vw, svh)), so on a short phone the logos shrink instead of
+ *    crowding the text.
  *
  * Order matters: hero logos come first so they pop in first.
  *
- * width  : clamp(min on phones, fluid vw, max on large screens)
+ * size   : Tailwind width classes: phone clamp, then the `wide:` desktop clamp
+ * imgSizes: the matching `sizes` hint for the image, so a phone downloads a
+ *          small file
+ * position: Tailwind placement classes: phone arrangement, then `wide:`
  * depth  : parallax strength + shadow length (big/close logos move more)
  * rotate : resting tilt in degrees
  * float  : [amplitude px, duration s, tilt deg, phase s]
@@ -102,8 +107,10 @@ const LOGOS = [
     src: '/hero-logos/hero-claude-4827.webp',
     width: 300,
     height: 261,
-    size: 'clamp(62px, 8.4vw, 152px)', // was clamp(76px, 10.5vw, 190px)
-    position: 'left-[4%] top-[14%] md:left-[7%] md:top-[15%]',
+    size: 'w-[clamp(44px,min(16vw,7.5svh),68px)] wide:w-[clamp(62px,8.4vw,152px)]',
+    imgSizes: '(min-width: 768px) 152px, 68px',
+    position:
+      'left-[5%] top-[calc(var(--band)_+_24px)] wide:left-[7%] wide:top-[max(15%,calc(var(--band)_+_20px))]',
     rotate: -9,
     depth: 1.3,
     float: [10, 6.2, 1.6, 0],
@@ -113,8 +120,10 @@ const LOGOS = [
     src: '/hero-logos/hero-comfy-9153.webp',
     width: 420,
     height: 172,
-    size: 'clamp(84px, 12vw, 224px)', // was clamp(104px, 15vw, 280px)
-    position: 'right-[4%] top-[21%] md:right-[8%] md:top-[24%]',
+    size: 'w-[clamp(60px,min(22.5vw,13svh),96px)] wide:w-[clamp(84px,12vw,224px)]',
+    imgSizes: '(min-width: 768px) 224px, 96px',
+    position:
+      'right-[5%] bottom-[calc(100%_-_var(--hero-top)_+_56px)] wide:bottom-auto wide:right-[8%] wide:top-[24%]',
     rotate: 5,
     depth: 1.5,
     float: [12, 7.4, 1.2, 0.8],
@@ -124,9 +133,10 @@ const LOGOS = [
     src: '/hero-logos/hero-squiggle-1084.webp',
     width: 224,
     height: 196,
-    size: 'clamp(54px, 8vw, 148px)', // was clamp(68px, 10vw, 185px)
+    size: 'w-[clamp(46px,min(14.5vw,8.5svh),64px)] wide:w-[clamp(54px,8vw,148px)]',
+    imgSizes: '(min-width: 768px) 148px, 64px',
     position:
-      'bottom-[29%] right-[6%] md:bottom-auto md:right-[6%] md:top-[50%]',
+      'right-[6%] top-[calc(var(--hero-bottom)_+_14px)] wide:right-[6%] wide:top-[50%]',
     rotate: -8,
     depth: 1.25,
     float: [9, 6.6, 1.5, 2],
@@ -136,23 +146,25 @@ const LOGOS = [
     src: '/hero-logos/hero-n8n-2606.webp',
     width: 320,
     height: 200,
-    size: 'clamp(48px, 6vw, 100px)',
-    // lifted: was bottom-[26%] on mobile and md:top-[60%] on desktop
-    position: 'bottom-[34%] left-[5%] md:bottom-auto md:left-[4%] md:top-[49%]',
+    size: 'w-[clamp(40px,min(12vw,7svh),58px)] wide:w-[clamp(48px,6vw,100px)]',
+    imgSizes: '(min-width: 768px) 100px, 58px',
+    position:
+      'left-[6%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.28)] wide:left-[4%] wide:top-[49%]',
     rotate: -14,
     depth: 0.7,
     float: [6, 6.8, 2, 1.6],
   },
   {
-    // the new GitHub logo (octocat). Desktop: lowered (bottom 22% -> 16%) and
-    // moved a bit left (left 20% -> 17%); mobile only lowered (19% -> 16%).
-    // Same size, tilt and float as before.
+    // the new GitHub logo (octocat). Wide: lowered (bottom 22% -> 16%) and
+    // moved a bit left (left 20% -> 17%). Same size, tilt and float as before.
     id: 'github',
     src: '/hero-logos/hero-gitcat-4719.webp',
     width: 190,
     height: 200,
-    size: 'clamp(34px, 4.2vw, 68px)',
-    position: 'bottom-[16%] left-[36%] md:bottom-[16%] md:left-[17%]',
+    size: 'w-[clamp(30px,min(9.5vw,5.5svh),42px)] wide:w-[clamp(34px,4.2vw,68px)]',
+    imgSizes: '(min-width: 768px) 68px, 42px',
+    position:
+      'left-[46%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel))] wide:top-auto wide:bottom-[16%] wide:left-[17%]',
     rotate: 7,
     depth: 0.5,
     float: [5, 5.2, 1.8, 1.1],
@@ -162,37 +174,40 @@ const LOGOS = [
     src: '/hero-logos/hero-elevenlabs-7342.webp',
     width: 240,
     height: 234,
-    size: 'clamp(38px, 4.8vw, 78px)',
-    position: 'bottom-[15%] right-[26%] md:bottom-[13%] md:right-[27%]',
+    size: 'w-[clamp(32px,min(10vw,5.8svh),46px)] wide:w-[clamp(38px,4.8vw,78px)]',
+    imgSizes: '(min-width: 768px) 78px, 46px',
+    position:
+      'right-[22%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.55)] wide:top-auto wide:bottom-[13%] wide:right-[27%]',
     rotate: 11,
     depth: 0.6,
     float: [5, 5.6, 1.4, 0.4],
   },
   {
-    // Codex: same size as before. Sits in the blank space after "We build it."
-    // Moved inwards on desktop (right 24% -> 27%) and a bit upwards (offset
-    // 84px -> 112px above the middle); mobile is unchanged.
+    // Codex: sits in the blank space after "We build it." (line 2 of the
+    // headline). On a phone it is centred on that line: the line's middle is
+    // the block top + 1.5 lines (1.5 * 1.08 = 1.62 headline sizes).
     id: 'codex',
     src: '/hero-logos/hero-mylogo-6382.webp',
     width: 193,
     height: 200,
-    size: 'clamp(34px, 4.2vw, 68px)',
+    size: 'w-[clamp(30px,9vw,40px)] wide:w-[clamp(34px,4.2vw,68px)]',
+    imgSizes: '(min-width: 768px) 68px, 40px',
     position:
-      'right-[6%] top-[calc(50%_-_60px)] md:right-[27%] md:top-[calc(50%_-_112px)]',
+      'right-[6%] top-[calc(var(--hero-top)_+_var(--hero-fs)_*_1.62_-_17px)] wide:right-[27%] wide:top-[calc(50%_-_112px)]',
     rotate: 8,
     depth: 0.6,
     float: [5, 5.4, 1.7, 0.9],
   },
   {
-    // Runway ML: left side, below n8n, above GitHub. Desktop: smaller (max
-    // 74px -> 58px), higher (bottom 41%) and a bit to the right (left 21% ->
-    // 24%). Mobile is unchanged.
+    // Runway ML: left side, below n8n, above GitHub (wide: smaller, higher).
     id: 'runway',
     src: '/hero-logos/hero-letter-r-8156.webp',
     width: 200,
     height: 200,
-    size: 'clamp(30px, 3.6vw, 58px)',
-    position: 'bottom-[24%] left-[14%] md:bottom-[41%] md:left-[24%]',
+    size: 'w-[clamp(28px,min(9vw,5.2svh),40px)] wide:w-[clamp(30px,3.6vw,58px)]',
+    imgSizes: '(min-width: 768px) 58px, 40px',
+    position:
+      'left-[26%] top-[calc(var(--hero-bottom)_+_14px_+_var(--hero-travel)_*_0.8)] wide:top-auto wide:bottom-[41%] wide:left-[24%]',
     rotate: -8,
     depth: 0.55,
     float: [5, 6.1, 1.5, 1.9],
@@ -236,11 +251,10 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
   return (
     // the outer box carries position, scroll fade and parallax
     <motion.div
-      className={`pointer-events-none absolute z-0 ${logo.position}`}
-      style={{
-        width: logo.size,
-        ...(reduceMotion ? {} : { opacity: scrollOpacity, x: parallaxX, y }),
-      }}
+      className={`pointer-events-none absolute z-0 ${logo.size} ${logo.position}`}
+      style={
+        reduceMotion ? undefined : { opacity: scrollOpacity, x: parallaxX, y }
+      }
     >
       {/* filter lives on this box so the shadow is cast in screen space: it
           keeps pointing down-right whatever the logo tilt or float is */}
@@ -297,7 +311,7 @@ function Logo({ logo, index, mouseX, mouseY, active }) {
                 alt=''
                 width={logo.width}
                 height={logo.height}
-                sizes={logo.size}
+                sizes={logo.imgSizes}
                 {...(index < 4
                   ? { priority: true }
                   : { loading: 'eager', fetchPriority: 'low' })}

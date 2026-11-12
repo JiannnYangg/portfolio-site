@@ -67,10 +67,12 @@ const GROUPS = [
 const DASHES = `repeating-linear-gradient(to right, ${PARTITION_LINE} 0 7px, transparent 7px 13px)`;
 
 /**
- * Same inset the intro box above uses (Description), so the text sits inside
- * the dashed guides instead of touching them.
+ * Same inset the intro box above uses (Description): the shared
+ * --section-inset token (globals.css), so the text sits inside the dashed
+ * guides instead of touching them, and every section's text starts on one
+ * edge. 1.25rem on phones, 2.5rem and up from 640px.
  */
-const INSET = 'clamp(2.5em, 4vw, 8em)';
+const INSET = 'var(--section-inset)';
 
 /**
  * The word reveal of the intro paragraph (Description): every word sits in its
@@ -167,7 +169,11 @@ function DashedDivider() {
   );
 }
 
-/** One tag pill: the pill fades in, its dot pops, its words slide up. */
+/**
+ * One tag pill: the pill fades in, its dot pops, its words slide up.
+ * The dark hover fill only applies where hovering is real (a mouse): on a
+ * touch screen a tap would leave the pill stuck dark.
+ */
 function Tag({ tag, position }) {
   const reduceMotion = useReducedMotion();
   const delay = Math.min(position, MAX_STAGGER_STEPS) * TAG_STAGGER;
@@ -196,7 +202,7 @@ function Tag({ tag, position }) {
   return (
     <motion.li
       {...pillMotion}
-      className='flex cursor-default items-center gap-3 rounded-full border border-solid px-6 py-3 text-base transition-colors duration-300 ease-in-expo hover:bg-foreground hover:text-background lg:text-xl'
+      className='flex cursor-default items-center gap-2.5 rounded-full border border-solid px-4 py-2 text-[0.9375rem] transition-colors duration-300 ease-in-expo sm:gap-3 sm:px-6 sm:py-3 sm:text-base lg:text-xl [@media(hover:hover)]:hover:bg-foreground [@media(hover:hover)]:hover:text-background'
     >
       <motion.span
         aria-hidden='true'
@@ -214,7 +220,7 @@ function Group({ index, title, note, tags = [] }) {
   return (
     <section className='container relative'>
       <div
-        className='grid gap-6 py-[clamp(2.5em,6vw,5em)] lg:grid-cols-12 lg:gap-10'
+        className='grid gap-5 py-[clamp(2rem,6vw,5rem)] sm:gap-6 lg:grid-cols-12 lg:gap-10'
         style={{ paddingInline: INSET }}
       >
         <div className='flex flex-col gap-2 lg:col-span-3 lg:pt-3'>
@@ -229,7 +235,7 @@ function Group({ index, title, note, tags = [] }) {
           </h3>
         </div>
 
-        <ul className='flex flex-wrap gap-3 lg:col-span-9'>
+        <ul className='flex flex-wrap gap-2 sm:gap-3 lg:col-span-9'>
           {tags.map((tag, i) => (
             <Tag key={tag} tag={tag} position={i} />
           ))}

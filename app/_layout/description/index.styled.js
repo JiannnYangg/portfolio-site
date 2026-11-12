@@ -26,19 +26,34 @@ export const Wrapper = styled.div`
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  gap: clamp(3.5rem, 6vw, 7rem);
+  /* stacked (phones, tablets): a tighter gap between the paragraph and the
+     side note; from about 930px up this is the same value as before */
+  gap: clamp(2.5rem, 6vw, 7rem);
 
   /* top padding lifted (was clamp(3em, 6vw, 7em)): the paragraph and the side
      note sit close to the dashed line above. The bottom padding is lighter
      than it used to be, because the "About us" circle is now part of the right
      column instead of being pinned into the bottom padding. */
-  padding-block: clamp(2em, 3.6vw, 4.25em) clamp(4em, 10vh, 10em);
-  padding-inline: clamp(2.5em, 4vw, 8em);
+  padding-block: clamp(2em, 3.6vw, 4.25em) clamp(3em, 10vh, 10em);
+
+  /* --section-inset (globals.css) is the one inset every section shares: 1.25rem
+     on phones, so the text column is as wide as it can be while still sitting
+     clear of the dashed guides; 2.5rem and up from 640px. */
+  padding-inline: var(--section-inset);
 `;
 
 export const Title = styled.h4`
   font-size: clamp(1.5em, 2.2vw, 3em);
   line-height: 1.55;
+
+  /* Stacked layout (below lg): the vw curve above would stay at its 1.5em
+     floor all the way up to a tablet. This one grows from 24px on a small
+     phone to 32px, and the line spacing is a little tighter, so the paragraph
+     does not turn into a tall, thin column. */
+  @media (width < 1024px) {
+    font-size: clamp(1.5rem, 4.2vw + 0.35rem, 2rem);
+    line-height: 1.42;
+  }
 `;
 
 /* Positioning context for the paragraph */

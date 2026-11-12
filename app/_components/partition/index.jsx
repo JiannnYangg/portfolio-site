@@ -40,10 +40,12 @@ const LABEL_TEXT = '#ffffff';
 
 /**
  * x of a guide, measured from the page edge. Mirrors the Tailwind `container`
- * (max 1400px, centred, 2rem side padding) so guides line up with content.
+ * (max 1400px, centred, --guide-inset side padding: 1rem on phones, 2rem from
+ * 640px up, see globals.css) so guides line up with content.
  * Exported so the navbar can align the logo and the links to the same guides.
  */
-export const GUIDE_X = 'calc((100% - min(100%, 1400px)) / 2 + 2rem)';
+export const GUIDE_X =
+  'calc((100% - min(100%, 1400px)) / 2 + var(--guide-inset, 2rem))';
 
 const dashes = direction =>
   `repeating-linear-gradient(${direction}, ${PARTITION_LINE} 0 7px, transparent 7px 13px)`;
@@ -116,7 +118,8 @@ function useGlitchText({ text, active, startDelayMs, reduceMotion }) {
     const decodeOnce = () => {
       const startedAt = performance.now();
       const resolveAt = chars.map(
-        (_, i) => FIRST_LOCK_MS + i * LOCK_STEP_MS + Math.random() * LOCK_JITTER_MS,
+        (_, i) =>
+          FIRST_LOCK_MS + i * LOCK_STEP_MS + Math.random() * LOCK_JITTER_MS,
       );
       const lastResolve = Math.max(...resolveAt);
 
@@ -156,7 +159,17 @@ function useGlitchText({ text, active, startDelayMs, reduceMotion }) {
   return { display, glitching };
 }
 
-/** Small gradient label sitting on a guide crossing */
+/**
+ * Small gradient label sitting on a guide crossing.
+ *
+ * From md up the label is centred on the guide, like a drawing sheet. On
+ * phones the guide is only 1rem from the screen edge, so a centred label (up
+ * to about 75px wide, "(Contact)") would hang off the screen and be cut. There
+ * it is anchored instead: the label's outer edge sits 6px past the guide, so
+ * the guide still runs through the tag, and the tag stays fully on screen.
+ * The offset is done with CSS on a wrapper (not on the animated label), so it
+ * can change with the breakpoint.
+ */
 function Tag({ side, delay, text }) {
   const ref = useRef(null);
   const reduceMotion = useReducedMotion();
@@ -170,27 +183,33 @@ function Tag({ side, delay, text }) {
   });
 
   return (
-    <motion.span
-      ref={ref}
-      className='absolute top-1/2 z-10 whitespace-nowrap rounded-md px-2 font-mono text-[10px] font-bold leading-5 tracking-tight sm:text-[11px]'
-      style={{
-        [side]: GUIDE_X,
-        x: side === 'left' ? '-50%' : '50%',
-        y: '-50%',
-        backgroundColor: LABEL_SOLID,
-        backgroundImage: LABEL_GRADIENT,
-        color: LABEL_TEXT,
-        textShadow: glitching ? GLITCH_SHADOW : 'none',
-        // paper-coloured ring so the label cuts cleanly through the dashes
-        boxShadow: '0 0 0 3px rgba(250, 243, 232, 0.95)',
-      }}
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.4, delay: 0.7 + delay }}
+    <span
+      className={`absolute top-1/2 z-10 -translate-y-1/2 ${
+        side === 'left'
+          ? '-translate-x-[6px] md:-translate-x-1/2'
+          : 'translate-x-[6px] md:translate-x-1/2'
+      }`}
+      style={{ [side]: GUIDE_X }}
     >
-      {display}
-    </motion.span>
+      <motion.span
+        ref={ref}
+        className='block whitespace-nowrap rounded-md px-2 font-mono text-[10px] font-bold leading-5 tracking-tight sm:text-[11px]'
+        style={{
+          backgroundColor: LABEL_SOLID,
+          backgroundImage: LABEL_GRADIENT,
+          color: LABEL_TEXT,
+          textShadow: glitching ? GLITCH_SHADOW : 'none',
+          // paper-coloured ring so the label cuts cleanly through the dashes
+          boxShadow: '0 0 0 3px rgba(250, 243, 232, 0.95)',
+        }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, delay: 0.7 + delay }}
+      >
+        {display}
+      </motion.span>
+    </span>
   );
 }
 

@@ -11,14 +11,7 @@ import {
   CIRCLE_SHAPE_BASE,
   CIRCLE_SIZE,
 } from '../circle-button';
-import {
-  Frame,
-  Highlight,
-  Mark,
-  Strike,
-  Title,
-  Wrapper,
-} from './index.styled';
+import { Frame, Highlight, Mark, Strike, Title, Wrapper } from './index.styled';
 
 /** Same word reveal used across the site */
 const reveal = {
@@ -54,7 +47,10 @@ const NOTE_TEXT =
  * The circle's size, shape and hover colour are shared with the About page's
  * "Works" circle (see ../circle-button), so the two always match.
  */
-const CIRCLE = `${CIRCLE_SHAPE_BASE} ${CIRCLE_SIZE} ${CIRCLE_GUARD} ${CIRCLE_HOVER}`;
+//? max-sm:h-40 w-40: on a phone the circle is 160px instead of 200px, which is
+//? still a big, easy target but no longer takes half a screen. (The About
+//? page's circle keeps the shared size.)
+const CIRCLE = `${CIRCLE_SHAPE_BASE} ${CIRCLE_SIZE} max-sm:h-40 max-sm:w-40 ${CIRCLE_GUARD} ${CIRCLE_HOVER}`;
 
 function Words({ text, start, inMark }) {
   const words = text.split(' ');
