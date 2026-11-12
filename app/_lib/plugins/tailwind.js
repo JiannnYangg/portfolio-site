@@ -5,7 +5,16 @@ export const tailwindPlugin = plugin(
   //? Add CSS variable definitions to the base layer
   //? Palette: soft grey-beige paper, vermilion orange (#e24a28), pure neutral
   //? charcoal / grey ink. No brown anywhere: every neutral has a near-zero hue.
-  function ({ addBase }) {
+  function ({ addBase, addVariant }) {
+    //? `wide:` = the roomy layout. Anything from a tablet up, plus a phone held
+    //? sideways (at least 520px wide): there the hero is wider than it is
+    //? tall, so it uses the side-by-side arrangement instead of the stacked
+    //? portrait one. Same idea as `md:` everywhere else, with that one extra case.
+    addVariant(
+      'wide',
+      '@media (min-width: 768px), (orientation: landscape) and (min-width: 520px)',
+    );
+
     addBase({
       ':root': {
         '--background': '0 0% 100%',
@@ -36,7 +45,9 @@ export const tailwindPlugin = plugin(
     theme: {
       container: {
         center: true,
-        padding: '2rem',
+        //? same token as the dashed page guides (globals.css), so content and
+        //? guides always share one edge: 1rem on phones, 2rem from 640px up
+        padding: 'var(--guide-inset, 2rem)',
         screens: {
           '2xl': '1400px',
         },

@@ -48,7 +48,7 @@ export function OffcanvasToggle({ isOpen, handleOpen }) {
       <MagneticButton
         size='md'
         variant='ghost'
-        className={`border border-solid border-muted-foreground ${TOGGLE_HOVER}`}
+        className={`border border-solid border-muted-foreground max-lg:size-11 max-lg:p-0 ${TOGGLE_HOVER}`}
         aria-expanded={isOpen}
         onClick={() => handleOpen(!isOpen)}
       >

@@ -10,6 +10,34 @@
     /* Slightly stronger than the default so dividers and pill outlines stay
        readable on the paper + grid background */
     --border: 40 8% 76%;
+
+    /* Layout tokens shared by the dashed page guides, the navbar, the burger
+       button and every section, so they all line up at every width.
+       --guide-inset   page edge to the dashed vertical guides
+       --section-inset guides to the section text
+       --band          height of the navbar band (logo row)
+       --nav-inset     guides to the logo / last link / burger
+       Phones get tighter values so the text column is as wide as it can be
+       while the labels that sit on the guides stay on screen. */
+    --guide-inset: 1rem;
+    --section-inset: 1.25rem;
+    --band: 4.25rem;
+    --nav-inset: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --guide-inset: 2rem;
+      --section-inset: clamp(2.5rem, 4vw, 8rem);
+      --nav-inset: 1rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --band: 5rem;
+      --nav-inset: 1.5rem;
+    }
   }
 
   * {
@@ -154,5 +182,86 @@
     display: none; /* Chrome, Edge, Safari */
     width: 0;
     height: 0;
+  }
+}
+
+/* Landing hero (see layout/header). The headline block (headline + CTA) is
+   centred in the hero, so its top and bottom edges can be written in CSS from
+   the same numbers the markup uses. The floating logos are placed against
+   those edges (hero-logos.jsx), so on a short phone they stay in the free
+   bands above and below the text instead of sitting on top of it.
+   All lengths here are used inside `top` / `bottom` of the hero-sized logo
+   layer, so the percentages are percentages of the hero.
+     --hero-fs      headline size
+     --hero-gap     headline to CTA
+     --hero-pt/pb   hero padding above / below the block
+     --hero-ch      block height: 3 lines at 1.08 + gap + the 62px CTA
+     --hero-top     block top edge, --hero-bottom its bottom edge
+     --hero-travel  spare room in the band under the CTA (0 on short phones)
+     --head-y/--cta-y  centres of the two calm zones, from the hero middle */
+@layer components {
+  .hero-scope {
+    --hero-fs: clamp(2.25rem, 11vw, 3.1rem);
+    --hero-gap: 3.5rem;
+    --hero-pt: 7.25rem;
+    --hero-pb: 5rem;
+    --hero-ch: calc(var(--hero-fs) * 3.24 + var(--hero-gap) + 62px);
+    --hero-top: calc(
+      50% + (var(--hero-pt) - var(--hero-pb)) / 2 - var(--hero-ch) / 2
+    );
+    --hero-bottom: calc(var(--hero-top) + var(--hero-ch));
+    --hero-travel: max(0px, calc(100% - var(--hero-bottom) - 120px));
+
+    /* centres of the two calm zones, measured from the hero's middle */
+    --head-y-calc: calc(
+      (var(--hero-pt) - var(--hero-pb)) / 2 - (var(--hero-gap) + 62px) / 2
+    );
+    --cta-y-calc: calc(
+      var(--hero-fs) * 1.62 +
+        (var(--hero-gap) + var(--hero-pt) - var(--hero-pb)) / 2
+    );
+    --head-y: var(--head-y-calc);
+    --cta-y: var(--cta-y-calc);
+  }
+
+  /* Tablets and desktops: the original type scale and spacing (the two
+     centres keep their hand-tuned values). */
+  @media (min-width: 768px) {
+    .hero-scope {
+      --hero-fs: clamp(2.5rem, 6.4vw, 5.5rem);
+      --hero-gap: 5.5rem;
+      --hero-pt: 9rem;
+      --hero-pb: 6rem;
+      --head-y: -50px;
+      --cta-y: 196px;
+    }
+  }
+
+  /* A phone held sideways (520 to 767px wide): wider than tall, so it gets
+     the roomy desktop arrangement (the `wide:` variant) and the desktop type
+     scale, otherwise the headline is bigger than the logo layout expects. */
+  @media (orientation: landscape) and (min-width: 520px) and (max-width: 767px) {
+    .hero-scope {
+      --hero-fs: clamp(2.5rem, 6.4vw, 5.5rem);
+      --hero-gap: 5.5rem;
+      --hero-pt: 9rem;
+      --hero-pb: 6rem;
+    }
+  }
+
+  /* Any short landscape screen (a phone on its side, 844x390 and the like):
+     the whole headline block has to fit one screen, so the type is limited by
+     the screen height too, and the space above, between and below shrinks.
+     The top still clears the navbar band plus the 46px the selection callout
+     needs above the first line. */
+  @media (orientation: landscape) and (min-width: 520px) and (max-height: 500px) {
+    .hero-scope {
+      --hero-fs: clamp(2.25rem, min(6.4vw, 10.5svh), 5.5rem);
+      --hero-gap: 2rem;
+      --hero-pt: calc(var(--band) + 3rem);
+      --hero-pb: 1.5rem;
+      --head-y: var(--head-y-calc);
+      --cta-y: var(--cta-y-calc);
+    }
   }
 }

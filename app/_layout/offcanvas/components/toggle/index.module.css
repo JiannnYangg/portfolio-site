@@ -6,6 +6,21 @@
   z-index: theme(zIndex.40);
 }
 
+/* Below lg the top links are hidden (see navbar/list.jsx), so this button is
+   the only way into the menu: it is there from the very first screen instead
+   of growing in after a scroll (the scroll-linked scale is overridden here,
+   in CSS, so there is no flash before the script runs). It is a 44px circle,
+   the minimum comfortable touch target, centred on the navbar band and
+   aligned to the right edge the logo mirrors on the left. */
+@media (width < 1024px) {
+  .wrapper {
+    top: calc((var(--band) - 2.75rem) / 2);
+    right: calc(var(--guide-inset) + var(--nav-inset));
+    margin: 0;
+    transform: none !important;
+  }
+}
+
 /* The lines are light by default (the button is dark) and turn dark charcoal
    on hover, when the light peach-coral gradient fills the button. */
 .burger {
