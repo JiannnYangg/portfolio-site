@@ -3,10 +3,10 @@
 import { motion } from 'framer-motion';
 
 /**
- * The light version of the showcase: a plain CSS scroll-snap strip. No WebGL,
- * no three.js, images load lazily. Used on phones / tablets / small windows,
- * for reduced-motion, data-saver and low-spec devices, and whenever WebGL is
- * unavailable or fails.
+ * The plainest version of the showcase: a CSS scroll-snap strip. No WebGL, no
+ * three.js, no pinning, images load lazily. Used for reduced-motion and in
+ * browsers that cannot pin the section (no `overflow: clip`). Phones, tablets
+ * and low-spec devices get the pinned scroll-driven row instead (see lite.jsx).
  *
  * Layout (same idea as the desktop carousel: every panel has the SAME HEIGHT
  * and gets its width from its own aspect ratio, so nothing is stretched and
