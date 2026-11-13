@@ -51,14 +51,17 @@
  *   preloader and the hero intro), the idle timer and the first scroll do.
  * - The scroll listener only exists while the section is within a screen of
  *   the viewport, and reads the layout once per frame (heights are cached).
- * - Phones, tablets, small windows, reduced-motion, data-saver, low-memory /
- *   low-core devices, browsers without `overflow: clip` and browsers without
- *   WebGL get a plain CSS scroll strip (no WebGL, no three.js download, no
- *   scroll hijacking).
+ * - Phones, tablets, small windows, data-saver, low-memory / low-core devices
+ *   and browsers without WebGL get the lightweight pinned version (./lite): the
+ *   same pinned section where the page scroll slides the cards to the centre
+ *   one by one, built from plain CSS transforms (no WebGL, no three.js
+ *   download, no scroll hijacking: it is `position: sticky`).
+ * - Reduced-motion and browsers without `overflow: clip` (nothing can be
+ *   pinned there) get a plain CSS scroll strip (./strip).
  * - On devices that pass those checks but still struggle, the engine lowers
  *   its resolution step by step (see QUALITY in ./engine).
  * - If WebGL fails or the GPU context is lost at any point, it switches to
- *   that same strip instead of leaving a blank block.
+ *   the lightweight version (or the strip) instead of leaving a blank block.
  * - A page restored from the back/forward cache replays the animation from
  *   the start; a normal refresh builds a fresh carousel (and the page shell
  *   returns to the top, see Transition).
@@ -71,6 +74,7 @@ import { createPortal } from 'react-dom';
 import { isNavScrolling, NAV_SCROLL_END } from '@/hooks';
 
 import { ENTRY, getScrollLength, PROJECTS, SCROLL, UI_ANIM } from './config';
+import { ShowcaseLite } from './lite';
 import { loadThree, warmThree } from './load-three';
 import { lockScroll, scrollToY } from './scroll-lock';
 import { ShowcaseStrip } from './strip';
@@ -132,19 +136,27 @@ const WIDE_QUERY = SCROLL.enabled
   ? `(min-width: ${MIN_VIEWPORT_WIDTH}px) and (min-height: ${MIN_VIEWPORT_HEIGHT}px)`
   : `(min-width: ${MIN_VIEWPORT_WIDTH}px)`;
 
+/**
+ * Can the stage be pinned? It relies on `position: sticky` surviving the page
+ * shell, which needs `overflow: clip`; without it the pin would silently not
+ * work, so those browsers get the plain strip.
+ */
+function canPin() {
+  return (
+    SCROLL.enabled &&
+    typeof CSS !== 'undefined' &&
+    !!CSS.supports?.('overflow', 'clip')
+  );
+}
+
 /** Can this device afford the shader? Evaluated once, on the client. */
 function canRunWebGL() {
   const nav = navigator;
   if (nav.connection?.saveData) return false;
   if (nav.deviceMemory && nav.deviceMemory < 4) return false;
   if (nav.hardwareConcurrency && nav.hardwareConcurrency < 4) return false;
-  // the pinned stage relies on `position: sticky` surviving the page shell,
-  // which needs `overflow: clip`; without it the pin would silently not work
-  if (
-    SCROLL.enabled &&
-    !(typeof CSS !== 'undefined' && CSS.supports?.('overflow', 'clip'))
-  )
-    return false;
+  // the pinned stage needs `overflow: clip` (see canPin)
+  if (SCROLL.enabled && !canPin()) return false;
   try {
     const canvas = document.createElement('canvas');
     const gl =
@@ -170,7 +182,7 @@ export function Showcase() {
   const revealPlayedRef = useRef(false); // entry reveal runs exactly once
   const failedRef = useRef(false); // WebGL failed once: stay on the strip
 
-  const [mode, setMode] = useState('pending'); // pending | webgl | fallback
+  const [mode, setMode] = useState('pending'); // pending | webgl | lite | fallback
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(0);
   const [focused, setFocused] = useState(false);
@@ -183,12 +195,16 @@ export function Showcase() {
     const wide = window.matchMedia(WIDE_QUERY);
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
     const capable = canRunWebGL();
-    const update = () =>
-      setMode(
-        capable && !failedRef.current && wide.matches && !calm.matches
-          ? 'webgl'
-          : 'fallback',
-      );
+    const pinnable = canPin();
+    // reduced motion: no animation at all (plain strip). Wide screen + capable
+    // device: the WebGL carousel. Everything else (phones, tablets, small
+    // windows, weak devices, WebGL failed): the lightweight pinned row, or the
+    // strip where nothing can be pinned.
+    const update = () => {
+      if (calm.matches) setMode('fallback');
+      else if (capable && !failedRef.current && wide.matches) setMode('webgl');
+      else setMode(pinnable ? 'lite' : 'fallback');
+    };
     update();
     // this visitor is about to get the WebGL version: open the connection to
     // the CDN that serves three.js now, so the boot later does not wait for it
@@ -226,7 +242,7 @@ export function Showcase() {
     const fail = () => {
       if (cancelled) return;
       failedRef.current = true;
-      setMode('fallback');
+      setMode(canPin() ? 'lite' : 'fallback');
     };
 
     // Share (0..1) of the stage that is on screen right now.
@@ -539,6 +555,10 @@ export function Showcase() {
 
   if (mode === 'fallback') {
     return <ShowcaseStrip projects={PROJECTS} />;
+  }
+
+  if (mode === 'lite') {
+    return <ShowcaseLite />;
   }
 
   if (mode === 'pending') {

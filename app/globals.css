@@ -139,6 +139,19 @@
       --showcase-stage: max(560px, 100svh);
     }
   }
+
+  /* The lightweight row (phones / tablets, see showcase/lite.jsx): the stage is
+     exactly the screen, with no 560px floor, so a landscape phone is not
+     pinned to a stage taller than its screen. */
+  .showcase-pin--lite {
+    --showcase-stage: 100vh;
+  }
+
+  @supports (height: 100svh) {
+    .showcase-pin--lite {
+      --showcase-stage: 100svh;
+    }
+  }
 }
 
 @layer base {

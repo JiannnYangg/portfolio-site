@@ -115,8 +115,10 @@ export const CONFIG = {
 // footer only arrives once the last card has been reached. The row is a
 // finite strip in this mode (no looping), so it really has a start and an end.
 //
-// Phones / tablets / reduced-motion keep the plain strip (see strip.jsx):
-// hijacking the scroll there would hurt more than it helps.
+// Phones, tablets, small windows and devices that can't afford the WebGL lens
+// get the same pinned, scroll-driven row built from plain CSS transforms (see
+// lite.jsx and LITE below). Only reduced-motion and browsers without
+// `overflow: clip` keep the plain swipe strip (see strip.jsx).
 export const SCROLL = {
   enabled: true,
   // page px scrolled per px the row travels. Lower = shorter section / faster
@@ -127,6 +129,33 @@ export const SCROLL = {
   holdEnd: 0.06, // last card rests centered for this share before the footer
   // scrolling this far (share of the section) while a card is focused closes it
   focusCloseDelta: 0.03,
+};
+
+// The lightweight pinned row (phones / tablets / low-spec devices): no WebGL,
+// just transforms driven by the page scroll. Same behaviour as the desktop
+// carousel (pinned section, cards slide to the centre one by one, the page only
+// moves on once the last card has been reached), sized from the screen.
+// SCROLL.holdStart / holdEnd are shared with the desktop version.
+export const LITE = {
+  heightShare: 0.5, // card height as a share of the pinned screen height
+  minHeight: 200, // px
+  maxHeight: 460, // px (matches the desktop PANEL_H range)
+  maxWidthShare: 0.82, // a card is never wider than this share of the screen,
+  // so the next card always peeks in (very wide pictures are cropped a little)
+  minWidth: 120, // px
+  gap: 12, // px between cards
+  // page px scrolled per px the row travels. Near 1 = the row follows the
+  // finger, higher = slower / longer section.
+  pxPerPx: 0.9,
+  // screens shorter than this (landscape phones) drop the heading above the
+  // cards and show the title next to the counter instead
+  compactBelow: 480, // px of pinned stage height
+  preload: 2, // cards on each side of the centred one whose image is fetched
+  entryOffset: 48, // px the cards rise from while the entry plays
+  entryScale: 0.88, // size the cards start the entry at
+  entryDuration: 1.1, // seconds
+  entryStagger: 0.07, // seconds between the first cards
+  entryStaggerMax: 5, // cards that are staggered, the rest share the last delay
 };
 
 /** Distance (px) from the first panel's center to the last panel's center. */
