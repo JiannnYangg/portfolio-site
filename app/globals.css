@@ -139,19 +139,6 @@
       --showcase-stage: max(560px, 100svh);
     }
   }
-
-  /* The lightweight row (phones / tablets, see showcase/lite.jsx): the stage is
-     exactly the screen, with no 560px floor, so a landscape phone is not
-     pinned to a stage taller than its screen. */
-  .showcase-pin--lite {
-    --showcase-stage: 100vh;
-  }
-
-  @supports (height: 100svh) {
-    .showcase-pin--lite {
-      --showcase-stage: 100svh;
-    }
-  }
 }
 
 @layer base {
@@ -207,8 +194,9 @@
    layer, so the percentages are percentages of the hero.
      --hero-fs      headline size
      --hero-gap     headline to CTA
+     --hero-cta     height of the CTA pill (52px on phones, 62px from `wide:` up)
      --hero-pt/pb   hero padding above / below the block
-     --hero-ch      block height: 3 lines at 1.08 + gap + the 62px CTA
+     --hero-ch      block height: 3 lines at 1.08 + gap + the CTA
      --hero-top     block top edge, --hero-bottom its bottom edge
      --hero-travel  spare room in the band under the CTA (0 on short phones)
      --hero-top-room  spare room in the band above the headline (0 on short phones)
@@ -216,10 +204,11 @@
 @layer components {
   .hero-scope {
     --hero-fs: clamp(2.25rem, 11vw, 3.1rem);
-    --hero-gap: 3.5rem;
+    --hero-gap: 2.75rem;
+    --hero-cta: 3.25rem;
     --hero-pt: 7.25rem;
     --hero-pb: 5rem;
-    --hero-ch: calc(var(--hero-fs) * 3.24 + var(--hero-gap) + 62px);
+    --hero-ch: calc(var(--hero-fs) * 3.24 + var(--hero-gap) + var(--hero-cta));
     --hero-top: calc(
       50% + (var(--hero-pt) - var(--hero-pb)) / 2 - var(--hero-ch) / 2
     );
@@ -229,7 +218,8 @@
 
     /* centres of the two calm zones, measured from the hero's middle */
     --head-y-calc: calc(
-      (var(--hero-pt) - var(--hero-pb)) / 2 - (var(--hero-gap) + 62px) / 2
+      (var(--hero-pt) - var(--hero-pb)) / 2 -
+        (var(--hero-gap) + var(--hero-cta)) / 2
     );
     --cta-y-calc: calc(
       var(--hero-fs) * 1.62 +
@@ -245,6 +235,7 @@
     .hero-scope {
       --hero-fs: clamp(2.5rem, 6.4vw, 5.5rem);
       --hero-gap: 5.5rem;
+      --hero-cta: 62px;
       --hero-pt: 9rem;
       --hero-pb: 6rem;
       --head-y: -50px;
@@ -259,6 +250,7 @@
     .hero-scope {
       --hero-fs: clamp(2.5rem, 6.4vw, 5.5rem);
       --hero-gap: 5.5rem;
+      --hero-cta: 62px;
       --hero-pt: 9rem;
       --hero-pb: 6rem;
     }
