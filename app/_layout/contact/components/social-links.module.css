@@ -31,9 +31,16 @@
    footer sets for phones is already more solid to make up for it. */
 @media (width < 768px) {
   .pending {
+    gap: 0.35rem;
+    min-height: 2rem;
+    padding-inline: 0.65rem 0.75rem;
     backdrop-filter: none;
-    padding-inline: 0.75rem;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
+  }
+
+  .pending svg {
+    width: 14px;
+    height: 14px;
   }
 }
 

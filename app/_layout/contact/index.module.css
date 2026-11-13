@@ -49,14 +49,14 @@
  * `--ft-cols` only sets the side gutters, so the text lines up with the rest
  * of the page at every breakpoint.
  *
- * PHONES (under 768px, see "phones" near the end of the layout rules): the
- * actions stack full width (under 480px), the socials become an even grid, the
- * version / time row becomes two stacked columns, and the picture is cropped
- * onto its darkest tiles. Frosted-glass blur is dropped (the glass is a little
- * more opaque instead), because backdrop-filter over a blended, masked layer is
- * the most expensive thing on this page for a phone's GPU. Hover effects only
- * run where there is a real hover (mouse / trackpad), so nothing sticks after
- * a tap.
+ * PHONES (under 768px, see "phones" near the end of the layout rules): a
+ * compact, left-aligned footer. Small CTA, small email capsule, small social
+ * pills in a flowing row, a small "Back to top", the version / time row as two
+ * stacked columns, and the picture cropped onto its richer tiles. Frosted-glass
+ * blur is dropped (the glass is a little more opaque instead), because
+ * backdrop-filter over a blended, masked layer is the most expensive thing on
+ * this page for a phone's GPU. Hover effects only run where there is a real
+ * hover (mouse / trackpad), so nothing sticks after a tap.
  */
 .root {
   --ft-cols: 8;
@@ -860,16 +860,16 @@
 }
 
 /* ---------- phones (under 768px) ----------
-   Spacing, stacking and cost for small screens. Tablets and up are untouched.
-   Touch targets are 44px or more (chips 44px, the email capsule 48px, the CTA
-   62px with its ring). */
+   A footer, not a landing page: everything here is compact and left-aligned
+   (small CTA, small email capsule, small chips that sit in a row and wrap),
+   so the headline stays the one big thing. Tablets and up are untouched. */
 @media (width < 768px) {
   .root {
     /* no blur on phones, so the glass is a touch more solid to stay legible */
     --ft-glass: rgb(255 255 255 / 74%);
     --ft-glass-hover: rgb(255 255 255 / 90%);
 
-    gap: 3rem;
+    gap: 2.5rem;
     padding-block: 4rem
       max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem));
 
@@ -884,56 +884,114 @@
     object-position: 30% bottom;
   }
 
-  .actions {
-    margin-block-start: 2rem;
-  }
-
   .email,
   .chip,
   .up {
     backdrop-filter: none;
   }
 
-  .chip {
-    gap: 0.5rem;
-    padding-inline: 0.75rem;
-    font-size: 0.9rem;
+  /* CTA: the same shape, at a small size, as wide as its own content. */
+  .actions {
+    gap: 0.625rem 0.75rem;
+    align-items: center;
+    margin-block-start: 1.5rem;
+  }
+
+  .cta {
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .ctaLabel,
+  .ctaArrow {
+    height: 38px;
+  }
+
+  .ctaLabel {
+    min-width: 0;
+    padding-inline: 1.1rem;
+    font-size: 15px;
+  }
+
+  .ctaArrow {
+    width: 38px;
+  }
+
+  .ctaArrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Email capsule: small, as wide as the address. */
+  .email {
+    min-height: 2.25rem;
+    font-size: 0.8125rem;
+  }
+
+  .emailLink {
+    gap: 0.4rem;
+    padding-inline: 0.8rem 0.7rem;
+  }
+
+  .emailCopy {
+    gap: 0.35rem;
+    padding: 0 0.8rem 0 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .emailLink svg,
+  .emailCopy svg {
+    width: 14px;
+    height: 14px;
   }
 
   .base {
     --ft-glass: rgb(255 255 255 / 74%);
     --ft-glass-hover: rgb(255 255 255 / 90%);
 
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
+  /* Socials and back to top: small pills, left-aligned, one flowing group. */
   .baseRow {
     flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  /* Socials: an even two-column grid, and a lone last chip takes the full row
-     instead of hanging at the left. */
-  .socials {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: flex-start;
     gap: 0.5rem;
   }
 
-  .socials > li:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
+  .socials {
+    gap: 0.375rem;
   }
 
-  .socials > li > * {
-    justify-content: center;
-    width: 100%;
-  }
-
-  /* Back to top: full width, label on the left, arrow circle on the right
-     (the CTA's shape), the easiest thing to hit at the end of a long scroll. */
+  .chip,
   .up {
-    justify-content: space-between;
+    min-height: 2rem;
+    font-size: 0.75rem;
+  }
+
+  .chip {
+    gap: 0.35rem;
+    padding-inline: 0.65rem 0.75rem;
+  }
+
+  .chip svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .up {
+    gap: 0.5rem;
+    padding: 3px 3px 3px 0.75rem;
+  }
+
+  .upIcon {
+    width: 1.625rem;
+    height: 1.625rem;
+  }
+
+  .upIcon svg {
+    width: 14px;
+    height: 14px;
   }
 
   /* Version and local time: label above value, one on each side. */
@@ -951,37 +1009,6 @@
   .metaTime {
     align-items: flex-end;
     text-align: end;
-  }
-}
-
-/* Small phones: the socials go one per row rather than squeeze a label. */
-@media (width < 360px) {
-  .socials {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* Under 480px: the CTA and the email stack and fill the width, so each is one
-   big, easy target and the pair lines up with the grid of socials below. */
-@media (width < 480px) {
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .cta,
-  .email {
-    display: flex;
-  }
-
-  .ctaLabel {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .emailLink {
-    flex: 1;
   }
 }
 
