@@ -48,6 +48,15 @@
  *
  * `--ft-cols` only sets the side gutters, so the text lines up with the rest
  * of the page at every breakpoint.
+ *
+ * PHONES (under 768px, see "phones" near the end of the layout rules): the
+ * actions stack full width (under 480px), the socials become an even grid, the
+ * version / time row becomes two stacked columns, and the picture is cropped
+ * onto its darkest tiles. Frosted-glass blur is dropped (the glass is a little
+ * more opaque instead), because backdrop-filter over a blended, masked layer is
+ * the most expensive thing on this page for a phone's GPU. Hover effects only
+ * run where there is a real hover (mouse / trackpad), so nothing sticks after
+ * a tap.
  */
 .root {
   --ft-cols: 8;
@@ -58,6 +67,14 @@
   --ft-glass: rgb(255 255 255 / 62%);
   --ft-glass-hover: rgb(255 255 255 / 88%);
   --ft-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* The "together!" entrance and shine. A soft in-out curve (gentle start,
+     long smooth landing) so the eye can follow it, and a springy one for the
+     sparkles. The times are long on purpose: the pill takes about 1.5s to
+     wipe in, then the shine crosses it once. */
+  --ft-reveal-ease: cubic-bezier(0.45, 0, 0.15, 1);
+  --ft-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ft-wipe-time: 1.5s;
   --ft-icon-bg: #1f1b18;
   --ft-icon-fg: #fff;
   --ft-live: #1f9d55;
@@ -268,10 +285,12 @@
 }
 
 /* Phones: sized so "Let's work" and the "together!" pill fill the width the
-   way the hero headline does (continuous with the 6.4vw curve at 768px). */
+   way the hero headline does (continuous with the 6.4vw curve at 768px). The
+   2.1rem floor lets very small screens (280-320px) scale down instead of
+   pushing the pill out past the gutter. */
 @media (width < 768px) {
   .headline {
-    font-size: clamp(2.5rem, 13vw, 3.1rem);
+    font-size: clamp(2.1rem, 12.6vw, 3.1rem);
   }
 }
 
@@ -322,7 +341,7 @@
   white-space: nowrap;
   transform: rotate(-2.5deg);
   transform-origin: 20% 80%;
-  transition: transform 0.5s var(--ft-ease);
+  transition: transform 0.8s var(--ft-ease);
 }
 
 /* the shine: a soft diagonal band that sweeps across on hover / focus */
@@ -349,29 +368,91 @@
 
   .headline:hover .together::after {
     transform: translateX(300%) skewX(-12deg);
-    transition: transform 0.9s var(--ft-ease);
+    transition: transform 1.5s var(--ft-reveal-ease);
   }
 }
 
-/* Where the browser supports scroll-driven animation, the pill wipes in from
-   the left as the footer scrolls into view. Elsewhere it is simply there. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .together {
-      animation: ft-wipe linear both;
-      animation-timeline: view();
-      animation-range: entry 20% cover 38%;
-    }
+/* The entrance (see components/together-pill.jsx, which sets data-reveal).
+   Once the pill is well on screen it plays one slow sequence, the same on a
+   phone and on a laptop:
+     1. the pill wipes in from the left while it settles from a stronger tilt
+        into its resting one (--ft-wipe-time, soft in-out curve)
+     2. the sparkles pop in after it, one after the other
+     3. the shine crosses the finished pill once
+   `pending` holds the pill back until then. Every animation uses
+   `backwards` fill, so once it is over the pill is back on its normal styles
+   and the hover effects above work as before. All of it is inside
+   no-preference, so "reduce motion" visitors get the pill with no animation. */
+@media (prefers-reduced-motion: no-preference) {
+  .pillWrap[data-reveal='pending'] .together {
+    clip-path: inset(-60% 100% -60% 0 round 999px);
+  }
+
+  .pillWrap[data-reveal='pending'] .star {
+    opacity: 0;
+  }
+
+  .pillWrap[data-reveal='in'] .together {
+    animation:
+      ft-wipe var(--ft-wipe-time) var(--ft-reveal-ease) 0.2s backwards,
+      ft-settle var(--ft-wipe-time) var(--ft-reveal-ease) 0.2s backwards;
+  }
+
+  .pillWrap[data-reveal='in'] .together::after {
+    animation: ft-shine 1.4s var(--ft-reveal-ease) 1.5s backwards;
+  }
+
+  .pillWrap[data-reveal='in'] .starBig {
+    animation: ft-pop 0.9s var(--ft-spring) 1.3s backwards;
+  }
+
+  .pillWrap[data-reveal='in'] .starSmall {
+    animation: ft-pop 0.9s var(--ft-spring) 1.5s backwards;
   }
 }
 
+/* The wipe ends on a clip that is bigger than the pill on every side, so the
+   pill's shadow is not cut off, and so there is no jump when the animation
+   hands over to "no clip" at its end. */
 @keyframes ft-wipe {
   from {
-    clip-path: inset(-40% 100% -40% 0 round 999px);
+    clip-path: inset(-60% 100% -60% 0 round 999px);
   }
 
   to {
-    clip-path: inset(-40% -10% -40% -10% round 999px);
+    clip-path: inset(-60% -30% -60% -30% round 999px);
+  }
+}
+
+@keyframes ft-settle {
+  from {
+    transform: translateY(0.12em) rotate(-7deg);
+  }
+
+  to {
+    transform: translateY(0) rotate(-2.5deg);
+  }
+}
+
+@keyframes ft-shine {
+  from {
+    transform: translateX(-130%) skewX(-12deg);
+  }
+
+  to {
+    transform: translateX(300%) skewX(-12deg);
+  }
+}
+
+@keyframes ft-pop {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-90deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
 }
 
@@ -379,7 +460,7 @@
 .star {
   position: absolute;
   color: var(--ft-cta-solid);
-  transition: transform 0.7s var(--ft-ease);
+  transition: transform 1s var(--ft-ease);
 }
 
 .starBig {
@@ -424,9 +505,13 @@
   transition: transform 0.3s var(--ft-ease);
 }
 
-.cta:hover,
 .cta:focus-visible {
   transform: scale(1.03);
+}
+
+/* touch: a quick press instead of hover (hover sticks after a tap) */
+.cta:active {
+  transform: scale(0.98);
 }
 
 .ctaLabel,
@@ -480,8 +565,6 @@
   background-image: var(--ft-cta-gradient);
 }
 
-.cta:hover .ctaLabel::before,
-.cta:hover .ctaArrow::before,
 .cta:focus-visible .ctaLabel::before,
 .cta:focus-visible .ctaArrow::before {
   opacity: 1;
@@ -491,9 +574,23 @@
   transition: transform 0.3s var(--ft-ease);
 }
 
-.cta:hover .ctaArrow svg,
 .cta:focus-visible .ctaArrow svg {
   transform: translate(2px, -2px);
+}
+
+@media (hover: hover) {
+  .cta:hover {
+    transform: scale(1.03);
+  }
+
+  .cta:hover .ctaLabel::before,
+  .cta:hover .ctaArrow::before {
+    opacity: 1;
+  }
+
+  .cta:hover .ctaArrow svg {
+    transform: translate(2px, -2px);
+  }
 }
 
 /* ---------- the email: one capsule, address + copy ---------- */
@@ -544,9 +641,16 @@
   cursor: pointer;
 }
 
-.emailLink:hover,
-.emailCopy:hover {
+.emailLink:active,
+.emailCopy:active {
   background-color: var(--ft-glass-hover);
+}
+
+@media (hover: hover) {
+  .emailLink:hover,
+  .emailCopy:hover {
+    background-color: var(--ft-glass-hover);
+  }
 }
 
 /* the capsule's own edge is the clip, so keep the focus ring inside it */
@@ -637,13 +741,21 @@
   padding-inline: 1rem 1.15rem;
 }
 
-.chip:hover,
-.up:hover {
+.chip:active,
+.up:active {
   background-color: var(--ft-glass-hover);
+  transform: scale(0.97);
 }
 
-.chip:hover {
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .chip:hover,
+  .up:hover {
+    background-color: var(--ft-glass-hover);
+  }
+
+  .chip:hover {
+    transform: translateY(-2px);
+  }
 }
 
 /* Back to top: label, then a circle with the arrow (the CTA's shape,
@@ -668,8 +780,10 @@
   transition: transform 0.4s var(--ft-ease);
 }
 
-.up:hover .upIcon svg {
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .up:hover .upIcon svg {
+    transform: translateY(-2px);
+  }
 }
 
 /* ---------- version + local time ---------- */
@@ -745,6 +859,132 @@
   }
 }
 
+/* ---------- phones (under 768px) ----------
+   Spacing, stacking and cost for small screens. Tablets and up are untouched.
+   Touch targets are 44px or more (chips 44px, the email capsule 48px, the CTA
+   62px with its ring). */
+@media (width < 768px) {
+  .root {
+    /* no blur on phones, so the glass is a touch more solid to stay legible */
+    --ft-glass: rgb(255 255 255 / 74%);
+    --ft-glass-hover: rgb(255 255 255 / 90%);
+
+    gap: 3rem;
+    padding-block: 4rem
+      max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem));
+
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* The picture is a wide landscape, the footer is a tall column: `cover`
+     shows a narrow slice of it. Anchor that slice to the darker, richer left
+     of the picture (which sits under the big orange cloud) and the bottom,
+     where the tiles are. */
+  .bgImage {
+    object-position: 30% bottom;
+  }
+
+  .actions {
+    margin-block-start: 2rem;
+  }
+
+  .email,
+  .chip,
+  .up {
+    backdrop-filter: none;
+  }
+
+  .chip {
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .base {
+    --ft-glass: rgb(255 255 255 / 74%);
+    --ft-glass-hover: rgb(255 255 255 / 90%);
+
+    gap: 1.5rem;
+  }
+
+  .baseRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  /* Socials: an even two-column grid, and a lone last chip takes the full row
+     instead of hanging at the left. */
+  .socials {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .socials > li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .socials > li > * {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Back to top: full width, label on the left, arrow circle on the right
+     (the CTA's shape), the easiest thing to hit at the end of a long scroll. */
+  .up {
+    justify-content: space-between;
+  }
+
+  /* Version and local time: label above value, one on each side. */
+  .meta {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .metaItem {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .metaTime {
+    align-items: flex-end;
+    text-align: end;
+  }
+}
+
+/* Small phones: the socials go one per row rather than squeeze a label. */
+@media (width < 360px) {
+  .socials {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Under 480px: the CTA and the email stack and fill the width, so each is one
+   big, easy target and the pair lines up with the grid of socials below. */
+@media (width < 480px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .cta,
+  .email {
+    display: flex;
+  }
+
+  .ctaLabel {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .emailLink {
+    flex: 1;
+  }
+}
+
 /* Windows high-contrast mode drops backgrounds, which would leave the white
    word invisible: give the pill a real border and the word a system colour. */
 @media (forced-colors: active) {
@@ -787,6 +1027,9 @@
   .chip,
   .chip:hover,
   .up:hover .upIcon svg,
+  .cta:active,
+  .chip:active,
+  .up:active,
   .upIcon svg,
   .ctaArrow svg,
   .cta:hover .ctaArrow svg,
@@ -816,6 +1059,17 @@
     box-shadow: none;
     color: #000;
     transform: none;
+  }
+
+  /* printing before the entrance has played must not print a hidden pill */
+  .pillWrap[data-reveal] .together {
+    clip-path: none;
+    animation: none;
+  }
+
+  .pillWrap[data-reveal] .star {
+    opacity: 1;
+    animation: none;
   }
 
   .base {

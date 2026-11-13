@@ -1,7 +1,7 @@
 import styles from '../index.module.css';
 import { EmailActions } from './copy-email';
 import { GetInTouch } from './get-in-touch';
-import { Sparkle } from './sparkles';
+import { TogetherPill } from './together-pill';
 
 /**
  * Top of the footer: the call to action. Same typeface, weight, size and
@@ -21,11 +21,7 @@ export function Headline() {
       <h2 className={styles.headline}>
         <span className={styles.phrase}>
           <span className={styles.ink}>Let’s work</span>
-          <span className={styles.pillWrap}>
-            <em className={styles.together}>together!</em>
-            <Sparkle className={`${styles.star} ${styles.starBig}`} />
-            <Sparkle className={`${styles.star} ${styles.starSmall}`} />
-          </span>
+          <TogetherPill />
         </span>
       </h2>
 

@@ -18,7 +18,11 @@ import styles from './index.module.css';
  *      the footer and fading out as the orange takes over (FooterGrid), so
  *      the notebook paper dissolves into the tiles instead of stopping.
  * The picture goes through next/image, so visitors get a right-sized
- * AVIF/WebP (see next.config.js). The top 150px of the picture are plain
+ * AVIF/WebP (see next.config.js). On phones `cover` crops the wide picture to
+ * a narrow slice but scales it to the footer's height, so `sizes` cannot be
+ * 100vw there (that would ask for a small file and blow it up); the art is
+ * soft and blurry, so a ~480px-wide request (1x to 2x of the screen) is plenty
+ * and keeps phones off the largest file. The top 150px of the picture are plain
  * white, so they are not shown and the footer is about one screen tall. The
  * site's dashed vertical guides stop at the footer's top edge.
  *   top     the call to action (headline, CTA, email)
@@ -37,7 +41,7 @@ export function Contact() {
           src='/images/footer-bg.webp'
           alt=''
           fill
-          sizes='100vw'
+          sizes='(max-width: 767px) 480px, 100vw'
           quality={85}
           className={styles.bgImage}
         />

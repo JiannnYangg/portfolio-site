@@ -27,6 +27,16 @@
   user-select: none;
 }
 
+/* Phones: no blur (it is costly on a phone's GPU); the glass variable the
+   footer sets for phones is already more solid to make up for it. */
+@media (width < 768px) {
+  .pending {
+    backdrop-filter: none;
+    padding-inline: 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
 @media print {
   .pending {
     display: none;

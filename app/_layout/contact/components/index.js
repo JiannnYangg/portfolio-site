@@ -7,3 +7,4 @@ export * from './headline';
 export * from './local-time';
 export * from './social-links';
 export * from './sparkles';
+export * from './together-pill';
