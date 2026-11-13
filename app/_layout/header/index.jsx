@@ -360,6 +360,10 @@ function Marker({ children }) {
  * frosted charcoal glass (see MENU_BG) with a soft blur, small radius,
  * hairline dividers, a trailing chevron and a pointer arrow.
  * A slim, soft sheen sweeps slowly across it, like light catching glass.
+ *
+ * On phones it is a size smaller (10px text, tighter padding, 12px of air
+ * under it) so it stays a small detail on a narrow screen; from `wide:` up it
+ * keeps its original size.
  */
 function IosCallout() {
   const reduceMotion = useReducedMotion();
@@ -372,10 +376,10 @@ function IosCallout() {
   return (
     <span
       aria-hidden='true'
-      className='pointer-events-none absolute bottom-full left-1/2 z-10 mb-[16px] -translate-x-1/2'
+      className='pointer-events-none absolute bottom-full left-1/2 z-10 mb-[12px] -translate-x-1/2 wide:mb-[16px]'
     >
       <motion.span
-        className='relative flex select-none items-stretch whitespace-nowrap rounded-[9px] text-[12px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_6px_20px_rgba(0,0,0,0.28),0_0_0_0.5px_rgba(255,255,255,0.12)]'
+        className='relative flex select-none items-stretch whitespace-nowrap rounded-[7px] text-[10px] font-medium not-italic leading-none tracking-normal text-white shadow-[0_6px_20px_rgba(0,0,0,0.28),0_0_0_0.5px_rgba(255,255,255,0.12)] wide:rounded-[9px] wide:text-[12px]'
         style={{
           fontFamily: IOS_FONT,
           background: MENU_BG,
@@ -394,20 +398,24 @@ function IosCallout() {
         {CALLOUT_ITEMS.map((item, index) => (
           <span
             key={item}
-            className={`flex items-center px-[10px] py-[9px] ${index > 0 ? 'border-l-[0.5px] border-white/20' : ''}`}
+            className={`flex items-center px-[7px] py-[6px] wide:px-[10px] wide:py-[9px] ${index > 0 ? 'border-l-[0.5px] border-white/20' : ''}`}
           >
             {item}
           </span>
         ))}
-        <span className='flex items-center border-l-[0.5px] border-white/20 px-[6px]'>
-          <ChevronRight size={12} strokeWidth={2.5} />
+        <span className='flex items-center border-l-[0.5px] border-white/20 px-[5px] wide:px-[6px]'>
+          <ChevronRight
+            size={12}
+            strokeWidth={2.5}
+            className='h-[9px] w-[9px] wide:h-3 wide:w-3'
+          />
         </span>
 
         {/* light sweep: a slim diagonal sheen that slowly passes over the bubble */}
         {!reduceMotion && (
           <span
             ref={sheenRef}
-            className='pointer-events-none absolute inset-0 overflow-hidden rounded-[9px]'
+            className='pointer-events-none absolute inset-0 overflow-hidden rounded-[7px] wide:rounded-[9px]'
           >
             <motion.span
               className='absolute inset-y-0 left-0 w-[24%]'
@@ -435,7 +443,7 @@ function IosCallout() {
 
         {/* pointer arrow */}
         <span
-          className='absolute left-1/2 top-full h-[6px] w-[12px] -translate-x-1/2'
+          className='absolute left-1/2 top-full h-[5px] w-[10px] -translate-x-1/2 wide:h-[6px] wide:w-[12px]'
           style={{
             background: MENU_BG,
             backdropFilter: MENU_FILTER,
@@ -591,6 +599,10 @@ export function Header() {
           {/* CTA: same shape and sizing as the reference (no border, no
               outer shadow). Near-white outer pill, 6px ring, 6px gap, 50px
               inner buttons. Only the colours are themed.
+              On phones it is one size smaller (5px ring, 42px buttons, 17px
+              label: 52px tall in all, which is the --hero-cta token in
+              globals.css) and sits closer under the headline; from `wide:`
+              up it keeps the original 62px size.
               Resting state: a blue gradient label with white text, and a
               dark circle with a white arrow. On hover the two swap (dark
               label, gradient circle). A CSS gradient can't be transitioned,
@@ -608,10 +620,10 @@ export function Header() {
                 type='button'
                 onClick={() => scrollToId('contact-footer')}
                 aria-label="Let's talk, go to contact"
-                className='group flex items-center gap-[6px] rounded-full bg-[#f6f4f0] p-[6px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f1b18] motion-reduce:transition-none motion-reduce:hover:scale-100'
+                className='group flex items-center gap-[5px] rounded-full bg-[#f6f4f0] p-[5px] font-[family-name:var(--font-inter-tight)] wide:gap-[6px] wide:p-[6px] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f1b18] motion-reduce:transition-none motion-reduce:hover:scale-100'
               >
                 <span
-                  className='relative isolate flex h-[50px] w-[156px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full text-[20px] font-semibold leading-none tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]'
+                  className='relative isolate flex h-[42px] w-[128px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full text-[17px] font-semibold leading-none tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] wide:h-[50px] wide:w-[156px] wide:text-[20px]'
                   style={{
                     backgroundColor: CTA_SOLID,
                     backgroundImage: CTA_GRADIENT,
@@ -626,7 +638,7 @@ export function Header() {
                   Let&apos;s talk
                 </span>
                 <span
-                  className='relative isolate flex h-[50px] w-[50px] items-center justify-center overflow-hidden rounded-full'
+                  className='relative isolate flex h-[42px] w-[42px] items-center justify-center overflow-hidden rounded-full wide:h-[50px] wide:w-[50px]'
                   style={{ backgroundColor: CTA_DARK }}
                 >
                   {/* hover / focus: the blue gradient fades in behind the arrow */}
@@ -641,7 +653,7 @@ export function Header() {
                   <ArrowUpRight
                     size={20}
                     strokeWidth={2.25}
-                    className='text-white transition-transform duration-300 ease-in-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0'
+                    className='h-[17px] w-[17px] text-white transition-transform duration-300 ease-in-expo wide:h-5 wide:w-5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0'
                   />
                 </span>
               </button>
