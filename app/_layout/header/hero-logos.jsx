@@ -92,7 +92,9 @@ const shadowFor = depth =>
  *                          just above the headline's selection callout)
  *      beside line 1       runway, in the left pocket
  *      beside line 2       codex, in the right pocket after "We build it."
- *      beside line 3       elevenlabs, in the left pocket
+ *      under line 3        elevenlabs, in the gap between the headline and
+ *                          the CTA, left of the pill and well inside the
+ *                          edge, so it does not line up with runway above
  *      below the CTA       squiggle (right, the big one) and github (left
  *                          of centre, lower). --hero-top-room /
  *                          --hero-travel are the spare height of the top /
@@ -189,7 +191,7 @@ const LOGOS = [
     size: 'w-[clamp(26px,min(8.5vw,5.5svh),36px)] wide:w-[clamp(38px,4.8vw,78px)]',
     imgSizes: '(min-width: 768px) 78px, 36px',
     position:
-      'left-[3%] top-[calc(var(--hero-top)_+_var(--hero-fs)_*_2.7_+_3px)] wide:left-auto wide:top-auto wide:bottom-[13%] wide:right-[27%]',
+      'left-[11%] top-[calc(var(--hero-top)_+_var(--hero-fs)_*_3.24_+_2px)] wide:left-auto wide:top-auto wide:bottom-[13%] wide:right-[27%]',
     rotate: 11,
     depth: 0.6,
     float: [5, 5.6, 1.4, 0.4],
