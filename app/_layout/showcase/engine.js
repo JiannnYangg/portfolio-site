@@ -69,6 +69,7 @@ import {
   LENS,
   LENS_BACKDROP,
   LENS_PAPER_GLOW,
+  panelHeightFor,
   PROJECTS,
   SCROLL,
 } from './config';
@@ -249,9 +250,11 @@ export function createCarousel(THREE, mount, callbacks = {}) {
     return s;
   });
 
-  // width of one slot: height is fixed (PANEL_H), so width = aspect * PANEL_H + gap
+  // width of one slot: height is fixed (PANEL_H; a picture wider than
+  // PANEL_MAX_W is scaled down to fit), so width = aspect * height + gap
   function slotWidth(srcIndex) {
-    return sources[srcIndex].aspect * CONFIG.PANEL_H + CONFIG.GAP;
+    const { aspect } = sources[srcIndex];
+    return aspect * panelHeightFor(aspect) + CONFIG.GAP;
   }
 
   // cumulative x of each source's slot, and the total loop width
@@ -750,8 +753,9 @@ export function createCarousel(THREE, mount, callbacks = {}) {
 
       // fixed size for every panel; shrink up to 25% with scroll speed
       const shrink = 1 - 0.25 * scrollEnergy;
-      const h = CONFIG.PANEL_H * shrink;
-      const wPx = src.aspect * CONFIG.PANEL_H * shrink;
+      const baseH = panelHeightFor(src.aspect);
+      const h = baseH * shrink;
+      const wPx = src.aspect * baseH * shrink;
 
       // bind texture once available
       if (src.tex && !p.bound) {
@@ -806,7 +810,10 @@ export function createCarousel(THREE, mount, callbacks = {}) {
         }
         const slotH = s => {
           const gg = growArr[midRep * N + s] || 0;
-          return ENTRY.startH + (CONFIG.PANEL_H - ENTRY.startH) * gg;
+          return (
+            ENTRY.startH +
+            (panelHeightFor(sources[s].aspect) - ENTRY.startH) * gg
+          );
         };
         let off = 0;
         if (di > 0) {
@@ -1590,7 +1597,8 @@ export function createCarousel(THREE, mount, callbacks = {}) {
       if (Math.abs(target - scroll) < 0.5) {
         const pf = pendingFocus;
         pendingFocus = null;
-        if (centeredPanel && centeredPanel.srcIndex === pf.srcIndex) openFocus();
+        if (centeredPanel && centeredPanel.srcIndex === pf.srcIndex)
+          openFocus();
         else applyProgress(); // nothing to focus: rejoin the page scroll
       }
     }
