@@ -403,12 +403,12 @@
 }
 
 .ctaLabel {
-  min-width: 144px;
-  padding: 0 26px 0 28px;
+  min-width: 162px;
+  padding: 0 22px 0 34px;
 }
 
 .ctaTile {
-  width: 56px;
+  width: 58px;
   transition: transform 0.3s var(--ease);
 }
 
@@ -449,13 +449,13 @@
 
 .ctaClip[data-side='left'] {
   left: 0;
-  width: 56px;
+  width: 64px;
   border-radius: 16px 0 0 16px;
 }
 
 .ctaClip[data-side='right'] {
   right: 0;
-  width: 24px;
+  width: 28px;
   border-radius: 0 16px 16px 0;
 }
 
@@ -464,7 +464,7 @@
   top: 50%;
   margin-top: -32px;
   overflow: visible;
-  filter: drop-shadow(0 0 1.5px rgb(255 255 255 / 50%));
+  shape-rendering: geometricprecision;
 }
 
 .ctaDots[data-side='left'] {

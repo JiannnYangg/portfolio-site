@@ -48,27 +48,28 @@ const ARROW_PATH =
   'M20 0H44Q60 0 60 16V36Q60 52 44 52H13Q1 52 2.6 40L6.4 12Q8 0 20 0Z';
 
 /**
- * Halftone dots for the CTA's outer ends: perfectly round circles on a hex
- * grid, biggest at the outer edge and shrinking (and thinning) toward the
- * label / arrow. Real SVG circles, so every dot is a clean, smooth disc.
+ * Halftone dots for the CTA's outer ends: perfectly round, solid white circles
+ * on a staggered grid, biggest at the outer edge and shrinking (and thinning)
+ * toward the label / arrow. Real SVG circles, so every dot is a clean, smooth
+ * disc, never a star or a blur.
  */
 const DOT_H = 64;
-function makeDots(width, maxR, pitch) {
+function makeDots(width, maxR, pitch, minR) {
   const rowHeight = pitch * 0.866;
   const rows = Math.ceil(DOT_H / rowHeight) + 1;
   const dots = [];
   for (let row = 0; row < rows; row += 1) {
     const shift = row % 2 ? pitch / 2 : 0;
-    for (let x = 2.5 + shift; x < width; x += pitch) {
+    for (let x = 3 + shift; x < width; x += pitch) {
       const t = x / width;
-      const r = maxR * (1 - t) ** 1.15;
-      if (r >= 0.75) {
+      const r = maxR * (1 - t) ** 1.1;
+      if (r >= minR) {
         dots.push({
           key: `${row}-${x}`,
           cx: Number(x.toFixed(2)),
           cy: Number((row * rowHeight).toFixed(2)),
           r: Number(r.toFixed(2)),
-          o: Number((0.97 - 0.4 * t).toFixed(2)),
+          o: Number((1 - 0.35 * t).toFixed(2)),
         });
       }
     }
@@ -76,10 +77,10 @@ function makeDots(width, maxR, pitch) {
   return dots;
 }
 
-const LABEL_DOT_W = 56;
-const TILE_DOT_W = 24;
-const LABEL_DOTS = makeDots(LABEL_DOT_W, 3.6, 9.6);
-const TILE_DOTS = makeDots(TILE_DOT_W, 2.9, 8);
+const LABEL_DOT_W = 64;
+const TILE_DOT_W = 28;
+const LABEL_DOTS = makeDots(LABEL_DOT_W, 4, 9.8, 1);
+const TILE_DOTS = makeDots(TILE_DOT_W, 3.2, 8.6, 0.9);
 
 function validate({ name, phone, email }) {
   const errors = {};
