@@ -477,7 +477,7 @@
   top: 50%;
   margin-top: -32px;
   overflow: visible;
-  opacity: 0.55;
+  opacity: 0.275;
   shape-rendering: geometricprecision;
 }
 
@@ -498,9 +498,9 @@
     ui-monospace, 'SF Mono', 'Roboto Mono', 'JetBrains Mono', menlo, consolas,
     monospace;
   font-size: 14.5px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.1em;
-  text-shadow: 0 0 8px rgb(255 255 255 / 12%);
+  text-shadow: 0 0 10px rgb(255 255 255 / 38%);
   text-transform: uppercase;
   white-space: nowrap;
 }
