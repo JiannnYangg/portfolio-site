@@ -5,9 +5,11 @@
  * gradient of the hero "Let's talk" button (#4d65ee -> #4359e8 -> #2f40c1),
  * around a warm white card. Each field is a small label above a clean rounded
  * input (white box, hairline border, soft blue focus ring). The submit button
- * is a glow CTA: rounded blue button with bright-white, perfectly round
- * halftone dots (SVG circles, big at the ends and shrinking toward the middle),
- * a bright inner highlight, a white halo ring and a soft blue glow.
+ * is the original split CTA: a near-black "LET'S GO" label with a leaning
+ * right edge, and next to it a separate tile in the blue gradient with a
+ * leaning left edge holding the arrow (both halves are SVG shapes, see
+ * SplitButton in modal.jsx). Both halves carry the glow treatment: a soft top
+ * gloss, round white halftone dots on the outer ends, and a glow around them.
  *
  * Errors are a clean red (never orange) so they read as "fix this" and don't
  * clash with the blue theme.
@@ -369,64 +371,100 @@
   line-height: 1.4;
 }
 
-/* ---------- the CTA: glow button (blue take on the halftone swap button) ---------- */
+/* ---------- the CTA: split button, near-black label + blue arrow tile ---------- */
 .cta {
   --cta-h: 46px;
 
-  position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
   width: fit-content;
-  min-width: 196px;
   height: var(--cta-h);
   margin: 24px auto 0;
-  padding: 0 38px;
-  overflow: hidden;
-  isolation: isolate;
+  padding: 0;
   border: 0;
-  border-radius: 16px;
-  background-color: var(--blue);
-  background-image:
-    linear-gradient(180deg, rgb(255 255 255 / 16%) 0%, transparent 55%),
-    linear-gradient(
-      180deg,
-      var(--blue-light) 0%,
-      var(--blue) 55%,
-      var(--blue-deep) 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 55%),
-    inset 0 0 0 1px rgb(255 255 255 / 14%),
-    inset 0 -3px 8px rgb(47 64 193 / 45%),
-    0 0 0 4px rgb(255 255 255 / 85%),
-    0 0 0 5px rgb(67 89 232 / 14%),
-    0 10px 24px rgb(67 89 232 / 42%),
-    0 0 34px rgb(77 101 238 / 45%);
+  border-radius: 18px;
+  background: none;
   color: #fff;
   font: inherit;
   cursor: pointer;
-  transition:
-    transform 0.3s var(--ease),
-    box-shadow 0.3s ease,
-    filter 0.3s ease;
+  transition: transform 0.3s var(--ease);
   -webkit-appearance: none;
   appearance: none;
 }
 
+.ctaLabel,
+.ctaTile {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  height: 100%;
+}
+
+.ctaLabel {
+  min-width: 144px;
+  padding: 0 26px 0 28px;
+}
+
+.ctaTile {
+  width: 56px;
+  transition: transform 0.3s var(--ease);
+}
+
+/* the SVG shape sits behind the content and stretches to its box */
+.ctaShape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  transition: filter 0.3s ease;
+}
+
+/* glow: a soft halo in the brand blue around both halves */
+.ctaLabel .ctaShape {
+  filter: drop-shadow(0 8px 12px rgb(18 22 46 / 28%))
+    drop-shadow(0 0 12px rgb(77 101 238 / 32%));
+}
+
+.ctaTile .ctaShape {
+  filter: drop-shadow(0 8px 14px rgb(67 89 232 / 42%))
+    drop-shadow(0 0 16px rgb(77 101 238 / 55%));
+}
+
 /*
- * Halftone dots: one SVG per end (see HalftoneDots in modal.jsx), each a
- * hex grid of perfectly round white discs that shrink toward the label. It is
- * centred vertically and pinned to its edge; the right one is the left one
- * mirrored. The button's overflow clips the dots at the rounded corners.
+ * Halftone dots: a clip box per outer end (rounded to match the button's
+ * corners) holding an SVG of round white discs that shrink toward the middle.
+ * The right-hand one is mirrored.
  */
+.ctaClip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ctaClip[data-side='left'] {
+  left: 0;
+  width: 56px;
+  border-radius: 16px 0 0 16px;
+}
+
+.ctaClip[data-side='right'] {
+  right: 0;
+  width: 24px;
+  border-radius: 0 16px 16px 0;
+}
+
 .ctaDots {
   position: absolute;
   top: 50%;
-  z-index: 0;
   margin-top: -32px;
   overflow: visible;
   filter: drop-shadow(0 0 1.5px rgb(255 255 255 / 50%));
-  pointer-events: none;
 }
 
 .ctaDots[data-side='left'] {
@@ -438,23 +476,27 @@
   transform: scaleX(-1);
 }
 
-.ctaContent {
+.ctaText {
   position: relative;
   z-index: 1;
-  display: inline-flex;
-  gap: 9px;
-  align-items: center;
+  color: #fff;
+  font-family:
+    ui-monospace, 'SF Mono', 'Roboto Mono', 'JetBrains Mono', menlo, consolas,
+    monospace;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 12px rgb(255 255 255 / 40%);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.ctaText {
+.ctaArrow {
+  position: relative;
+  z-index: 1;
   color: #fff;
-  font-size: 15.5px;
-  font-weight: 650;
-  letter-spacing: 0.01em;
-  text-shadow:
-    0 0 14px rgb(255 255 255 / 60%),
-    0 1px 1px rgb(18 22 46 / 22%);
-  white-space: nowrap;
+  filter: drop-shadow(0 0 6px rgb(255 255 255 / 45%));
+  transition: transform 0.3s var(--ease);
 }
 
 .cta:active {
@@ -467,22 +509,37 @@
 
 @media (hover: hover) {
   .cta:hover {
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 60%),
-      inset 0 0 0 1px rgb(255 255 255 / 18%),
-      inset 0 -3px 8px rgb(47 64 193 / 45%),
-      0 0 0 4px rgb(255 255 255 / 90%),
-      0 0 0 6px rgb(67 89 232 / 18%),
-      0 14px 30px rgb(67 89 232 / 52%),
-      0 0 44px rgb(77 101 238 / 55%);
-    filter: brightness(1.06) saturate(1.05);
     transform: translateY(-1px);
+  }
+
+  .cta:hover .ctaTile {
+    transform: translateX(3px);
+  }
+
+  .cta:hover .ctaTile .ctaShape {
+    filter: brightness(1.1) drop-shadow(0 10px 18px rgb(67 89 232 / 52%))
+      drop-shadow(0 0 22px rgb(77 101 238 / 70%));
+  }
+
+  .cta:hover .ctaLabel .ctaShape {
+    filter: brightness(1.25) drop-shadow(0 8px 12px rgb(18 22 46 / 32%))
+      drop-shadow(0 0 14px rgb(77 101 238 / 40%));
+  }
+
+  .cta:hover .ctaArrow {
+    transform: translateX(3px);
   }
 }
 
+.cta:focus-visible .ctaTile {
+  transform: translateX(3px);
+}
+
 .spin {
-  width: 17px;
-  height: 17px;
+  position: relative;
+  z-index: 1;
+  width: 19px;
+  height: 19px;
   border: 2.5px solid rgb(255 255 255 / 35%);
   border-top-color: #fff;
   border-radius: 50%;
@@ -687,6 +744,11 @@
   .cta,
   .cta:hover,
   .cta:active,
+  .ctaTile,
+  .cta:hover .ctaTile,
+  .cta:focus-visible .ctaTile,
+  .ctaArrow,
+  .cta:hover .ctaArrow,
   .tick {
     transform: none;
     transition: none;

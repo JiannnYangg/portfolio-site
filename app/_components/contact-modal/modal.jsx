@@ -9,7 +9,7 @@ import {
   useDragControls,
   useReducedMotion,
 } from 'framer-motion';
-import { Check, Info, Lock, X } from 'lucide-react';
+import { ArrowRight, Check, Info, Lock, X } from 'lucide-react';
 
 import { getLenis } from '@/hooks';
 
@@ -37,29 +37,36 @@ const BURST = Array.from({ length: 8 }, (_, index) => {
 });
 
 /**
- * The halftone dots on the CTA's ends: perfectly round circles on a hex grid,
- * big at the outer edge and shrinking (and thinning) toward the label. Drawn
- * as real SVG circles so every dot is a clean, smooth disc at any pixel ratio.
- * The right-hand block is the same drawing mirrored with CSS.
+ * The two halves of the split CTA, drawn as SVG paths so every corner is
+ * rounded while the two facing edges lean the same way (top further right):
+ * the label is a 156x52 box with a leaning right edge, the arrow tile is a
+ * 60x52 box with a leaning left edge.
  */
-const DOT_W = 72;
+const LABEL_PATH =
+  'M16 0H142Q156 0 154.4 12L150.6 40Q149 52 137 52H16Q0 52 0 36V16Q0 0 16 0Z';
+const ARROW_PATH =
+  'M20 0H44Q60 0 60 16V36Q60 52 44 52H13Q1 52 2.6 40L6.4 12Q8 0 20 0Z';
+
+/**
+ * Halftone dots for the CTA's outer ends: perfectly round circles on a hex
+ * grid, biggest at the outer edge and shrinking (and thinning) toward the
+ * label / arrow. Real SVG circles, so every dot is a clean, smooth disc.
+ */
 const DOT_H = 64;
-const DOT_PITCH = 9.6;
-const DOT_MAX_R = 3.7;
-const DOT_ROW = DOT_PITCH * 0.866;
-const DOTS = (() => {
+function makeDots(width, maxR, pitch) {
+  const rowHeight = pitch * 0.866;
+  const rows = Math.ceil(DOT_H / rowHeight) + 1;
   const dots = [];
-  const rows = Math.ceil(DOT_H / DOT_ROW) + 1;
   for (let row = 0; row < rows; row += 1) {
-    const shift = row % 2 ? DOT_PITCH / 2 : 0;
-    for (let x = 3 + shift; x < DOT_W; x += DOT_PITCH) {
-      const t = x / DOT_W;
-      const r = DOT_MAX_R * (1 - t) ** 1.15;
-      if (r >= 0.8) {
+    const shift = row % 2 ? pitch / 2 : 0;
+    for (let x = 2.5 + shift; x < width; x += pitch) {
+      const t = x / width;
+      const r = maxR * (1 - t) ** 1.15;
+      if (r >= 0.75) {
         dots.push({
           key: `${row}-${x}`,
           cx: Number(x.toFixed(2)),
-          cy: Number((row * DOT_ROW).toFixed(2)),
+          cy: Number((row * rowHeight).toFixed(2)),
           r: Number(r.toFixed(2)),
           o: Number((0.97 - 0.4 * t).toFixed(2)),
         });
@@ -67,7 +74,12 @@ const DOTS = (() => {
     }
   }
   return dots;
-})();
+}
+
+const LABEL_DOT_W = 56;
+const TILE_DOT_W = 24;
+const LABEL_DOTS = makeDots(LABEL_DOT_W, 3.6, 9.6);
+const TILE_DOTS = makeDots(TILE_DOT_W, 2.9, 8);
 
 function validate({ name, phone, email }) {
   const errors = {};
@@ -87,36 +99,38 @@ function validate({ name, phone, email }) {
   return errors;
 }
 
-function HalftoneDots({ side }) {
+function HalftoneDots({ dots, width, side }) {
   return (
-    <svg
-      className={styles.ctaDots}
-      data-side={side}
-      width={DOT_W}
-      height={DOT_H}
-      viewBox={`0 0 ${DOT_W} ${DOT_H}`}
-      aria-hidden='true'
-    >
-      {DOTS.map(dot => (
-        <circle
-          key={dot.key}
-          cx={dot.cx}
-          cy={dot.cy}
-          r={dot.r}
-          fill='#fff'
-          fillOpacity={dot.o}
-        />
-      ))}
-    </svg>
+    <span className={styles.ctaClip} data-side={side} aria-hidden='true'>
+      <svg
+        className={styles.ctaDots}
+        data-side={side}
+        width={width}
+        height={DOT_H}
+        viewBox={`0 0 ${width} ${DOT_H}`}
+      >
+        {dots.map(dot => (
+          <circle
+            key={dot.key}
+            cx={dot.cx}
+            cy={dot.cy}
+            r={dot.r}
+            fill='#fff'
+            fillOpacity={dot.o}
+          />
+        ))}
+      </svg>
+    </span>
   );
 }
 
 /**
- * The glow CTA: a soft-cornered blue button (the landing CTA's gradient) with
- * a halftone dot pattern on both ends, a bright inner highlight, a white halo
- * and a blue glow around it. While busy a small spinner sits before the label.
+ * The split CTA: a near-black label (monospace, capitals) and, next to it, a
+ * separate tile in the landing blue gradient holding the arrow. Both halves
+ * carry the glow treatment: a soft top gloss, round halftone dots on the outer
+ * ends and a glow around them. While busy the arrow turns into a spinner.
  */
-function GlowButton({ label, busy = false, buttonRef, ...buttonProps }) {
+function SplitButton({ label, busy = false, buttonRef, ...buttonProps }) {
   return (
     <button
       ref={buttonRef}
@@ -124,11 +138,70 @@ function GlowButton({ label, busy = false, buttonRef, ...buttonProps }) {
       aria-busy={busy}
       {...buttonProps}
     >
-      <HalftoneDots side='left' />
-      <HalftoneDots side='right' />
-      <span className={styles.ctaContent}>
-        {busy ? <span className={styles.spin} aria-hidden='true' /> : null}
+      <span className={styles.ctaLabel}>
+        <svg
+          className={styles.ctaShape}
+          viewBox='0 0 156 52'
+          preserveAspectRatio='none'
+          aria-hidden='true'
+        >
+          <defs>
+            <linearGradient id='lm-night' x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stopColor='#1d2030' />
+              <stop offset='100%' stopColor='#12141c' />
+            </linearGradient>
+            <linearGradient id='lm-gloss' x1='0' y1='0' x2='0' y2='1'>
+              <stop offset='0%' stopColor='#fff' stopOpacity='0.24' />
+              <stop offset='55%' stopColor='#fff' stopOpacity='0' />
+            </linearGradient>
+          </defs>
+          <path
+            d={LABEL_PATH}
+            fill='url(#lm-night)'
+            stroke='rgba(255,255,255,0.12)'
+            strokeWidth='1'
+            vectorEffect='non-scaling-stroke'
+          />
+          <path d={LABEL_PATH} fill='url(#lm-gloss)' />
+        </svg>
+        <HalftoneDots dots={LABEL_DOTS} width={LABEL_DOT_W} side='left' />
         <span className={styles.ctaText}>{label}</span>
+      </span>
+
+      <span className={styles.ctaTile}>
+        <svg
+          className={styles.ctaShape}
+          viewBox='0 0 60 52'
+          preserveAspectRatio='none'
+          aria-hidden='true'
+        >
+          <defs>
+            <linearGradient id='lm-blue' x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stopColor='#4d65ee' />
+              <stop offset='50%' stopColor='#4359e8' />
+              <stop offset='100%' stopColor='#2f40c1' />
+            </linearGradient>
+          </defs>
+          <path
+            d={ARROW_PATH}
+            fill='url(#lm-blue)'
+            stroke='rgba(255,255,255,0.28)'
+            strokeWidth='1'
+            vectorEffect='non-scaling-stroke'
+          />
+          <path d={ARROW_PATH} fill='url(#lm-gloss)' />
+        </svg>
+        <HalftoneDots dots={TILE_DOTS} width={TILE_DOT_W} side='right' />
+        {busy ? (
+          <span className={styles.spin} aria-hidden='true' />
+        ) : (
+          <ArrowRight
+            className={styles.ctaArrow}
+            size={20}
+            strokeWidth={2}
+            aria-hidden='true'
+          />
+        )}
       </span>
     </button>
   );
@@ -237,7 +310,7 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
         <span>We’ll reach you at {reachAt}</span>
       </p>
 
-      <GlowButton
+      <SplitButton
         buttonRef={doneRef}
         type='button'
         label='Done'
@@ -254,7 +327,8 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
  *   with the iOS sheet curve and can be dragged down (from its top) to close.
  * - A frame in the landing CTA's blue gradient around a warm white card.
  * - Three labelled fields (name, phone, email) in clean rounded inputs, then
- *   the glow CTA (see GlowButton).
+ *   the split CTA: a near-black "LET'S GO" label plus a separate blue-gradient
+ *   arrow tile, with the glow + halftone treatment (see SplitButton).
  * - Name is required, and at least one of phone / email. Errors are gentle,
  *   inline, red, and only show after the visitor has touched a field or tried
  *   to send.
@@ -581,7 +655,7 @@ export function ContactModal({ onClose }) {
                     </p>
                   ) : null}
 
-                  <GlowButton
+                  <SplitButton
                     type='submit'
                     label={sending ? 'Sending' : 'Let’s go'}
                     busy={sending}
