@@ -188,7 +188,8 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
  *   with the iOS sheet curve and can be dragged down (from its top) to close.
  * - A frame in the landing CTA's blue gradient around a warm white card.
  * - Three separate fields with inline icons and plain placeholders (name,
- *   phone, email), then a compact blue pill button with its own shine.
+ *   phone, email), then a near-black pill with just a blue arrow (no text; it
+ *   keeps an aria-label for screen readers).
  * - Name is required, and at least one of phone / email. Errors are gentle,
  *   inline, red, and only show after the visitor has touched a field or tried
  *   to send.
@@ -522,28 +523,25 @@ export function ContactModal({ onClose }) {
                     </p>
                   ) : null}
 
+                  {/* icon-only button: the arrow is the whole label, so the
+                      accessible name lives on aria-label */}
                   <button
                     type='submit'
                     className={styles.cta}
+                    aria-label={sending ? 'Sending' : 'Send my details'}
                     aria-disabled={sending}
                     aria-busy={sending}
                   >
                     <span className={styles.ctaLabel}>
                       {sending ? (
-                        <>
-                          <span className={styles.spin} aria-hidden='true' />
-                          Sending…
-                        </>
+                        <span className={styles.spin} aria-hidden='true' />
                       ) : (
-                        <>
-                          Let’s get started
-                          <ArrowRight
-                            className={styles.ctaArrow}
-                            size={18}
-                            strokeWidth={2.4}
-                            aria-hidden='true'
-                          />
-                        </>
+                        <ArrowRight
+                          className={styles.ctaArrow}
+                          size={24}
+                          strokeWidth={2.5}
+                          aria-hidden='true'
+                        />
                       )}
                     </span>
                   </button>
