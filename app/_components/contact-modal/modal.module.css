@@ -5,9 +5,9 @@
  * gradient of the hero "Let's talk" button (#4d65ee -> #4359e8 -> #2f40c1),
  * around a warm white card. Each field is a small label above a clean rounded
  * input (white box, hairline border, soft blue focus ring). The submit button
- * is a glow CTA: rounded blue button with bold, bright-white halftone dots
- * (big and dense at the ends, shrinking and fading toward the middle), a
- * bright inner highlight, a white halo ring and a soft blue glow.
+ * is a glow CTA: rounded blue button with bright-white, perfectly round
+ * halftone dots (SVG circles, big at the ends and shrinking toward the middle),
+ * a bright inner highlight, a white halo ring and a soft blue glow.
  *
  * Errors are a clean red (never orange) so they read as "fix this" and don't
  * clash with the blue theme.
@@ -414,105 +414,28 @@
 }
 
 /*
- * Halftone dots, one block per end (data-side = left | right). Two layers:
- * ::before = big, solid, bright-white dots hugging the edge (the "mass");
- * ::after  = smaller dots in the gaps that carry the pattern further in and
- * fade out. Together the dots shrink and thin out toward the label.
+ * Halftone dots: one SVG per end (see HalftoneDots in modal.jsx), each a
+ * hex grid of perfectly round white discs that shrink toward the label. It is
+ * centred vertically and pinned to its edge; the right one is the left one
+ * mirrored. The button's overflow clips the dots at the rounded corners.
  */
 .ctaDots {
-  --dir: 90deg;
-
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 50%;
   z-index: 0;
-  width: 46%;
+  margin-top: -32px;
+  overflow: visible;
+  filter: drop-shadow(0 0 1.5px rgb(255 255 255 / 50%));
   pointer-events: none;
 }
 
 .ctaDots[data-side='left'] {
-  --dir: 90deg;
-
   left: 0;
 }
 
 .ctaDots[data-side='right'] {
-  --dir: 270deg;
-
   right: 0;
-}
-
-.ctaDots::before,
-.ctaDots::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-}
-
-.ctaDots::before {
-  background-image:
-    radial-gradient(
-      circle at center,
-      #fff 0,
-      #fff 2.5px,
-      rgb(255 255 255 / 0%) 3.4px
-    ),
-    radial-gradient(
-      circle at center,
-      #fff 0,
-      #fff 2.5px,
-      rgb(255 255 255 / 0%) 3.4px
-    );
-  background-position:
-    0 0,
-    6.5px 6.5px;
-  background-size: 13px 13px;
-  mask-image: linear-gradient(
-    var(--dir),
-    #000 0%,
-    #000 20%,
-    rgb(0 0 0 / 55%) 48%,
-    transparent 82%
-  );
-  -webkit-mask-image: linear-gradient(
-    var(--dir),
-    #000 0%,
-    #000 20%,
-    rgb(0 0 0 / 55%) 48%,
-    transparent 82%
-  );
-}
-
-.ctaDots::after {
-  background-image:
-    radial-gradient(
-      circle at center,
-      rgb(255 255 255 / 95%) 0,
-      rgb(255 255 255 / 90%) 1.2px,
-      rgb(255 255 255 / 0%) 2px
-    ),
-    radial-gradient(
-      circle at center,
-      rgb(255 255 255 / 95%) 0,
-      rgb(255 255 255 / 90%) 1.2px,
-      rgb(255 255 255 / 0%) 2px
-    );
-  background-position:
-    6.5px 0,
-    0 6.5px;
-  background-size: 13px 13px;
-  mask-image: linear-gradient(
-    var(--dir),
-    rgb(0 0 0 / 70%) 0%,
-    #000 35%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    var(--dir),
-    rgb(0 0 0 / 70%) 0%,
-    #000 35%,
-    transparent 100%
-  );
+  transform: scaleX(-1);
 }
 
 .ctaContent {

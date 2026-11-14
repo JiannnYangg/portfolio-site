@@ -36,6 +36,39 @@ const BURST = Array.from({ length: 8 }, (_, index) => {
   };
 });
 
+/**
+ * The halftone dots on the CTA's ends: perfectly round circles on a hex grid,
+ * big at the outer edge and shrinking (and thinning) toward the label. Drawn
+ * as real SVG circles so every dot is a clean, smooth disc at any pixel ratio.
+ * The right-hand block is the same drawing mirrored with CSS.
+ */
+const DOT_W = 72;
+const DOT_H = 64;
+const DOT_PITCH = 9.6;
+const DOT_MAX_R = 3.7;
+const DOT_ROW = DOT_PITCH * 0.866;
+const DOTS = (() => {
+  const dots = [];
+  const rows = Math.ceil(DOT_H / DOT_ROW) + 1;
+  for (let row = 0; row < rows; row += 1) {
+    const shift = row % 2 ? DOT_PITCH / 2 : 0;
+    for (let x = 3 + shift; x < DOT_W; x += DOT_PITCH) {
+      const t = x / DOT_W;
+      const r = DOT_MAX_R * (1 - t) ** 1.15;
+      if (r >= 0.8) {
+        dots.push({
+          key: `${row}-${x}`,
+          cx: Number(x.toFixed(2)),
+          cy: Number((row * DOT_ROW).toFixed(2)),
+          r: Number(r.toFixed(2)),
+          o: Number((0.97 - 0.4 * t).toFixed(2)),
+        });
+      }
+    }
+  }
+  return dots;
+})();
+
 function validate({ name, phone, email }) {
   const errors = {};
   const digits = phone.replace(/\D/g, '');
@@ -54,9 +87,33 @@ function validate({ name, phone, email }) {
   return errors;
 }
 
+function HalftoneDots({ side }) {
+  return (
+    <svg
+      className={styles.ctaDots}
+      data-side={side}
+      width={DOT_W}
+      height={DOT_H}
+      viewBox={`0 0 ${DOT_W} ${DOT_H}`}
+      aria-hidden='true'
+    >
+      {DOTS.map(dot => (
+        <circle
+          key={dot.key}
+          cx={dot.cx}
+          cy={dot.cy}
+          r={dot.r}
+          fill='#fff'
+          fillOpacity={dot.o}
+        />
+      ))}
+    </svg>
+  );
+}
+
 /**
  * The glow CTA: a soft-cornered blue button (the landing CTA's gradient) with
- * a halftone dot pattern fading in from both ends, a bright inner highlight
+ * a halftone dot pattern on both ends, a bright inner highlight, a white halo
  * and a blue glow around it. While busy a small spinner sits before the label.
  */
 function GlowButton({ label, busy = false, buttonRef, ...buttonProps }) {
@@ -67,8 +124,8 @@ function GlowButton({ label, busy = false, buttonRef, ...buttonProps }) {
       aria-busy={busy}
       {...buttonProps}
     >
-      <span className={styles.ctaDots} data-side='left' aria-hidden='true' />
-      <span className={styles.ctaDots} data-side='right' aria-hidden='true' />
+      <HalftoneDots side='left' />
+      <HalftoneDots side='right' />
       <span className={styles.ctaContent}>
         {busy ? <span className={styles.spin} aria-hidden='true' /> : null}
         <span className={styles.ctaText}>{label}</span>
