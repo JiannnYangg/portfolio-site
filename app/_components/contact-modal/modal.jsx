@@ -9,16 +9,7 @@ import {
   useDragControls,
   useReducedMotion,
 } from 'framer-motion';
-import {
-  ArrowRight,
-  Check,
-  Info,
-  Lock,
-  Mail,
-  Phone,
-  User,
-  X,
-} from 'lucide-react';
+import { Check, Info, Lock, X } from 'lucide-react';
 
 import { getLenis } from '@/hooks';
 
@@ -45,17 +36,6 @@ const BURST = Array.from({ length: 8 }, (_, index) => {
   };
 });
 
-/**
- * The two halves of the split CTA, drawn as SVG paths so every corner is
- * rounded while the two facing edges lean the same way (top further right):
- * the label is a 156x52 box with a leaning right edge, the arrow tile is a
- * 60x52 box with a leaning left edge.
- */
-const LABEL_PATH =
-  'M16 0H142Q156 0 154.4 12L150.6 40Q149 52 137 52H16Q0 52 0 36V16Q0 0 16 0Z';
-const ARROW_PATH =
-  'M20 0H44Q60 0 60 16V36Q60 52 44 52H13Q1 52 2.6 40L6.4 12Q8 0 20 0Z';
-
 function validate({ name, phone, email }) {
   const errors = {};
   const digits = phone.replace(/\D/g, '');
@@ -75,11 +55,11 @@ function validate({ name, phone, email }) {
 }
 
 /**
- * The split CTA: a near-black label (monospace, capitals) and, next to it, a
- * separate tile in the landing blue gradient holding the arrow. While busy the
- * arrow turns into a spinner.
+ * The glow CTA: a soft-cornered blue button (the landing CTA's gradient) with
+ * a halftone dot pattern fading in from both ends, a bright inner highlight
+ * and a blue glow around it. While busy a small spinner sits before the label.
  */
-function SplitButton({ label, busy = false, buttonRef, ...buttonProps }) {
+function GlowButton({ label, busy = false, buttonRef, ...buttonProps }) {
   return (
     <button
       ref={buttonRef}
@@ -87,87 +67,33 @@ function SplitButton({ label, busy = false, buttonRef, ...buttonProps }) {
       aria-busy={busy}
       {...buttonProps}
     >
-      <span className={styles.ctaLabel}>
-        <svg
-          className={styles.ctaShape}
-          viewBox='0 0 156 52'
-          preserveAspectRatio='none'
-          aria-hidden='true'
-        >
-          <defs>
-            <linearGradient id='lm-night' x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#1d2030' />
-              <stop offset='100%' stopColor='#12141c' />
-            </linearGradient>
-          </defs>
-          <path
-            d={LABEL_PATH}
-            fill='url(#lm-night)'
-            stroke='rgba(255,255,255,0.12)'
-            strokeWidth='1'
-            vectorEffect='non-scaling-stroke'
-          />
-        </svg>
+      <span className={styles.ctaDots} data-side='left' aria-hidden='true' />
+      <span className={styles.ctaDots} data-side='right' aria-hidden='true' />
+      <span className={styles.ctaContent}>
+        {busy ? <span className={styles.spin} aria-hidden='true' /> : null}
         <span className={styles.ctaText}>{label}</span>
-      </span>
-
-      <span className={styles.ctaTile}>
-        <svg
-          className={styles.ctaShape}
-          viewBox='0 0 60 52'
-          preserveAspectRatio='none'
-          aria-hidden='true'
-        >
-          <defs>
-            <linearGradient id='lm-blue' x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#4d65ee' />
-              <stop offset='50%' stopColor='#4359e8' />
-              <stop offset='100%' stopColor='#2f40c1' />
-            </linearGradient>
-          </defs>
-          <path
-            d={ARROW_PATH}
-            fill='url(#lm-blue)'
-            stroke='rgba(255,255,255,0.28)'
-            strokeWidth='1'
-            vectorEffect='non-scaling-stroke'
-          />
-        </svg>
-        {busy ? (
-          <span className={styles.spin} aria-hidden='true' />
-        ) : (
-          <ArrowRight
-            className={styles.ctaArrow}
-            size={20}
-            strokeWidth={2}
-            aria-hidden='true'
-          />
-        )}
       </span>
     </button>
   );
 }
 
 /**
- * One field: its own rounded box with a quiet inline icon. The placeholder is
- * plain wording ("Your name", "Phone number", "Your email address"), never an
- * example value. The real <label> stays in the DOM for screen readers. A small
- * blue tick shows once the value is good.
+ * One field: a small label above a clean rounded input (white box, hairline
+ * border, soft blue focus ring), the way modern onboarding forms do it. The
+ * label is real, visible text tied to the input. A small blue tick shows once
+ * the value is good.
  */
-function Field({ id, icon: Icon, label, error, valid, inputRef, ...inputProps }) {
+function Field({ id, label, error, valid, inputRef, ...inputProps }) {
   return (
     <div className={styles.item}>
+      <label htmlFor={id} className={styles.label}>
+        {label}
+      </label>
       <div
         className={styles.field}
         data-invalid={error ? 'true' : undefined}
         data-valid={valid ? 'true' : undefined}
       >
-        <span className={styles.icon} aria-hidden='true'>
-          <Icon size={19} strokeWidth={2} />
-        </span>
-        <label htmlFor={id} className={styles.srOnly}>
-          {label}
-        </label>
         <input
           id={id}
           ref={inputRef}
@@ -254,7 +180,7 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
         <span>We’ll reach you at {reachAt}</span>
       </p>
 
-      <SplitButton
+      <GlowButton
         buttonRef={doneRef}
         type='button'
         label='Done'
@@ -265,14 +191,13 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
 }
 
 /**
- * The "Let's talk" popup, opened by the hero and footer CTAs.
+ * The contact popup, opened by the hero and footer CTAs.
  *
  * - Desktop: a centred card that springs in. Phones: a bottom sheet that rises
  *   with the iOS sheet curve and can be dragged down (from its top) to close.
  * - A frame in the landing CTA's blue gradient around a warm white card.
- * - Three separate fields with inline icons and plain placeholders (name,
- *   phone, email), then a split CTA: a near-black "LET'S GO" label plus a
- *   separate blue-gradient arrow tile (see SplitButton).
+ * - Three labelled fields (name, phone, email) in clean rounded inputs, then
+ *   the glow CTA (see GlowButton).
  * - Name is required, and at least one of phone / email. Errors are gentle,
  *   inline, red, and only show after the visitor has touched a field or tried
  *   to send.
@@ -489,10 +414,6 @@ export function ContactModal({ onClose }) {
             >
               <span className={styles.grab} aria-hidden='true' />
               <div className={styles.head}>
-                <span className={styles.eyebrow}>
-                  <span className={styles.eyebrowDot} aria-hidden='true' />
-                  Let’s talk
-                </span>
                 <button
                   type='button'
                   className={styles.close}
@@ -534,12 +455,11 @@ export function ContactModal({ onClose }) {
                     <div className={styles.group}>
                       <Field
                         id={`${baseId}-name`}
-                        icon={User}
                         label='Your name'
                         inputRef={nameRef}
                         type='text'
                         name='name'
-                        placeholder='Your name'
+                        placeholder='Enter your name'
                         autoComplete='name'
                         autoCapitalize='words'
                         enterKeyHint='next'
@@ -551,12 +471,11 @@ export function ContactModal({ onClose }) {
                       />
                       <Field
                         id={`${baseId}-phone`}
-                        icon={Phone}
                         label='Phone number'
                         inputRef={phoneRef}
                         type='tel'
                         name='phone'
-                        placeholder='Phone number'
+                        placeholder='Enter your phone number'
                         autoComplete='tel'
                         inputMode='tel'
                         enterKeyHint='next'
@@ -568,12 +487,11 @@ export function ContactModal({ onClose }) {
                       />
                       <Field
                         id={`${baseId}-email`}
-                        icon={Mail}
                         label='Email address'
                         inputRef={emailRef}
                         type='email'
                         name='email'
-                        placeholder='Your email address'
+                        placeholder='Enter your email address'
                         autoComplete='email'
                         inputMode='email'
                         autoCapitalize='none'
@@ -606,7 +524,7 @@ export function ContactModal({ onClose }) {
                     </p>
                   ) : null}
 
-                  <SplitButton
+                  <GlowButton
                     type='submit'
                     label={sending ? 'Sending' : 'Let’s go'}
                     busy={sending}
