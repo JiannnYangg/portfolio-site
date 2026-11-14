@@ -213,7 +213,7 @@
      --hero-top     block top edge, --hero-bottom its bottom edge
      --hero-travel  spare room in the band under the CTA (0 on short phones)
      --hero-top-room  spare room in the band above the headline (0 on short phones)
-     --head-y/--cta-y  centres of the two calm zones, from the hero middle */
+     --head-y       centre of the headline's calm zone, from the hero middle */
 @layer components {
   .hero-scope {
     --hero-fs: clamp(2.25rem, 11vw, 3.1rem);
@@ -229,21 +229,16 @@
     --hero-travel: max(0px, calc(100% - var(--hero-bottom) - 120px));
     --hero-top-room: max(0px, calc(var(--hero-top) - var(--band) - 170px));
 
-    /* centres of the two calm zones, measured from the hero's middle */
+    /* centre of the headline's calm zone, measured from the hero's middle */
     --head-y-calc: calc(
       (var(--hero-pt) - var(--hero-pb)) / 2 -
         (var(--hero-gap) + var(--hero-cta)) / 2
     );
-    --cta-y-calc: calc(
-      var(--hero-fs) * 1.62 +
-        (var(--hero-gap) + var(--hero-pt) - var(--hero-pb)) / 2
-    );
     --head-y: var(--head-y-calc);
-    --cta-y: var(--cta-y-calc);
   }
 
-  /* Tablets and desktops: the original type scale and spacing (the two
-     centres keep their hand-tuned values). */
+  /* Tablets and desktops: the original type scale and spacing (the
+     headline's calm-zone centre keeps its hand-tuned value). */
   @media (min-width: 768px) {
     .hero-scope {
       --hero-fs: clamp(2.5rem, 6.4vw, 5.5rem);
@@ -252,7 +247,6 @@
       --hero-pt: 9rem;
       --hero-pb: 6rem;
       --head-y: -50px;
-      --cta-y: 196px;
     }
   }
 
@@ -281,7 +275,6 @@
       --hero-pt: calc(var(--band) + 3rem);
       --hero-pb: 1.5rem;
       --head-y: var(--head-y-calc);
-      --cta-y: var(--cta-y-calc);
     }
   }
 }
