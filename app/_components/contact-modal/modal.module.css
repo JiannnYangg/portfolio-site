@@ -9,7 +9,8 @@
  * right edge, and next to it a separate tile in the blue gradient with a
  * leaning left edge holding the arrow (both halves are SVG shapes, see
  * SplitButton in modal.jsx). Both halves carry the glow treatment: a soft top
- * gloss, round white halftone dots on the outer ends, and a glow around them.
+ * gloss, a white light spill and round white halftone dots on the outer ends,
+ * and a glow around them.
  *
  * Errors are a clean red (never orange) so they read as "fix this" and don't
  * clash with the blue theme.
@@ -403,12 +404,12 @@
 }
 
 .ctaLabel {
-  min-width: 162px;
-  padding: 0 22px 0 34px;
+  min-width: 178px;
+  padding: 0 22px 0 44px;
 }
 
 .ctaTile {
-  width: 58px;
+  width: 62px;
   transition: transform 0.3s var(--ease);
 }
 
@@ -435,9 +436,10 @@
 }
 
 /*
- * Halftone dots: a clip box per outer end (rounded to match the button's
- * corners) holding an SVG of round white discs that shrink toward the middle.
- * The right-hand one is mirrored.
+ * Halftone ends: a clip box per outer end (rounded to match the button's
+ * corners). Each holds a soft white light spill that fades toward the middle,
+ * with round white dots on top that shrink the same way. The right-hand one
+ * is mirrored.
  */
 .ctaClip {
   position: absolute;
@@ -449,14 +451,26 @@
 
 .ctaClip[data-side='left'] {
   left: 0;
-  width: 64px;
+  width: 84px;
   border-radius: 16px 0 0 16px;
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 36%) 0%,
+    rgb(255 255 255 / 14%) 45%,
+    rgb(255 255 255 / 0%) 100%
+  );
 }
 
 .ctaClip[data-side='right'] {
   right: 0;
-  width: 28px;
+  width: 34px;
   border-radius: 0 16px 16px 0;
+  background: linear-gradient(
+    270deg,
+    rgb(255 255 255 / 34%) 0%,
+    rgb(255 255 255 / 12%) 50%,
+    rgb(255 255 255 / 0%) 100%
+  );
 }
 
 .ctaDots {
@@ -464,6 +478,7 @@
   top: 50%;
   margin-top: -32px;
   overflow: visible;
+  filter: drop-shadow(0 0 3px rgb(255 255 255 / 65%));
   shape-rendering: geometricprecision;
 }
 

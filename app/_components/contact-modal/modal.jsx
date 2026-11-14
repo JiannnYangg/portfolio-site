@@ -51,7 +51,8 @@ const ARROW_PATH =
  * Halftone dots for the CTA's outer ends: perfectly round, solid white circles
  * on a staggered grid, biggest at the outer edge and shrinking (and thinning)
  * toward the label / arrow. Real SVG circles, so every dot is a clean, smooth
- * disc, never a star or a blur.
+ * disc, never a star. A soft white light spills out of each end behind them
+ * (see .ctaClip in the CSS), like the lit-up ends of the reference button.
  */
 const DOT_H = 64;
 function makeDots(width, maxR, pitch, minR) {
@@ -60,16 +61,16 @@ function makeDots(width, maxR, pitch, minR) {
   const dots = [];
   for (let row = 0; row < rows; row += 1) {
     const shift = row % 2 ? pitch / 2 : 0;
-    for (let x = 3 + shift; x < width; x += pitch) {
+    for (let x = 4 + shift; x < width; x += pitch) {
       const t = x / width;
-      const r = maxR * (1 - t) ** 1.1;
+      const r = maxR * (1 - t) ** 1.05;
       if (r >= minR) {
         dots.push({
           key: `${row}-${x}`,
           cx: Number(x.toFixed(2)),
           cy: Number((row * rowHeight).toFixed(2)),
           r: Number(r.toFixed(2)),
-          o: Number((1 - 0.35 * t).toFixed(2)),
+          o: Number((1 - 0.3 * t).toFixed(2)),
         });
       }
     }
@@ -77,10 +78,10 @@ function makeDots(width, maxR, pitch, minR) {
   return dots;
 }
 
-const LABEL_DOT_W = 64;
-const TILE_DOT_W = 28;
-const LABEL_DOTS = makeDots(LABEL_DOT_W, 4, 9.8, 1);
-const TILE_DOTS = makeDots(TILE_DOT_W, 3.2, 8.6, 0.9);
+const LABEL_DOT_W = 84;
+const TILE_DOT_W = 34;
+const LABEL_DOTS = makeDots(LABEL_DOT_W, 4.7, 10.4, 1.1);
+const TILE_DOTS = makeDots(TILE_DOT_W, 3.5, 9, 1);
 
 function validate({ name, phone, email }) {
   const errors = {};
@@ -128,8 +129,9 @@ function HalftoneDots({ dots, width, side }) {
 /**
  * The split CTA: a near-black label (monospace, capitals) and, next to it, a
  * separate tile in the landing blue gradient holding the arrow. Both halves
- * carry the glow treatment: a soft top gloss, round halftone dots on the outer
- * ends and a glow around them. While busy the arrow turns into a spinner.
+ * carry the glow treatment: a soft top gloss, a white light spill and round
+ * halftone dots on the outer ends, and a glow around them. While busy the
+ * arrow turns into a spinner.
  */
 function SplitButton({ label, busy = false, buttonRef, ...buttonProps }) {
   return (
