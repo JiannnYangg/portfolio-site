@@ -4,8 +4,11 @@
  * A modern card in the landing CTA's own blue: the frame uses the exact
  * gradient of the hero "Let's talk" button (#4d65ee -> #4359e8 -> #2f40c1),
  * around a warm white card. Each field is its own rounded box with a quiet
- * inline icon and a floating label, and the submit button is a full-width
- * blue button with a light sweep and a sliding arrow.
+ * inline icon and a plain placeholder, and the submit button is a compact
+ * blue pill with a light sweep and a sliding arrow.
+ *
+ * Errors are a clean red (never orange) so they read as "fix this" and don't
+ * clash with the blue theme.
  *
  * Phones (under 640px) turn it into a bottom sheet: full width, a grab handle,
  * taller touch targets and a safe-area aware foot. Inputs are 17px so iOS
@@ -42,7 +45,7 @@
     #4359e8 50%,
     #2f40c1 100%
   );
-  --danger: #c2321a;
+  --danger: #dc2626;
   --ok: #1f9d55;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
@@ -240,7 +243,7 @@
   line-height: 1.45;
 }
 
-/* ---------- the fields: separate boxes, floating labels ---------- */
+/* ---------- the fields: separate boxes, plain placeholders ---------- */
 .group {
   display: flex;
   flex-direction: column;
@@ -254,7 +257,7 @@
 
 .field {
   position: relative;
-  height: 58px;
+  height: 56px;
   border: 1.5px solid var(--hair);
   border-radius: 16px;
   background: var(--field);
@@ -277,14 +280,14 @@
 }
 
 .field[data-invalid='true'] {
-  border-color: rgb(194 50 26 / 55%);
-  background: rgb(194 50 26 / 4%);
+  border-color: rgb(220 38 38 / 55%);
+  background: rgb(220 38 38 / 4%);
 }
 
 .field[data-invalid='true']:focus-within {
   border-color: var(--danger);
   background: #fff;
-  box-shadow: 0 0 0 4px rgb(194 50 26 / 14%);
+  box-shadow: 0 0 0 4px rgb(220 38 38 / 14%);
 }
 
 .icon {
@@ -311,7 +314,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  padding: 20px 46px 0 46px;
+  padding: 0 46px;
   border: 0;
   border-radius: inherit;
   outline: none;
@@ -327,15 +330,10 @@
   appearance: none;
 }
 
-/* the example text only shows while the field is focused */
 .input::placeholder {
-  color: transparent;
+  color: rgb(31 27 24 / 46%);
   font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.input:focus::placeholder {
-  color: rgb(31 27 24 / 32%);
+  opacity: 1;
 }
 
 .input:-webkit-autofill {
@@ -343,41 +341,18 @@
   box-shadow: 0 0 0 100px var(--field) inset;
 }
 
-.label {
+/* the real label stays for screen readers */
+.srOnly {
   position: absolute;
-  top: 50%;
-  left: 46px;
-  max-width: calc(100% - 92px);
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
   overflow: hidden;
-  color: var(--muted);
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1;
-  text-overflow: ellipsis;
+  border: 0;
   white-space: nowrap;
-  pointer-events: none;
-  transform: translateY(-50%);
-  transform-origin: left center;
-  transition:
-    top 0.22s var(--ease),
-    transform 0.22s var(--ease),
-    color 0.22s ease;
-}
-
-.input:focus ~ .label,
-.input:not(:placeholder-shown) ~ .label,
-.input:-webkit-autofill ~ .label {
-  top: 17px;
-  transform: translateY(-50%) scale(0.78);
-}
-
-.field:focus-within .label {
-  color: var(--blue-deep);
-  font-weight: 600;
-}
-
-.field[data-invalid='true'] .label {
-  color: var(--danger);
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
 }
 
 /* a small blue tick once the value is good */
@@ -443,36 +418,37 @@
   margin: 12px 2px 0;
   padding: 10px 14px;
   border-radius: 14px;
-  background: rgb(194 50 26 / 8%);
+  background: rgb(220 38 38 / 8%);
   color: var(--danger);
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.4;
 }
 
-/* ---------- the CTA: full-width blue button, light sweep + sliding arrow ---------- */
+/* ---------- the CTA: a compact blue pill, light sweep + sliding arrow ---------- */
 .cta {
   position: relative;
   isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 58px;
-  margin-top: 18px;
-  padding: 0 20px;
+  width: fit-content;
+  min-width: 210px;
+  height: 48px;
+  margin: 20px auto 0;
+  padding: 0 26px;
   overflow: hidden;
   border: 0;
-  border-radius: 18px;
+  border-radius: 999px;
   background-color: var(--blue);
   background-image: var(--blue-gradient);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 30%),
     inset 0 -1px 0 rgb(18 22 46 / 14%),
-    0 12px 24px rgb(67 89 232 / 34%);
+    0 10px 22px rgb(67 89 232 / 32%);
   color: #fff;
   font: inherit;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 650;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -505,7 +481,7 @@
   position: relative;
   z-index: 1;
   display: inline-flex;
-  gap: 10px;
+  gap: 9px;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
@@ -517,7 +493,7 @@
 }
 
 .cta:active {
-  transform: scale(0.985);
+  transform: scale(0.97);
 }
 
 .cta[aria-busy='true'] {
@@ -533,7 +509,7 @@
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 34%),
       inset 0 -1px 0 rgb(18 22 46 / 14%),
-      0 16px 32px rgb(67 89 232 / 44%);
+      0 14px 28px rgb(67 89 232 / 44%);
     filter: brightness(1.05);
     transform: translateY(-1px);
   }
@@ -552,8 +528,8 @@
 }
 
 .spin {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   border: 2.5px solid rgb(255 255 255 / 35%);
   border-top-color: #fff;
   border-radius: 50%;
@@ -687,22 +663,13 @@
 
   /* roomy touch targets */
   .field {
-    height: 60px;
-  }
-
-  .input {
-    padding-top: 22px;
-  }
-
-  .input:focus ~ .label,
-  .input:not(:placeholder-shown) ~ .label,
-  .input:-webkit-autofill ~ .label {
-    top: 18px;
+    height: 58px;
   }
 
   .cta {
-    height: 60px;
-    margin-top: 16px;
+    width: 100%;
+    height: 52px;
+    margin-top: 18px;
   }
 
   .foot {
@@ -731,19 +698,13 @@
     margin-top: 14px;
   }
 
-  .field,
+  .field {
+    height: 52px;
+  }
+
   .cta {
-    height: 54px;
-  }
-
-  .input {
-    padding-top: 19px;
-  }
-
-  .input:focus ~ .label,
-  .input:not(:placeholder-shown) ~ .label,
-  .input:-webkit-autofill ~ .label {
-    top: 16px;
+    height: 46px;
+    margin-top: 14px;
   }
 }
 
@@ -790,10 +751,6 @@
 
   .cta::before {
     display: none;
-  }
-
-  .label {
-    transition: none;
   }
 }
 

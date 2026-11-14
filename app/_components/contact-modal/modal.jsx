@@ -64,11 +64,10 @@ function validate({ name, phone, email }) {
 }
 
 /**
- * One field: its own rounded box with a quiet inline icon and a floating
- * label. The label rests inside the box like a placeholder and glides up to
- * the top edge on focus or once there is a value. The example placeholder only
- * appears while focused, so an empty field stays calm. A small blue tick shows
- * once the value is good.
+ * One field: its own rounded box with a quiet inline icon. The placeholder is
+ * plain wording ("Your name", "Phone number", "Your email address"), never an
+ * example value. The real <label> stays in the DOM for screen readers. A small
+ * blue tick shows once the value is good.
  */
 function Field({ id, icon: Icon, label, error, valid, inputRef, ...inputProps }) {
   return (
@@ -81,7 +80,9 @@ function Field({ id, icon: Icon, label, error, valid, inputRef, ...inputProps })
         <span className={styles.icon} aria-hidden='true'>
           <Icon size={19} strokeWidth={2} />
         </span>
-        {/* the input comes first so the label can react to :focus / :placeholder-shown */}
+        <label htmlFor={id} className={styles.srOnly}>
+          {label}
+        </label>
         <input
           id={id}
           ref={inputRef}
@@ -90,9 +91,6 @@ function Field({ id, icon: Icon, label, error, valid, inputRef, ...inputProps })
           aria-describedby={error ? `${id}-error` : undefined}
           {...inputProps}
         />
-        <label htmlFor={id} className={styles.label}>
-          {label}
-        </label>
         <span className={styles.tick} aria-hidden='true'>
           <Check size={13} strokeWidth={3.5} />
         </span>
@@ -189,10 +187,11 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
  * - Desktop: a centred card that springs in. Phones: a bottom sheet that rises
  *   with the iOS sheet curve and can be dragged down (from its top) to close.
  * - A frame in the landing CTA's blue gradient around a warm white card.
- * - Three separate fields with floating labels and inline icons (name, phone,
- *   email), then a full-width blue button with its own shine and arrow.
+ * - Three separate fields with inline icons and plain placeholders (name,
+ *   phone, email), then a compact blue pill button with its own shine.
  * - Name is required, and at least one of phone / email. Errors are gentle,
- *   inline and only show after the visitor has touched a field or tried to send.
+ *   inline, red, and only show after the visitor has touched a field or tried
+ *   to send.
  * - Nothing is stored yet: see ./submit-lead.js.
  * - Accessible: dialog role, focus trap, Escape / backdrop close, scroll lock
  *   (Lenis + overflow), reduced motion.
@@ -456,7 +455,7 @@ export function ContactModal({ onClose }) {
                         inputRef={nameRef}
                         type='text'
                         name='name'
-                        placeholder='Jane Appleseed'
+                        placeholder='Your name'
                         autoComplete='name'
                         autoCapitalize='words'
                         enterKeyHint='next'
@@ -473,7 +472,7 @@ export function ContactModal({ onClose }) {
                         inputRef={phoneRef}
                         type='tel'
                         name='phone'
-                        placeholder='+91 98765 43210'
+                        placeholder='Phone number'
                         autoComplete='tel'
                         inputMode='tel'
                         enterKeyHint='next'
@@ -490,7 +489,7 @@ export function ContactModal({ onClose }) {
                         inputRef={emailRef}
                         type='email'
                         name='email'
-                        placeholder='jane@example.com'
+                        placeholder='Your email address'
                         autoComplete='email'
                         inputMode='email'
                         autoCapitalize='none'
@@ -537,10 +536,10 @@ export function ContactModal({ onClose }) {
                         </>
                       ) : (
                         <>
-                          Send my details
+                          Let’s get started
                           <ArrowRight
                             className={styles.ctaArrow}
-                            size={20}
+                            size={18}
                             strokeWidth={2.4}
                             aria-hidden='true'
                           />
