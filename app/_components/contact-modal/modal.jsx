@@ -9,7 +9,16 @@ import {
   useDragControls,
   useReducedMotion,
 } from 'framer-motion';
-import { ArrowUpRight, Check, Lock, Mail, Phone, User, X } from 'lucide-react';
+import {
+  ArrowRight,
+  Check,
+  Info,
+  Lock,
+  Mail,
+  Phone,
+  User,
+  X,
+} from 'lucide-react';
 
 import { getLenis } from '@/hooks';
 
@@ -26,13 +35,13 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const IOS_EASE = [0.32, 0.72, 0, 1];
 const SPRING = { type: 'spring', damping: 30, stiffness: 340, mass: 0.9 };
 
-/** little sparkles that burst out of the success badge */
+/** little sparkles that burst out of the success badge (blues + the success green) */
 const BURST = Array.from({ length: 8 }, (_, index) => {
   const angle = (index / 8) * Math.PI * 2;
   return {
     x: Math.cos(angle) * 58,
     y: Math.sin(angle) * 58,
-    color: ['#e24a28', '#ffb089', '#1f9d55', '#f9c6a0'][index % 4],
+    color: ['#4359e8', '#9aa8ff', '#1f9d55', '#c9d1ff'][index % 4],
   };
 });
 
@@ -54,23 +63,25 @@ function validate({ name, phone, email }) {
   return errors;
 }
 
-/** One row of the grouped, iOS-Settings-style list */
-function Field({ id, icon: Icon, label, error, inputRef, ...inputProps }) {
+/**
+ * One field: its own rounded box with a quiet inline icon and a floating
+ * label. The label rests inside the box like a placeholder and glides up to
+ * the top edge on focus or once there is a value. The example placeholder only
+ * appears while focused, so an empty field stays calm. A small blue tick shows
+ * once the value is good.
+ */
+function Field({ id, icon: Icon, label, error, valid, inputRef, ...inputProps }) {
   return (
-    // clicking anywhere on the row focuses its input (big, friendly touch target)
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div
-      className={styles.row}
-      data-invalid={error ? 'true' : undefined}
-      onClick={() => inputRef.current?.focus()}
-    >
-      <span className={styles.icon} aria-hidden='true'>
-        <Icon size={19} strokeWidth={2.2} />
-      </span>
-      <div className={styles.fieldBody}>
-        <label htmlFor={id} className={styles.label}>
-          {label}
-        </label>
+    <div className={styles.item}>
+      <div
+        className={styles.field}
+        data-invalid={error ? 'true' : undefined}
+        data-valid={valid ? 'true' : undefined}
+      >
+        <span className={styles.icon} aria-hidden='true'>
+          <Icon size={19} strokeWidth={2} />
+        </span>
+        {/* the input comes first so the label can react to :focus / :placeholder-shown */}
         <input
           id={id}
           ref={inputRef}
@@ -79,12 +90,18 @@ function Field({ id, icon: Icon, label, error, inputRef, ...inputProps }) {
           aria-describedby={error ? `${id}-error` : undefined}
           {...inputProps}
         />
-        {error ? (
-          <p id={`${id}-error`} className={styles.error} role='alert'>
-            {error}
-          </p>
-        ) : null}
+        <label htmlFor={id} className={styles.label}>
+          {label}
+        </label>
+        <span className={styles.tick} aria-hidden='true'>
+          <Check size={13} strokeWidth={3.5} />
+        </span>
       </div>
+      {error ? (
+        <p id={`${id}-error`} className={styles.error} role='alert'>
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -157,22 +174,23 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
       <button
         ref={doneRef}
         type='button'
-        className={styles.doneBtn}
+        className={`${styles.cta} ${styles.ctaDone}`}
         onClick={onDone}
       >
-        Done
+        <span className={styles.ctaLabel}>Done</span>
       </button>
     </motion.div>
   );
 }
 
 /**
- * The "Let's talk" popup: a friendly, iPhone-style card.
+ * The "Let's talk" popup, opened by the hero and footer CTAs.
  *
  * - Desktop: a centred card that springs in. Phones: a bottom sheet that rises
  *   with the iOS sheet curve and can be dragged down (from its top) to close.
- * - A brand-orange frame around a warm white card, with the details as one
- *   grouped, rounded list (name, phone, email) and the site's own pill CTA.
+ * - A frame in the landing CTA's blue gradient around a warm white card.
+ * - Three separate fields with floating labels and inline icons (name, phone,
+ *   email), then a full-width blue button with its own shine and arrow.
  * - Name is required, and at least one of phone / email. Errors are gentle,
  *   inline and only show after the visitor has touched a field or tried to send.
  * - Nothing is stored yet: see ./submit-lead.js.
@@ -196,9 +214,7 @@ export function ContactModal({ onClose }) {
   const shake = useAnimationControls();
   const dragControls = useDragControls();
 
-  const [isSheet] = useState(
-    () => window.matchMedia(SHEET_QUERY).matches,
-  );
+  const [isSheet] = useState(() => window.matchMedia(SHEET_QUERY).matches);
   const [values, setValues] = useState({ name: '', phone: '', email: '' });
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -208,6 +224,7 @@ export function ContactModal({ onClose }) {
 
   const errors = validate(values);
   const show = key => (submitted || touched[key] ? errors[key] : undefined);
+  const isValid = key => Boolean(values[key].trim()) && !errors[key];
   const contactError =
     submitted || (touched.phone && touched.email) ? errors.contact : undefined;
 
@@ -447,6 +464,7 @@ export function ContactModal({ onClose }) {
                         onChange={update('name')}
                         onBlur={markTouched('name')}
                         error={show('name')}
+                        valid={isValid('name')}
                       />
                       <Field
                         id={`${baseId}-phone`}
@@ -463,11 +481,12 @@ export function ContactModal({ onClose }) {
                         onChange={update('phone')}
                         onBlur={markTouched('phone')}
                         error={show('phone')}
+                        valid={isValid('phone')}
                       />
                       <Field
                         id={`${baseId}-email`}
                         icon={Mail}
-                        label='Email'
+                        label='Email address'
                         inputRef={emailRef}
                         type='email'
                         name='email'
@@ -481,6 +500,7 @@ export function ContactModal({ onClose }) {
                         onChange={update('email')}
                         onBlur={markTouched('email')}
                         error={show('email')}
+                        valid={isValid('email')}
                       />
                     </div>
                   </motion.div>
@@ -490,8 +510,11 @@ export function ContactModal({ onClose }) {
                     data-invalid={contactError ? 'true' : undefined}
                     role={contactError ? 'alert' : undefined}
                   >
-                    {contactError ||
-                      'Phone or email, whichever you like. One is enough.'}
+                    <Info size={14} strokeWidth={2.25} aria-hidden='true' />
+                    <span>
+                      {contactError ||
+                        'Phone or email, whichever you like. One is enough.'}
+                    </span>
                   </p>
 
                   {submitError ? (
@@ -513,11 +536,16 @@ export function ContactModal({ onClose }) {
                           Sending…
                         </>
                       ) : (
-                        'Send my details'
+                        <>
+                          Send my details
+                          <ArrowRight
+                            className={styles.ctaArrow}
+                            size={20}
+                            strokeWidth={2.4}
+                            aria-hidden='true'
+                          />
+                        </>
                       )}
-                    </span>
-                    <span className={styles.ctaArrow} aria-hidden='true'>
-                      <ArrowUpRight size={22} strokeWidth={2.25} />
                     </span>
                   </button>
                 </motion.form>
