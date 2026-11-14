@@ -11,9 +11,9 @@ import {
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 
-import { PAPER_RGB } from '@/components';
+import { PAPER_RGB, useContactModal } from '@/components';
 import { introDelay } from '@/data';
-import { scrollToId, useLoopDelay, useScrollFade } from '@/hooks';
+import { useLoopDelay, useScrollFade } from '@/hooks';
 
 import { HeroLogos } from './hero-logos';
 import { slideUp } from './variants';
@@ -519,6 +519,9 @@ function Selection({ children }) {
 }
 
 export function Header() {
+  //? the hero CTA opens the contact popup (see _components/contact-modal)
+  const { open: openContact } = useContactModal();
+
   return (
     <motion.header
       className='hero-scope relative min-h-[100svh] overflow-hidden text-[#1f1b18] selection:bg-[#f7c9b8] selection:text-[#1f1b18]'
@@ -606,13 +609,15 @@ export function Header() {
               flicker. The solid theme blue is the fallback colour under the
               gradient. A subtle top highlight gives the label some depth.
               Sits a deliberate, modest gap under the headline. It shares the
-              headline's rise-from-mask intro and scroll fade (CtaReveal). */}
+              headline's rise-from-mask intro and scroll fade (CtaReveal).
+              Clicking it opens the contact popup. */}
           <div className='mt-[var(--hero-gap)] flex justify-center'>
             <CtaReveal>
               <button
                 type='button'
-                onClick={() => scrollToId('contact-footer')}
-                aria-label="Let's talk, go to contact"
+                onClick={openContact}
+                aria-haspopup='dialog'
+                aria-label="Let's talk, open the contact form"
                 className='group flex items-center gap-[5px] rounded-full bg-[#f6f4f0] p-[5px] font-[family-name:var(--font-inter-tight)] wide:gap-[6px] wide:p-[6px] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f1b18] motion-reduce:transition-none motion-reduce:hover:scale-100'
               >
                 <span
