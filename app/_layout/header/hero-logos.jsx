@@ -80,23 +80,26 @@ const shadowFor = depth =>
  *    --hero-bottom from the headline size, gap and padding. On a phone the
  *    logos are placed against those two edges, not against percentages of the
  *    screen, so they can never land on the text whatever the screen height.
- *  - 3 above, 3 beside, 2 below, so the weight is spread over the whole
+ *  - 3 above, 3 beside, 1 by the CTA, 1 below, so the weight is spread over the whole
  *    screen and the area under the CTA is not a pile of logos. The sides are
  *    the blank pockets next to the headline lines (the lines are left
  *    aligned, so the left pocket is a thin strip at every line and the right
  *    one is wide beside line 2); each logo is centred on its line, using the
  *    line's middle (line 1 = 0.54, line 2 = 1.62, line 3 = 2.7 headline
  *    sizes below the block top). Nothing mirrors:
- *      above the headline  claude (top left, the biggest), n8n (a little
- *                          right of centre, lower), comfy (right, sitting
- *                          just above the headline's selection callout)
+ *      above the headline  claude (left, a bit smaller than before), n8n (a
+ *                          little left of centre, higher),
+ *                          comfy (right, sitting just above the headline's
+ *                          selection callout)
  *      beside line 1       runway, in the left pocket
  *      beside line 2       codex, in the right pocket after "We build it."
  *      under line 3        elevenlabs, in the gap between the headline and
  *                          the CTA, left of the pill and well inside the
  *                          edge, so it does not line up with runway above
- *      below the CTA       squiggle (right, the big one) and github (left
- *                          of centre, lower). --hero-top-room /
+ *      beside the CTA      squiggle, right of the pill (on screens narrower
+ *                          than 390px it slides down, so it hangs off the
+ *                          pill's corner instead of touching it)
+ *      below the CTA       github (left of centre). --hero-top-room /
  *                          --hero-travel are the spare height of the top /
  *                          bottom band (0 on the shortest phones, where the
  *                          logos stay side by side); each logo takes its own
@@ -121,10 +124,10 @@ const LOGOS = [
     src: '/hero-logos/hero-claude-4827.webp',
     width: 300,
     height: 261,
-    size: 'w-[clamp(48px,min(19vw,8.5svh),84px)] wide:w-[clamp(62px,8.4vw,152px)]',
-    imgSizes: '(min-width: 768px) 152px, 84px',
+    size: 'w-[clamp(42px,min(15.5vw,7svh),68px)] wide:w-[clamp(62px,8.4vw,152px)]',
+    imgSizes: '(min-width: 768px) 152px, 68px',
     position:
-      'left-[5%] top-[calc(var(--band)_+_22px_+_var(--hero-top-room)_*_0.1)] wide:left-[7%] wide:top-[max(15%,calc(var(--band)_+_20px))]',
+      'left-[7%] top-[calc(var(--band)_+_22px_+_var(--hero-top-room)_*_0.65)] wide:left-[7%] wide:top-[max(15%,calc(var(--band)_+_20px))]',
     rotate: -9,
     depth: 1.3,
     float: [10, 6.2, 1.6, 0],
@@ -147,10 +150,10 @@ const LOGOS = [
     src: '/hero-logos/hero-squiggle-1084.webp',
     width: 224,
     height: 196,
-    size: 'w-[clamp(48px,min(19vw,9.5svh),84px)] wide:w-[clamp(54px,8vw,148px)]',
-    imgSizes: '(min-width: 768px) 148px, 84px',
+    size: 'w-[clamp(42px,min(15.5vw,8svh),68px)] wide:w-[clamp(54px,8vw,148px)]',
+    imgSizes: '(min-width: 768px) 148px, 68px',
     position:
-      'right-[6%] top-[calc(var(--hero-bottom)_+_16px_+_var(--hero-travel)_*_0.3)] wide:right-[6%] wide:top-[50%]',
+      'right-[3.5%] top-[calc(var(--hero-bottom)_-_32px_+_max(0px,calc((390px_-_100vw)_*_0.45)))] wide:right-[6%] wide:top-[50%]',
     rotate: -8,
     depth: 1.25,
     float: [9, 6.6, 1.5, 2],
@@ -163,7 +166,7 @@ const LOGOS = [
     size: 'w-[clamp(40px,min(14vw,7.5svh),66px)] wide:w-[clamp(48px,6vw,100px)]',
     imgSizes: '(min-width: 768px) 100px, 66px',
     position:
-      'left-[44%] top-[calc(var(--band)_+_16px_+_var(--hero-top-room)_*_0.55)] wide:left-[4%] wide:top-[49%]',
+      'left-[40%] top-[calc(var(--band)_+_16px_+_var(--hero-top-room)_*_0.2)] wide:left-[4%] wide:top-[49%]',
     rotate: -14,
     depth: 0.7,
     float: [6, 6.8, 2, 1.6],
@@ -178,7 +181,7 @@ const LOGOS = [
     size: 'w-[clamp(34px,min(13vw,6.8svh),58px)] wide:w-[clamp(34px,4.2vw,68px)]',
     imgSizes: '(min-width: 768px) 68px, 58px',
     position:
-      'left-[34%] top-[calc(var(--hero-bottom)_+_16px_+_var(--hero-travel)_*_0.85)] wide:top-auto wide:bottom-[16%] wide:left-[17%]',
+      'left-[24%] top-[calc(var(--hero-bottom)_+_16px_+_var(--hero-travel)_*_0.36)] wide:top-auto wide:bottom-[16%] wide:left-[17%]',
     rotate: 7,
     depth: 0.5,
     float: [5, 5.2, 1.8, 1.1],
