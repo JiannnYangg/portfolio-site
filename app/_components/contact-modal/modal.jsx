@@ -45,6 +45,17 @@ const BURST = Array.from({ length: 8 }, (_, index) => {
   };
 });
 
+/**
+ * The two halves of the split CTA, drawn as SVG paths so every corner is
+ * rounded while the two facing edges lean the same way (top further right):
+ * the label is a 156x52 box with a leaning right edge, the arrow tile is a
+ * 60x52 box with a leaning left edge.
+ */
+const LABEL_PATH =
+  'M16 0H142Q156 0 154.4 12L150.6 40Q149 52 137 52H16Q0 52 0 36V16Q0 0 16 0Z';
+const ARROW_PATH =
+  'M20 0H44Q60 0 60 16V36Q60 52 44 52H13Q1 52 2.6 40L6.4 12Q8 0 20 0Z';
+
 function validate({ name, phone, email }) {
   const errors = {};
   const digits = phone.replace(/\D/g, '');
@@ -61,6 +72,80 @@ function validate({ name, phone, email }) {
     errors.contact = 'Add a phone number or an email so we can reach you.';
   }
   return errors;
+}
+
+/**
+ * The split CTA: a near-black label (monospace, capitals) and, next to it, a
+ * separate tile in the landing blue gradient holding the arrow. While busy the
+ * arrow turns into a spinner.
+ */
+function SplitButton({ label, busy = false, buttonRef, ...buttonProps }) {
+  return (
+    <button
+      ref={buttonRef}
+      className={styles.cta}
+      aria-busy={busy}
+      {...buttonProps}
+    >
+      <span className={styles.ctaLabel}>
+        <svg
+          className={styles.ctaShape}
+          viewBox='0 0 156 52'
+          preserveAspectRatio='none'
+          aria-hidden='true'
+        >
+          <defs>
+            <linearGradient id='lm-night' x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stopColor='#1d2030' />
+              <stop offset='100%' stopColor='#12141c' />
+            </linearGradient>
+          </defs>
+          <path
+            d={LABEL_PATH}
+            fill='url(#lm-night)'
+            stroke='rgba(255,255,255,0.12)'
+            strokeWidth='1'
+            vectorEffect='non-scaling-stroke'
+          />
+        </svg>
+        <span className={styles.ctaText}>{label}</span>
+      </span>
+
+      <span className={styles.ctaTile}>
+        <svg
+          className={styles.ctaShape}
+          viewBox='0 0 60 52'
+          preserveAspectRatio='none'
+          aria-hidden='true'
+        >
+          <defs>
+            <linearGradient id='lm-blue' x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stopColor='#4d65ee' />
+              <stop offset='50%' stopColor='#4359e8' />
+              <stop offset='100%' stopColor='#2f40c1' />
+            </linearGradient>
+          </defs>
+          <path
+            d={ARROW_PATH}
+            fill='url(#lm-blue)'
+            stroke='rgba(255,255,255,0.28)'
+            strokeWidth='1'
+            vectorEffect='non-scaling-stroke'
+          />
+        </svg>
+        {busy ? (
+          <span className={styles.spin} aria-hidden='true' />
+        ) : (
+          <ArrowRight
+            className={styles.ctaArrow}
+            size={20}
+            strokeWidth={2}
+            aria-hidden='true'
+          />
+        )}
+      </span>
+    </button>
+  );
 }
 
 /**
@@ -169,14 +254,12 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
         <span>We’ll reach you at {reachAt}</span>
       </p>
 
-      <button
-        ref={doneRef}
+      <SplitButton
+        buttonRef={doneRef}
         type='button'
-        className={`${styles.cta} ${styles.ctaDone}`}
+        label='Done'
         onClick={onDone}
-      >
-        <span className={styles.ctaLabel}>Done</span>
-      </button>
+      />
     </motion.div>
   );
 }
@@ -188,8 +271,8 @@ function SuccessView({ firstName, reachAt, formHeight, onDone, doneRef }) {
  *   with the iOS sheet curve and can be dragged down (from its top) to close.
  * - A frame in the landing CTA's blue gradient around a warm white card.
  * - Three separate fields with inline icons and plain placeholders (name,
- *   phone, email), then a near-black pill with just a blue arrow (no text; it
- *   keeps an aria-label for screen readers).
+ *   phone, email), then a split CTA: a near-black "LET'S GO" label plus a
+ *   separate blue-gradient arrow tile (see SplitButton).
  * - Name is required, and at least one of phone / email. Errors are gentle,
  *   inline, red, and only show after the visitor has touched a field or tried
  *   to send.
@@ -523,28 +606,12 @@ export function ContactModal({ onClose }) {
                     </p>
                   ) : null}
 
-                  {/* icon-only button: the arrow is the whole label, so the
-                      accessible name lives on aria-label */}
-                  <button
+                  <SplitButton
                     type='submit'
-                    className={styles.cta}
-                    aria-label={sending ? 'Sending' : 'Send my details'}
+                    label={sending ? 'Sending' : 'Let’s go'}
+                    busy={sending}
                     aria-disabled={sending}
-                    aria-busy={sending}
-                  >
-                    <span className={styles.ctaLabel}>
-                      {sending ? (
-                        <span className={styles.spin} aria-hidden='true' />
-                      ) : (
-                        <ArrowRight
-                          className={styles.ctaArrow}
-                          size={24}
-                          strokeWidth={2.5}
-                          aria-hidden='true'
-                        />
-                      )}
-                    </span>
-                  </button>
+                  />
                 </motion.form>
               )}
             </AnimatePresence>

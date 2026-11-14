@@ -4,8 +4,10 @@
  * A modern card in the landing CTA's own blue: the frame uses the exact
  * gradient of the hero "Let's talk" button (#4d65ee -> #4359e8 -> #2f40c1),
  * around a warm white card. Each field is its own rounded box with a quiet
- * inline icon and a plain placeholder, and the submit button is a compact
- * near-black pill holding just a blue arrow.
+ * inline icon and a plain placeholder. The submit button is a split CTA: a
+ * near-black "LET'S GO" label with a leaning right edge, and next to it a
+ * separate tile in the blue gradient with a leaning left edge holding the
+ * arrow (both halves are SVG shapes, see SplitButton in modal.jsx).
  *
  * Errors are a clean red (never orange) so they read as "fix this" and don't
  * clash with the blue theme.
@@ -45,13 +47,6 @@
     #4359e8 50%,
     #2f40c1 100%
   );
-
-  /* the send button: a near-black (a touch of navy so it sits with the blue
-     frame, never pure black) with a brighter blue arrow that reads on dark */
-  --night: #14161f;
-  --night-top: #1d2030;
-  --arrow: #6b82ff;
-  --arrow-hot: #8ea0ff;
   --danger: #dc2626;
   --ok: #1f9d55;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -215,7 +210,7 @@
 .close:focus-visible,
 .cta:focus-visible {
   outline: 2px solid var(--blue);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 /* ---------- copy ---------- */
@@ -432,120 +427,128 @@
   line-height: 1.4;
 }
 
-/* ---------- the CTA: near-black pill, one blue arrow ---------- */
+/* ---------- the CTA: split button, near-black label + blue arrow tile ---------- */
 .cta {
-  position: relative;
-  isolation: isolate;
+  --cta-h: 52px;
+
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  width: 96px;
-  height: 52px;
+  width: fit-content;
+  height: var(--cta-h);
   margin: 22px auto 0;
   padding: 0;
-  overflow: hidden;
   border: 0;
-  border-radius: 999px;
-  background-color: var(--night);
-  background-image: linear-gradient(160deg, var(--night-top) 0%, var(--night) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 7%),
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 12px 24px rgb(18 22 46 / 32%);
-  color: var(--arrow);
+  border-radius: 18px;
+  background: none;
+  color: #fff;
   font: inherit;
   cursor: pointer;
-  transition:
-    transform 0.3s var(--ease),
-    box-shadow 0.3s var(--ease);
+  transition: transform 0.3s var(--ease);
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-/* a soft blue sweep across the dark */
-.cta::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 42%;
-  background: linear-gradient(
-    100deg,
-    rgb(107 130 255 / 0%) 0%,
-    rgb(107 130 255 / 26%) 50%,
-    rgb(107 130 255 / 0%) 100%
-  );
-  pointer-events: none;
-  transform: translateX(-140%) skewX(-18deg);
-  transition: transform 0.75s var(--ease);
+.ctaLabel,
+.ctaTile {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  height: 100%;
 }
 
 .ctaLabel {
+  min-width: 156px;
+  padding: 0 28px 0 30px;
+}
+
+.ctaTile {
+  width: 60px;
+  transition: transform 0.3s var(--ease);
+}
+
+/* the SVG shape sits behind the content and stretches to its box */
+.ctaShape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  transition: filter 0.3s ease;
+}
+
+.ctaLabel .ctaShape {
+  filter: drop-shadow(0 8px 12px rgb(18 22 46 / 26%));
+}
+
+.ctaTile .ctaShape {
+  filter: drop-shadow(0 8px 14px rgb(67 89 232 / 38%));
+}
+
+.ctaText {
   position: relative;
   z-index: 1;
-  display: inline-flex;
-  gap: 9px;
-  align-items: center;
-  justify-content: center;
+  color: #fff;
+  font-family:
+    ui-monospace, 'SF Mono', 'Roboto Mono', 'JetBrains Mono', menlo, consolas,
+    monospace;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .ctaArrow {
-  flex: none;
-  filter: drop-shadow(0 0 8px rgb(107 130 255 / 45%));
-  transition:
-    transform 0.3s var(--ease),
-    color 0.3s ease;
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  transition: transform 0.3s var(--ease);
 }
 
 .cta:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 .cta[aria-busy='true'] {
   cursor: progress;
 }
 
-.cta:focus-visible::before {
-  transform: translateX(380%) skewX(-18deg);
-}
-
 @media (hover: hover) {
   .cta:hover {
-    box-shadow:
-      inset 0 0 0 1px rgb(107 130 255 / 45%),
-      inset 0 1px 0 rgb(255 255 255 / 16%),
-      0 0 0 4px rgb(67 89 232 / 20%),
-      0 14px 28px rgb(18 22 46 / 38%);
     transform: translateY(-1px);
   }
 
-  .cta:hover::before {
-    transform: translateX(380%) skewX(-18deg);
+  .cta:hover .ctaTile {
+    transform: translateX(3px);
+  }
+
+  .cta:hover .ctaTile .ctaShape {
+    filter: brightness(1.1) drop-shadow(0 10px 18px rgb(67 89 232 / 50%));
+  }
+
+  .cta:hover .ctaLabel .ctaShape {
+    filter: brightness(1.25) drop-shadow(0 8px 12px rgb(18 22 46 / 30%));
   }
 
   .cta:hover .ctaArrow {
-    color: var(--arrow-hot);
-    transform: translateX(5px);
+    transform: translateX(3px);
   }
 }
 
-/* the success screen's "Done" keeps a word, so it is wider with white text */
-.ctaDone {
-  width: fit-content;
-  min-width: 180px;
-  margin-top: 24px;
-  padding: 0 28px;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 650;
-  letter-spacing: 0.01em;
+.cta:focus-visible .ctaTile {
+  transform: translateX(3px);
 }
 
 .spin {
+  position: relative;
+  z-index: 1;
   width: 20px;
   height: 20px;
-  border: 2.5px solid rgb(107 130 255 / 30%);
-  border-top-color: var(--arrow-hot);
+  border: 2.5px solid rgb(255 255 255 / 35%);
+  border-top-color: #fff;
   border-radius: 50%;
   animation: lm-spin 0.7s linear infinite;
 }
@@ -558,6 +561,10 @@
   justify-content: center;
   padding: 22px 2px 2px;
   text-align: center;
+}
+
+.done .cta {
+  margin-top: 24px;
 }
 
 .badgeWrap {
@@ -681,13 +688,9 @@
   }
 
   .cta {
-    width: 104px;
-    height: 56px;
-    margin-top: 20px;
-  }
+    --cta-h: 56px;
 
-  .ctaDone {
-    width: 100%;
+    margin-top: 20px;
   }
 
   .foot {
@@ -721,7 +724,8 @@
   }
 
   .cta {
-    height: 46px;
+    --cta-h: 46px;
+
     margin-top: 14px;
   }
 }
@@ -760,15 +764,14 @@
   .cta,
   .cta:hover,
   .cta:active,
+  .ctaTile,
+  .cta:hover .ctaTile,
+  .cta:focus-visible .ctaTile,
   .ctaArrow,
   .cta:hover .ctaArrow,
   .tick {
     transform: none;
     transition: none;
-  }
-
-  .cta::before {
-    display: none;
   }
 }
 
@@ -776,8 +779,7 @@
   .frame,
   .card,
   .field,
-  .close,
-  .cta {
+  .close {
     border: 1px solid canvastext;
   }
 
@@ -785,5 +787,9 @@
     background: none;
     color: canvastext;
     -webkit-text-fill-color: currentcolor;
+  }
+
+  .cta {
+    border: 1px solid canvastext;
   }
 }
