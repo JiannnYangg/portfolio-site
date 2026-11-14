@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowUpRight, ChevronRight } from 'lucide-react';
 
 import { PAPER_RGB, useContactModal } from '@/components';
 import { introDelay } from '@/data';
@@ -108,77 +108,16 @@ const BUILD_GLOW = 'drop-shadow(0 6px 14px rgba(226,74,40,0.22))';
 /**
  * CTA colours: a diagonal blue gradient sampled from the reference button,
  * from a bright periwinkle blue (#4d65ee) at the top-left to a deeper
- * royal blue (#2f40c1) at the bottom-right, and a neutral charcoal for the
- * label. White text stays well above 4:1 on every stop.
+ * royal blue (#2f40c1) at the bottom-right. White text stays well above 4:1
+ * on every stop.
  *
- * CTA_SOLID / CTA_DARK are the fallbacks: they paint first, so a browser
- * that can't draw the gradient still shows a solid pill with white text.
+ * CTA_SOLID is the fallback: it paints first, so a browser that can't draw
+ * the gradient still shows a solid blue pill with white text.
  */
 const CTA_SOLID = '#4359e8';
 const CTA_GRADIENT =
   'linear-gradient(135deg, #4d65ee 0%, #4359e8 50%, #2f40c1 100%)';
 const CTA_DARK = '#1f1b18';
-const CTA_DARK_GRADIENT = 'linear-gradient(135deg, #34323a 0%, #1f1b18 75%)';
-
-/**
- * CTA shape: both buttons lean the same way (a parallelogram with rounded
- * corners). The content is skewed back by the same angle so the label and the
- * arrow stay upright.
- */
-const CTA_SKEW = 'skewX(-8deg)';
-const CTA_UNSKEW = 'skewX(8deg)';
-const CTA_MONO =
-  "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace";
-
-/**
- * CTA halftone: rows of dots that shrink and fade away from the edge of the
- * button, like a printed halftone. Three dot sizes, each one visible in a
- * band of the width (stops are percentages from the edge: fade in, full,
- * full, fade out). The dots are a soft, half-transparent white (never pure
- * white), so the texture is felt rather than glaring.
- */
-const DOT_ALPHA = 0.45;
-const HALFTONE_ZONES = [
-  { cell: 9, radius: 3.1, stops: [0, 0, 6, 22] },
-  { cell: 6, radius: 1.9, stops: [8, 22, 28, 40] },
-  { cell: 4, radius: 1, stops: [28, 40, 46, 58] },
-];
-
-const dotLayer = (radius) =>
-  `radial-gradient(circle at center, rgba(255,255,255,${DOT_ALPHA}) ${radius}px, rgba(255,255,255,0) ${radius + 0.7}px)`;
-
-/**
- * The dots of one button. `side` is the edge they grow from, `reach` scales
- * how far they travel across the button (the narrow arrow button needs more
- * than the long label, which keeps its text clear of them).
- */
-function Halftone({ side = 'left', reach = 1 }) {
-  const direction = side === 'left' ? 'right' : 'left';
-
-  return (
-    <span aria-hidden='true' className='pointer-events-none absolute inset-0'>
-      {HALFTONE_ZONES.map(({ cell, radius, stops }) => {
-        const [a, b, c, d] = stops.map((stop) => Math.min(100, stop * reach));
-        const mask = `linear-gradient(to ${direction}, transparent ${a}%, #000 ${b}%, #000 ${c}%, transparent ${d}%)`;
-
-        return (
-          <span
-            key={cell}
-            className='absolute inset-0'
-            style={{
-              // two layers, the second shifted by half a cell: a staggered grid
-              backgroundImage: `${dotLayer(radius)}, ${dotLayer(radius)}`,
-              backgroundSize: `${cell}px ${cell}px`,
-              backgroundPosition: `0 0, ${cell / 2}px ${cell / 2}px`,
-              maskImage: mask,
-              WebkitMaskImage: mask,
-            }}
-          />
-        );
-      })}
-    </span>
-  );
-}
 
 /**
  * The iOS edit menu is a neutral dark bubble, here a charcoal so it belongs
@@ -653,24 +592,22 @@ export function Header() {
             </Line>
           </h1>
 
-          {/* CTA: two slanted buttons side by side, like the reference. A dark
-              label with a halftone dot fade on its left edge and a mono
-              uppercase caption, and a blue square-ish arrow button with the
-              halftone on its right edge. There is no outer white pill any
-              more, and the glow is a small, tight shadow instead of a halo,
-              so the buttons sit calmly on the paper. The dots are a half
-              transparent white.
-              Each button is skewed; its content is skewed back so the text
-              and the arrow stay upright. The wrapper keeps the old 52px /
-              62px total height (--hero-cta token in globals.css) with a bit
-              of padding, because the hero logos are placed against it.
-              Resting state: dark label + blue arrow. On hover / keyboard
-              focus the two swap fills. A CSS gradient can't be transitioned,
+          {/* CTA: same shape and sizing as the reference (no border, no
+              outer shadow). Near-white outer pill, 6px ring, 6px gap, 50px
+              inner buttons. Only the colours are themed.
+              On phones it is one size smaller (5px ring, 42px buttons, 17px
+              label: 52px tall in all, which is the --hero-cta token in
+              globals.css) and sits closer under the headline; from `wide:`
+              up it keeps the original 62px size.
+              Resting state: a blue gradient label with white text, and a
+              dark circle with a white arrow. On hover the two swap (dark
+              label, gradient circle). A CSS gradient can't be transitioned,
               so each button has its resting fill as the background and the
-              other fill as an overlay that fades in. The overlay sits behind
-              the dots and the text (-z-10 inside an `isolate` stacking
-              context), so nothing flickers. The solid colour is the fallback
-              under each gradient.
+              other fill as an overlay that fades in on hover / keyboard
+              focus. The overlay sits behind the text (-z-10 inside an
+              `isolate` stacking context), so the label and arrow never
+              flicker. The solid theme blue is the fallback colour under the
+              gradient. A subtle top highlight gives the label some depth.
               Sits a deliberate, modest gap under the headline. It shares the
               headline's rise-from-mask intro and scroll fade (CtaReveal).
               Clicking it opens the contact popup. */}
@@ -681,19 +618,28 @@ export function Header() {
                 onClick={openContact}
                 aria-haspopup='dialog'
                 aria-label="Let's talk, open the contact form"
-                className='group flex items-center gap-[8px] py-[5px] font-[family-name:var(--font-inter-tight)] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f1b18] motion-reduce:transition-none motion-reduce:hover:scale-100 wide:gap-[10px] wide:py-[6px]'
+                className='group flex items-center gap-[5px] rounded-full bg-[#f6f4f0] p-[5px] font-[family-name:var(--font-inter-tight)] wide:gap-[6px] wide:p-[6px] transition-transform duration-300 ease-in-expo hover:scale-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1f1b18] motion-reduce:transition-none motion-reduce:hover:scale-100'
               >
-                {/* label: dark, halftone on the left edge */}
                 <span
-                  className='relative isolate flex h-[42px] w-[160px] items-center justify-center overflow-hidden whitespace-nowrap rounded-[14px] pl-[28px] text-[15px] font-medium uppercase leading-none tracking-[0.2em] text-white shadow-[0_6px_14px_-8px_rgba(31,27,24,0.5),inset_0_1px_0_rgba(255,255,255,0.1)] wide:h-[50px] wide:w-[200px] wide:rounded-[16px] wide:pl-[36px] wide:text-[17px]'
+                  className='relative isolate flex h-[42px] w-[128px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full text-[17px] font-semibold leading-none tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] wide:h-[50px] wide:w-[156px] wide:text-[20px]'
                   style={{
-                    backgroundColor: CTA_DARK,
-                    backgroundImage: CTA_DARK_GRADIENT,
-                    transform: CTA_SKEW,
-                    fontFamily: CTA_MONO,
+                    backgroundColor: CTA_SOLID,
+                    backgroundImage: CTA_GRADIENT,
                   }}
                 >
-                  {/* hover / focus: the blue gradient fades in behind the text */}
+                  {/* hover / focus: dark fill fades in behind the text */}
+                  <span
+                    aria-hidden='true'
+                    className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
+                    style={{ backgroundColor: CTA_DARK }}
+                  />
+                  Let&apos;s talk
+                </span>
+                <span
+                  className='relative isolate flex h-[42px] w-[42px] items-center justify-center overflow-hidden rounded-full wide:h-[50px] wide:w-[50px]'
+                  style={{ backgroundColor: CTA_DARK }}
+                >
+                  {/* hover / focus: the blue gradient fades in behind the arrow */}
                   <span
                     aria-hidden='true'
                     className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
@@ -702,41 +648,11 @@ export function Header() {
                       backgroundImage: CTA_GRADIENT,
                     }}
                   />
-                  <Halftone side='left' reach={0.6} />
-                  <span className='relative' style={{ transform: CTA_UNSKEW }}>
-                    Let&apos;s talk
-                  </span>
-                </span>
-
-                {/* arrow: blue, halftone on the right edge */}
-                <span
-                  className='relative isolate flex h-[42px] w-[52px] items-center justify-center overflow-hidden rounded-[14px] shadow-[0_6px_16px_-6px_rgba(67,89,232,0.4),inset_0_1px_0_rgba(255,255,255,0.14)] wide:h-[50px] wide:w-[62px] wide:rounded-[16px]'
-                  style={{
-                    backgroundColor: CTA_SOLID,
-                    backgroundImage: CTA_GRADIENT,
-                    transform: CTA_SKEW,
-                  }}
-                >
-                  {/* hover / focus: the dark fill fades in behind the arrow */}
-                  <span
-                    aria-hidden='true'
-                    className='absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none'
-                    style={{
-                      backgroundColor: CTA_DARK,
-                      backgroundImage: CTA_DARK_GRADIENT,
-                    }}
+                  <ArrowUpRight
+                    size={20}
+                    strokeWidth={2.25}
+                    className='h-[17px] w-[17px] text-white transition-transform duration-300 ease-in-expo wide:h-5 wide:w-5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0'
                   />
-                  <Halftone side='right' reach={1} />
-                  <span
-                    className='relative flex items-center justify-center pr-[10px]'
-                    style={{ transform: CTA_UNSKEW }}
-                  >
-                    <ArrowRight
-                      size={20}
-                      strokeWidth={2.25}
-                      className='h-[17px] w-[17px] text-white transition-transform duration-300 ease-in-expo wide:h-5 wide:w-5 group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0'
-                    />
-                  </span>
                 </span>
               </button>
             </CtaReveal>
