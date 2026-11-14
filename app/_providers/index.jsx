@@ -1,3 +1,5 @@
+import { ContactModalProvider } from '@/components';
+
 import { BalancerProvider } from './balancer';
 import { StyledComponentsRegistry } from './styled-components';
 
@@ -5,7 +7,9 @@ import { StyledComponentsRegistry } from './styled-components';
 export function Providers({ children }) {
   return (
     <StyledComponentsRegistry>
-      <BalancerProvider>{children}</BalancerProvider>
+      <BalancerProvider>
+        <ContactModalProvider>{children}</ContactModalProvider>
+      </BalancerProvider>
     </StyledComponentsRegistry>
   );
 }
