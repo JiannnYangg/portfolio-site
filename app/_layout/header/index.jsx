@@ -129,36 +129,30 @@ const MENU_BG = 'rgba(31, 27, 24, 0.94)';
 const MENU_FILTER = 'blur(20px) saturate(180%)';
 
 /**
- * "Calm zones": the site backdrop (paper folds, grid, blooms, orange glows) is
- * washed back toward the paper colour behind the headline and behind the
- * CTA, and nowhere else. The backdrop itself is now one fixed layer shared by
- * every page, so the calm zones are a soft paper-coloured wash that belongs
- * to the hero and scrolls away with it (a mask on the shared layer would
- * stay stuck mid-screen on every other section).
+ * "Calm zone": the site backdrop (paper folds, grid, blooms, orange glows) is
+ * washed back toward the paper colour behind the headline, and nowhere else.
+ * The backdrop itself is now one fixed layer shared by every page, so the calm
+ * zone is a soft paper-coloured wash that belongs to the hero and scrolls away
+ * with it (a mask on the shared layer would stay stuck mid-screen on every
+ * other section).
  *
- * Same look as the previous mask: CALM_OPACITY 0.55 left the background at
- * 55%, i.e. a 45% wash of paper on top, flat to 65% of the ellipse and
- * fading to nothing at its edge.
+ * CALM_OPACITY 0.55 leaves the background at 55%, i.e. a 45% wash of paper on
+ * top, flat to 65% of the ellipse and fading to nothing at its edge.
  *
- * The CTA zone is the exception: the pill is a near-white, so a paper
- * wash behind it made it vanish. Its wash uses a slightly darker stone grey,
- * and a bit stronger, so the pill reads clearly while the area still looks
- * calm.
+ * There used to be a second, darker stone-grey wash behind the CTA pill (so the
+ * near-white pill would stand out). It read as a dirty grey smudge under the
+ * button, so it is gone: the pill sits straight on the page background, which
+ * it already contrasts with.
  *
- * The zones follow the content: the headline + CTA are one block centered in
- * the hero, so the zone centers are offsets from the vertical middle
- * (--head-y / --cta-y, set per breakpoint on the wrapper below).
+ * The zone follows the content: the headline + CTA are one block centered in
+ * the hero, so the zone centre is an offset from the vertical middle
+ * (--head-y, set per breakpoint on the wrapper below).
  */
 const CALM_OPACITY = 0.55;
 const CALM_WASH = 1 - CALM_OPACITY;
-const CTA_WASH_RGB = '212,208,200';
-const CTA_WASH = 0.75;
 const calmZone = (size, centerY, rgb = PAPER_RGB, wash = CALM_WASH) =>
   `radial-gradient(ellipse ${size} at 50% ${centerY}, rgba(${rgb},${wash}) 0%, rgba(${rgb},${wash}) 65%, rgba(${rgb},0) 100%)`;
-const CALM_BACKGROUND = [
-  calmZone('40% 26%', 'calc(50% + var(--head-y))'), // headline block
-  calmZone('200px 80px', 'calc(50% + var(--cta-y))', CTA_WASH_RGB, CTA_WASH), // CTA pill
-].join(', ');
+const CALM_BACKGROUND = calmZone('40% 26%', 'calc(50% + var(--head-y))'); // headline block
 
 /** Clips only the bottom edge of a line, so text rises out of a mask
  *  while the callout above the word stays visible. */
@@ -534,13 +528,12 @@ export function Header() {
     >
       {/* The paper, blooms, glows and grid now come from the site-wide
           <SiteBackdrop /> (root layout), so the hero is transparent and shares
-          the exact same background as every other page. Only the two calm
-          zones live here: a soft paper wash behind the headline and a slightly
-          darker wash behind the CTA (so the near-white pill stands out).
-          The zone centers (offsets from the vertical middle, --head-y and
-          --cta-y) are worked out in globals.css (.hero-scope) from the same
-          numbers the block below uses (headline size, gap, padding), so the
-          calm zones stay behind the text and the pill at every phone size. */}
+          the exact same background as every other page. Only the calm zone
+          lives here: a soft paper wash behind the headline. Its centre (the
+          offset from the vertical middle, --head-y) is worked out in
+          globals.css (.hero-scope) from the same numbers the block below uses
+          (headline size, gap, padding), so it stays behind the text at every
+          phone size. */}
       <div
         aria-hidden='true'
         className='pointer-events-none absolute inset-0'
