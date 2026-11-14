@@ -8,9 +8,9 @@
  * is the original split CTA: a near-black "LET'S GO" label with a leaning
  * right edge, and next to it a separate tile in the blue gradient with a
  * leaning left edge holding the arrow (both halves are SVG shapes, see
- * SplitButton in modal.jsx). Both halves carry the glow treatment: a soft top
- * gloss, a white light spill and round white halftone dots on the outer ends,
- * and a glow around them.
+ * SplitButton in modal.jsx). Both halves carry a restrained glow treatment: a
+ * soft top gloss, a faint light spill and half-transparent round halftone
+ * dots on the outer ends, and a small, tight shadow under them.
  *
  * Errors are a clean red (never orange) so they read as "fix this" and don't
  * clash with the blue theme.
@@ -424,22 +424,21 @@
   transition: filter 0.3s ease;
 }
 
-/* glow: a soft halo in the brand blue around both halves */
+/* glow: kept small and tight, a soft shadow under each half (no wide halo) */
 .ctaLabel .ctaShape {
-  filter: drop-shadow(0 8px 12px rgb(18 22 46 / 28%))
-    drop-shadow(0 0 12px rgb(77 101 238 / 32%));
+  filter: drop-shadow(0 6px 9px rgb(18 22 46 / 22%));
 }
 
 .ctaTile .ctaShape {
-  filter: drop-shadow(0 8px 14px rgb(67 89 232 / 42%))
-    drop-shadow(0 0 16px rgb(77 101 238 / 55%));
+  filter: drop-shadow(0 6px 10px rgb(67 89 232 / 26%))
+    drop-shadow(0 0 7px rgb(77 101 238 / 16%));
 }
 
 /*
  * Halftone ends: a clip box per outer end (rounded to match the button's
- * corners). Each holds a soft white light spill that fades toward the middle,
- * with round white dots on top that shrink the same way. The right-hand one
- * is mirrored.
+ * corners). Each holds a faint light spill that fades toward the middle,
+ * with round half-transparent dots on top that shrink the same way. The
+ * right-hand one is mirrored.
  */
 .ctaClip {
   position: absolute;
@@ -455,8 +454,8 @@
   border-radius: 16px 0 0 16px;
   background: linear-gradient(
     90deg,
-    rgb(255 255 255 / 36%) 0%,
-    rgb(255 255 255 / 14%) 45%,
+    rgb(255 255 255 / 14%) 0%,
+    rgb(255 255 255 / 5%) 45%,
     rgb(255 255 255 / 0%) 100%
   );
 }
@@ -467,8 +466,8 @@
   border-radius: 0 16px 16px 0;
   background: linear-gradient(
     270deg,
-    rgb(255 255 255 / 34%) 0%,
-    rgb(255 255 255 / 12%) 50%,
+    rgb(255 255 255 / 12%) 0%,
+    rgb(255 255 255 / 4%) 50%,
     rgb(255 255 255 / 0%) 100%
   );
 }
@@ -478,7 +477,7 @@
   top: 50%;
   margin-top: -32px;
   overflow: visible;
-  filter: drop-shadow(0 0 3px rgb(255 255 255 / 65%));
+  opacity: 0.55;
   shape-rendering: geometricprecision;
 }
 
@@ -501,7 +500,7 @@
   font-size: 14.5px;
   font-weight: 500;
   letter-spacing: 0.1em;
-  text-shadow: 0 0 12px rgb(255 255 255 / 40%);
+  text-shadow: 0 0 8px rgb(255 255 255 / 12%);
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -510,7 +509,7 @@
   position: relative;
   z-index: 1;
   color: #fff;
-  filter: drop-shadow(0 0 6px rgb(255 255 255 / 45%));
+  filter: drop-shadow(0 0 3px rgb(255 255 255 / 18%));
   transition: transform 0.3s var(--ease);
 }
 
@@ -532,13 +531,12 @@
   }
 
   .cta:hover .ctaTile .ctaShape {
-    filter: brightness(1.1) drop-shadow(0 10px 18px rgb(67 89 232 / 52%))
-      drop-shadow(0 0 22px rgb(77 101 238 / 70%));
+    filter: brightness(1.08) drop-shadow(0 8px 12px rgb(67 89 232 / 32%))
+      drop-shadow(0 0 10px rgb(77 101 238 / 22%));
   }
 
   .cta:hover .ctaLabel .ctaShape {
-    filter: brightness(1.25) drop-shadow(0 8px 12px rgb(18 22 46 / 32%))
-      drop-shadow(0 0 14px rgb(77 101 238 / 40%));
+    filter: brightness(1.15) drop-shadow(0 6px 10px rgb(18 22 46 / 26%));
   }
 
   .cta:hover .ctaArrow {
