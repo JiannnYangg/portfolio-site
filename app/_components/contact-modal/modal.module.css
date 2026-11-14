@@ -5,8 +5,9 @@
  * gradient of the hero "Let's talk" button (#4d65ee -> #4359e8 -> #2f40c1),
  * around a warm white card. Each field is a small label above a clean rounded
  * input (white box, hairline border, soft blue focus ring). The submit button
- * is a glow CTA: rounded blue button with a halftone dot pattern fading in
- * from both ends, a bright inner highlight and a soft blue glow.
+ * is a glow CTA: rounded blue button with bold, bright-white halftone dots
+ * (big and dense at the ends, shrinking and fading toward the middle), a
+ * bright inner highlight, a white halo ring and a soft blue glow.
  *
  * Errors are a clean red (never orange) so they read as "fix this" and don't
  * clash with the blue theme.
@@ -376,17 +377,17 @@
   display: grid;
   place-items: center;
   width: fit-content;
-  min-width: 184px;
+  min-width: 196px;
   height: var(--cta-h);
   margin: 24px auto 0;
-  padding: 0 34px;
+  padding: 0 38px;
   overflow: hidden;
   isolation: isolate;
   border: 0;
   border-radius: 16px;
   background-color: var(--blue);
   background-image:
-    linear-gradient(180deg, rgb(255 255 255 / 20%) 0%, transparent 52%),
+    linear-gradient(180deg, rgb(255 255 255 / 16%) 0%, transparent 55%),
     linear-gradient(
       180deg,
       var(--blue-light) 0%,
@@ -397,9 +398,10 @@
     inset 0 1px 0 rgb(255 255 255 / 55%),
     inset 0 0 0 1px rgb(255 255 255 / 14%),
     inset 0 -3px 8px rgb(47 64 193 / 45%),
-    0 0 0 5px rgb(67 89 232 / 10%),
+    0 0 0 4px rgb(255 255 255 / 85%),
+    0 0 0 5px rgb(67 89 232 / 14%),
     0 10px 24px rgb(67 89 232 / 42%),
-    0 0 32px rgb(77 101 238 / 42%);
+    0 0 34px rgb(77 101 238 / 45%);
   color: #fff;
   font: inherit;
   cursor: pointer;
@@ -411,61 +413,104 @@
   appearance: none;
 }
 
-/* halftone dots: soft round dots in an offset lattice, fading toward the middle */
+/*
+ * Halftone dots, one block per end (data-side = left | right). Two layers:
+ * ::before = big, solid, bright-white dots hugging the edge (the "mass");
+ * ::after  = smaller dots in the gaps that carry the pattern further in and
+ * fade out. Together the dots shrink and thin out toward the label.
+ */
 .ctaDots {
+  --dir: 90deg;
+
   position: absolute;
   top: 0;
   bottom: 0;
   z-index: 0;
-  width: 38%;
-  background-image:
-    radial-gradient(
-      circle at center,
-      rgb(255 255 255 / 80%) 0,
-      rgb(255 255 255 / 55%) 1.5px,
-      transparent 3px
-    ),
-    radial-gradient(
-      circle at center,
-      rgb(255 255 255 / 80%) 0,
-      rgb(255 255 255 / 55%) 1.5px,
-      transparent 3px
-    );
-  background-position:
-    0 0,
-    6px 6px;
-  background-size: 12px 12px;
+  width: 46%;
   pointer-events: none;
 }
 
 .ctaDots[data-side='left'] {
+  --dir: 90deg;
+
   left: 0;
-  mask-image: linear-gradient(
-    90deg,
-    #000 0%,
-    rgb(0 0 0 / 45%) 50%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    #000 0%,
-    rgb(0 0 0 / 45%) 50%,
-    transparent 100%
-  );
 }
 
 .ctaDots[data-side='right'] {
+  --dir: 270deg;
+
   right: 0;
+}
+
+.ctaDots::before,
+.ctaDots::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.ctaDots::before {
+  background-image:
+    radial-gradient(
+      circle at center,
+      #fff 0,
+      #fff 2.5px,
+      rgb(255 255 255 / 0%) 3.4px
+    ),
+    radial-gradient(
+      circle at center,
+      #fff 0,
+      #fff 2.5px,
+      rgb(255 255 255 / 0%) 3.4px
+    );
+  background-position:
+    0 0,
+    6.5px 6.5px;
+  background-size: 13px 13px;
   mask-image: linear-gradient(
-    270deg,
+    var(--dir),
     #000 0%,
-    rgb(0 0 0 / 45%) 50%,
+    #000 20%,
+    rgb(0 0 0 / 55%) 48%,
+    transparent 82%
+  );
+  -webkit-mask-image: linear-gradient(
+    var(--dir),
+    #000 0%,
+    #000 20%,
+    rgb(0 0 0 / 55%) 48%,
+    transparent 82%
+  );
+}
+
+.ctaDots::after {
+  background-image:
+    radial-gradient(
+      circle at center,
+      rgb(255 255 255 / 95%) 0,
+      rgb(255 255 255 / 90%) 1.2px,
+      rgb(255 255 255 / 0%) 2px
+    ),
+    radial-gradient(
+      circle at center,
+      rgb(255 255 255 / 95%) 0,
+      rgb(255 255 255 / 90%) 1.2px,
+      rgb(255 255 255 / 0%) 2px
+    );
+  background-position:
+    6.5px 0,
+    0 6.5px;
+  background-size: 13px 13px;
+  mask-image: linear-gradient(
+    var(--dir),
+    rgb(0 0 0 / 70%) 0%,
+    #000 35%,
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(
-    270deg,
-    #000 0%,
-    rgb(0 0 0 / 45%) 50%,
+    var(--dir),
+    rgb(0 0 0 / 70%) 0%,
+    #000 35%,
     transparent 100%
   );
 }
@@ -481,7 +526,7 @@
 .ctaText {
   color: #fff;
   font-size: 15.5px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: 0.01em;
   text-shadow:
     0 0 14px rgb(255 255 255 / 60%),
@@ -503,7 +548,8 @@
       inset 0 1px 0 rgb(255 255 255 / 60%),
       inset 0 0 0 1px rgb(255 255 255 / 18%),
       inset 0 -3px 8px rgb(47 64 193 / 45%),
-      0 0 0 6px rgb(67 89 232 / 14%),
+      0 0 0 4px rgb(255 255 255 / 90%),
+      0 0 0 6px rgb(67 89 232 / 18%),
       0 14px 30px rgb(67 89 232 / 52%),
       0 0 44px rgb(77 101 238 / 55%);
     filter: brightness(1.06) saturate(1.05);
