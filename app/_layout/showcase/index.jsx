@@ -51,11 +51,15 @@
  *   preloader and the hero intro), the idle timer and the first scroll do.
  * - The scroll listener only exists while the section is within a screen of
  *   the viewport, and reads the layout once per frame (heights are cached).
- * - Phones, tablets, small windows, data-saver, low-memory / low-core devices
- *   and browsers without WebGL get the lightweight pinned version (./lite): the
- *   same pinned section where the page scroll slides the cards to the centre
- *   one by one, built from plain CSS transforms (no WebGL, no three.js
- *   download, no scroll hijacking: it is `position: sticky`).
+ * - Laptops AND phones / tablets run the same WebGL carousel (entry, glass
+ *   oval, scroll-driven row). On a small screen it runs with the phone profile
+ *   (see applyViewportProfile in ./config): smaller cards that never exceed the
+ *   screen, an entry whose small row fits the width, a glass oval scaled to the
+ *   screen and a lower pixel-ratio cap.
+ * - Data-saver, very low-memory / low-core devices and browsers without WebGL
+ *   get the lightweight pinned version (./lite): the same pinned section where
+ *   the page scroll slides the cards to the centre one by one, built from plain
+ *   CSS transforms (no WebGL, no three.js download).
  * - Reduced-motion and browsers without `overflow: clip` (nothing can be
  *   pinned there) get a plain CSS scroll strip (./strip).
  * - On devices that pass those checks but still struggle, the engine lowers
@@ -73,15 +77,21 @@ import { createPortal } from 'react-dom';
 
 import { isNavScrolling, NAV_SCROLL_END } from '@/hooks';
 
-import { ENTRY, getScrollLength, PROJECTS, SCROLL, UI_ANIM } from './config';
+import {
+  applyViewportProfile,
+  ENTRY,
+  getScrollLength,
+  PROJECTS,
+  SCROLL,
+  UI_ANIM,
+} from './config';
 import { ShowcaseLite } from './lite';
 import { loadThree, warmThree } from './load-three';
 import { lockScroll, scrollToY } from './scroll-lock';
 import { ShowcaseStrip } from './strip';
 
-/** Same cut-off as the original carousel: a wide-screen experience */
+/** Screens at least this big get the laptop sizes; smaller ones the phone profile */
 const MIN_VIEWPORT_WIDTH = 1025; // px
-/** The pinned stage is one screen tall (min 560px): shorter windows get the strip */
 const MIN_VIEWPORT_HEIGHT = 560; // px
 /**
  * The scroll maths run while the section is this close (viewport heights).
@@ -112,9 +122,6 @@ const BOOT_IDLE_TIMEOUT_MS = 3000;
 const SCROLL_BOOT_PX = 24;
 /** The page is only held if at least this share of the stage is on screen */
 const LOCK_VISIBILITY = 0.5;
-
-/** Page scroll length (px) of the pinned section; fixed by the config */
-const SCROLL_LENGTH = getScrollLength();
 
 /**
  * How long the entry can possibly run (ms) plus a safety margin. It is only the
@@ -153,7 +160,9 @@ function canPin() {
 function canRunWebGL() {
   const nav = navigator;
   if (nav.connection?.saveData) return false;
-  if (nav.deviceMemory && nav.deviceMemory < 4) return false;
+  // only the really weak devices (a 2 GB phone is fine: the engine lowers its
+  // resolution by itself if it cannot keep up, and falls back to the lite row)
+  if (nav.deviceMemory && nav.deviceMemory < 2) return false;
   if (nav.hardwareConcurrency && nav.hardwareConcurrency < 4) return false;
   // the pinned stage needs `overflow: clip` (see canPin)
   if (SCROLL.enabled && !canPin()) return false;
@@ -183,6 +192,12 @@ export function Showcase() {
   const failedRef = useRef(false); // WebGL failed once: stay on the strip
 
   const [mode, setMode] = useState('pending'); // pending | webgl | lite | fallback
+  // sizes the carousel is built for (laptop / phone, see applyViewportProfile)
+  const [profile, setProfile] = useState({
+    key: 'pending',
+    maxDpr: 2,
+    scrollLength: 0,
+  });
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(0);
   const [focused, setFocused] = useState(false);
@@ -200,20 +215,39 @@ export function Showcase() {
     // device: the WebGL carousel. Everything else (phones, tablets, small
     // windows, weak devices, WebGL failed): the lightweight pinned row, or the
     // strip where nothing can be pinned.
+    const portrait = window.matchMedia('(orientation: portrait)');
     const update = () => {
       if (calm.matches) setMode('fallback');
-      else if (capable && !failedRef.current && wide.matches) setMode('webgl');
-      else setMode(pinnable ? 'lite' : 'fallback');
+      else if (capable && !failedRef.current) {
+        // the sizes the carousel is built for, from the screen it is on
+        const applied = applyViewportProfile(
+          window.innerWidth,
+          window.innerHeight,
+          wide.matches,
+        );
+        setProfile(prev =>
+          prev.key === applied.key
+            ? prev
+            : {
+                key: applied.key,
+                maxDpr: applied.maxDpr,
+                scrollLength: getScrollLength(),
+              },
+        );
+        setMode('webgl');
+      } else setMode(pinnable ? 'lite' : 'fallback');
     };
     update();
     // this visitor is about to get the WebGL version: open the connection to
     // the CDN that serves three.js now, so the boot later does not wait for it
-    if (capable && wide.matches && !calm.matches) warmThree();
+    if (capable && !calm.matches) warmThree();
     wide.addEventListener('change', update);
     calm.addEventListener('change', update);
+    portrait.addEventListener('change', update);
     return () => {
       wide.removeEventListener('change', update);
       calm.removeEventListener('change', update);
+      portrait.removeEventListener('change', update);
     };
   }, []);
 
@@ -359,6 +393,7 @@ export function Showcase() {
         ]);
         if (cancelled || !mountRef.current) return;
         engine = createCarousel(THREE, mountRef.current, {
+          maxDpr: profile.maxDpr,
           cursorElement: cursorRef.current,
           scrollDriven: SCROLL.enabled,
           deferEntry: SCROLL.enabled && ENTRY.enabled,
@@ -479,7 +514,10 @@ export function Showcase() {
       setFocused(false);
       setEntryDone(false);
     };
-  }, [mode]);
+    // the engine is rebuilt when the sizes it was built for change (rotating a
+    // phone, resizing between laptop and phone sizes)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, profile.key]);
 
   // Back/forward navigation can restore this page from the browser's cache
   // with the carousel frozen mid-animation (or mid-focus). Start it over.
@@ -573,13 +611,20 @@ export function Showcase() {
 
   const project = PROJECTS[active] ?? PROJECTS[0];
   const pinned = SCROLL.enabled;
+  // on a phone the stage is exactly the screen (no 560px floor, see globals.css)
+  const pinClass =
+    profile.key === 'wide' ? 'showcase-pin' : 'showcase-pin showcase-pin--lite';
 
   return (
     <section
       ref={wrapperRef}
       aria-label='Selected work'
-      className={pinned ? 'showcase-pin' : 'relative w-full'}
-      style={pinned ? { '--showcase-travel': `${SCROLL_LENGTH}px` } : undefined}
+      className={pinned ? pinClass : 'relative w-full'}
+      style={
+        pinned
+          ? { '--showcase-travel': `${profile.scrollLength}px` }
+          : undefined
+      }
     >
       <div ref={sectionRef} className={pinned ? 'showcase-stage' : 'relative'}>
         <div
