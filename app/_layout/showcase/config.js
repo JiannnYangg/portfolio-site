@@ -92,6 +92,11 @@ export const PROJECTS = [
 // wheel / drag / snap are not used.)
 export const CONFIG = {
   PANEL_H: 450, // px height — same for every panel
+  // Widest a panel may be (px). A wider picture is scaled down (keeping its
+  // aspect ratio, so it ends up shorter than PANEL_H) instead of running off
+  // the screen. Infinity on laptops; set from the screen width on phones (see
+  // applyViewportProfile).
+  PANEL_MAX_W: Infinity,
   GAP: 12, // px gap between panels
   EASE: 0.09, // lerp toward target (lower = heavier / more glide)
   WHEEL: 1.4, // wheel sensitivity
@@ -158,11 +163,22 @@ export const LITE = {
   entryStaggerMax: 5, // cards that are staggered, the rest share the last delay
 };
 
+/**
+ * Height (px) of a panel with the given aspect ratio: PANEL_H, or less when
+ * the picture would be wider than PANEL_MAX_W.
+ */
+export function panelHeightFor(aspect) {
+  return Math.min(CONFIG.PANEL_H, CONFIG.PANEL_MAX_W / (aspect || 1));
+}
+
 /** Distance (px) from the first panel's center to the last panel's center. */
 export function getCarouselTravel() {
   const n = PROJECTS.length;
   if (n < 2) return 0;
-  const slot = i => (PROJECTS[i].aspect || 1) * CONFIG.PANEL_H + CONFIG.GAP;
+  const slot = i => {
+    const aspect = PROJECTS[i].aspect || 1;
+    return aspect * panelHeightFor(aspect) + CONFIG.GAP;
+  };
   let sum = 0;
   for (let i = 0; i < n - 1; i++) sum += slot(i);
   return sum + (slot(n - 1) - slot(0)) / 2;
@@ -289,3 +305,93 @@ export const UI_ANIM = {
   revealEase: 'power2.out',
   revealStagger: 0.18, // counter follows the top text by this delay
 };
+
+// ---- phones: the same carousel, sized for a small screen ----
+// The laptop numbers above are in px for a wide screen. On a phone they would
+// make the cards bigger than the screen and the lens oval far larger than it,
+// so the engine runs with a phone profile instead: smaller cards (never wider
+// than the screen), a tighter gap, an entry that starts from smaller cards so
+// the whole row fits, a glass oval scaled to the screen, a lower pixel-ratio
+// cap and a slightly longer scroll. Everything is derived from the screen size,
+// nothing is hard-coded per device.
+export const PHONE = {
+  panelHeightShare: 0.46, // card height as a share of the pinned screen height
+  minPanelH: 240, // px
+  maxWidthShare: 0.86, // a card is never wider than this share of the screen
+  gap: 10, // px
+  entryFill: 0.94, // the entry's small row spans at most this share of the screen
+  entryMinH: 24, // px: smallest starting height of the entry cards
+  focusScale: 1.1, // the tapped card grows less than on a laptop
+  pxPerPx: 0.9, // page px scrolled per px the row travels
+  maxDpr: 1.5, // pixel-ratio cap (laptops: 2)
+};
+
+// the laptop screen the lens oval was designed on
+const LENS_REF = { width: 1440, height: 900 };
+
+const DESKTOP = {
+  PANEL_H: CONFIG.PANEL_H,
+  GAP: CONFIG.GAP,
+  startH: ENTRY.startH,
+  sizeX: LENS.sizeX,
+  sizeY: LENS.sizeY,
+  centerScale: FOCUS.centerScale,
+  pxPerPx: SCROLL.pxPerPx,
+};
+
+/**
+ * Sets CONFIG / ENTRY / LENS / FOCUS / SCROLL for the given screen: the laptop
+ * numbers when `wide`, the phone profile otherwise. Call it before creating the
+ * engine (it reads these objects when it starts). Returns what the host needs:
+ * a key that changes when the engine has to be rebuilt (laptop <-> phone,
+ * portrait <-> landscape) and the engine's pixel-ratio cap.
+ */
+export function applyViewportProfile(width, height, wide) {
+  if (wide) {
+    CONFIG.PANEL_H = DESKTOP.PANEL_H;
+    CONFIG.GAP = DESKTOP.GAP;
+    CONFIG.PANEL_MAX_W = Infinity;
+    ENTRY.startH = DESKTOP.startH;
+    LENS.sizeX = DESKTOP.sizeX;
+    LENS.sizeY = DESKTOP.sizeY;
+    FOCUS.centerScale = DESKTOP.centerScale;
+    SCROLL.pxPerPx = DESKTOP.pxPerPx;
+    return { key: 'wide', maxDpr: 2 };
+  }
+
+  const w = Math.max(1, width);
+  const h = Math.max(1, height);
+
+  CONFIG.PANEL_H = Math.round(
+    Math.min(
+      DESKTOP.PANEL_H,
+      Math.max(PHONE.minPanelH, h * PHONE.panelHeightShare),
+    ),
+  );
+  CONFIG.PANEL_MAX_W = Math.round(w * PHONE.maxWidthShare);
+  CONFIG.GAP = PHONE.gap;
+
+  // entry: the whole row starts as small cards that fit the screen width
+  const aspectSum = PROJECTS.reduce((sum, p) => sum + (p.aspect || 1), 0);
+  const fit =
+    (w * PHONE.entryFill - PHONE.gap * (PROJECTS.length - 1)) / aspectSum;
+  ENTRY.startH = Math.round(
+    Math.min(DESKTOP.startH, Math.max(PHONE.entryMinH, fit)),
+  );
+
+  // glass oval: same share of the screen's diagonal as on the laptop, in the
+  // lens's own unit (a fraction of the screen height)
+  const diagScale =
+    Math.hypot(w, h) / Math.hypot(LENS_REF.width, LENS_REF.height);
+  const k = (diagScale * LENS_REF.height) / h;
+  LENS.sizeX = DESKTOP.sizeX * k;
+  LENS.sizeY = DESKTOP.sizeY * k;
+
+  FOCUS.centerScale = PHONE.focusScale;
+  SCROLL.pxPerPx = PHONE.pxPerPx;
+
+  return {
+    key: w > h ? 'phone-landscape' : 'phone-portrait',
+    maxDpr: PHONE.maxDpr,
+  };
+}
